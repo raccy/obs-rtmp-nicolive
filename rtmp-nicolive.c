@@ -64,7 +64,7 @@ static void *rtmp_nicolive_create(obs_data_t *settings, obs_service_t *service)
 
 static bool rtmp_nicolive_initialize(void *data, obs_output_t *output)
 {
-	struct rtmp_nicolive service = data;
+	struct rtmp_nicolive *service = data;
 
 	UNUSED_PARAMATER(output);
 
@@ -92,7 +92,7 @@ static bool rtmp_nicolive_initialize(void *data, obs_output_t *output)
 }
 
 static bool rtmp_nicolive_activate(void *data, obs_data_t *settings) {
-	struct rtmp_nicolive service = data;
+	struct rtmp_nicolive *service = data;
 
 	if (strcmp(obs_data_get_string(settings, "session"), service->session) != 0) {
 		obs_data_set_string(settings, "session", service->session);
