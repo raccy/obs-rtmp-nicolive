@@ -75,14 +75,14 @@ static bool rtmp_nicolive_initialize(void *data, obs_output_t *output)
 	}
 	if (service->session) {
 		const char *live_id;
-		live_id = nicolive_get_ownlive_id(service->session);
+		live_id = nicolive_get_live_id(service->session);
 		if (live_id) {
 			// free and set NULL
 			bfree(service->server);
 			bfree(service->key);
-			service->server = bstrdup(nicolive_get_ownlive_url(service->session,
+			service->server = bstrdup(nicolive_get_live_url(service->session,
 					live_id));
-			service->key = bstrdup(nicolive_get_ownlive_key(service->session,
+			service->key = bstrdup(nicolive_get_live_key(service->session,
 					live_id));
 			return true;
 		}

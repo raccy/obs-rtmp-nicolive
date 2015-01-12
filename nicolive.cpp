@@ -19,13 +19,13 @@ extern "C" const char *nicolive_get_session(const char *mail,
 	return "dummy";
 }
 
-extern "C" const char *nicolive_get_ownlive_id(const char *session)
+extern "C" const char *nicolive_get_live_id(const char *session)
 {
 	UNUSED_PARAMETER(session);
 	return "dummy";
 }
 
-extern "C" const char *nicolive_get_ownlive_url(const char *session,
+extern "C" const char *nicolive_get_live_url(const char *session,
 		const char *live_id)
 {
 	UNUSED_PARAMETER(session);
@@ -33,7 +33,7 @@ extern "C" const char *nicolive_get_ownlive_url(const char *session,
 	return "dummy";
 }
 
-extern "C" const char *nicolive_get_ownlive_key(const char *session,
+extern "C" const char *nicolive_get_live_key(const char *session,
 		const char *live_id)
 {
 	UNUSED_PARAMETER(session);
