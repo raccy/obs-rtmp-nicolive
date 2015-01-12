@@ -9,7 +9,7 @@ bool nicolive_chek_session_n(const char *session);
 // check that a session is active
 static inline bool nicolive_check_session(const char *session) {
 	if (!session || !*session) {
-		return false
+		return false;
 	}
 	return nicolive_chek_session_n(session);
 }
