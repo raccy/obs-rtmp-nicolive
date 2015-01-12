@@ -1,6 +1,7 @@
 project(rtmp-nicolive)
 
 set(rtmp-nicolive_SOURCES
+	nicolive.cpp
 	rtmp-nicolive.c)
 
 add_library(rtmp-nicolive MODULE

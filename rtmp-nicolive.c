@@ -145,9 +145,18 @@ struct obs_service_info rtmp_nicolive_service = {
 
 OBS_DECLARE_MODULE()
 OBS_MODULE_USE_DEFAULT_LOCALE("rtmp-nicolive", "ja-JP")
+OBS_MODULE_AUTHOR("raccy")
 
 bool obs_module_load(void)
 {
 	obs_register_service(&rtmp_nicolive_service)
 	return true;
+}
+const char *obs_module_name(void)
+{
+	return obs_module_text("NiconicoLiveModule");
+}
+const char *obs_module_description(void)
+{
+	return obs_module_text("NiconicoLiveDescription");
 }

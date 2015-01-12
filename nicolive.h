@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 bool nicolive_chek_session_n(const char *session);
 
 // check that a session is active
@@ -18,3 +22,7 @@ const char *nicolive_get_ownlive_id(const char *session);
 const char *nicolive_get_ownlive_url(const char *session, const char *live_id);
 
 const char *nicolive_get_ownlive_key(const char *session, const char *live_id);
+
+#ifdef __cplusplus
+}
+#endif
