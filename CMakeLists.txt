@@ -1,5 +1,6 @@
 project(rtmp-nicolive)
 
+find_package(Qt5Core ${FIND_MODE})
 find_package(Qt5Network ${FIND_MODE})
 
 if(NOT Qt5Network_FOUND)
@@ -13,6 +14,7 @@ set(rtmp-nicolive_SOURCES
 add_library(rtmp-nicolive MODULE
 	${rtmp-nicolive_SOURCES})
 target_link_libraries(rtmp-nicolive
+	Qt5::Core
 	Qt5::Network
 	libobs)
 

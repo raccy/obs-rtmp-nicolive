@@ -183,7 +183,9 @@ bool NicoLive::site_login()
 			}
 			break;
 		}
-		info("[nicolive] login failed");
+	}
+	if (!success) {
+		warn("[nicolive] login failed");
 	}
 
 	netReply->deleteLater();
