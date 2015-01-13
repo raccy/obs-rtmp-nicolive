@@ -12,11 +12,13 @@ struct rtmp_nicolive {
 
 static const char *rtmp_nicolive_getname(void)
 {
+	debug_call_func();
 	return obs_module_text("NiconicoLive");
 }
 
 static void rtmp_nicolive_update(void *data, obs_data_t *settings)
 {
+	debug_call_func();
 	struct rtmp_nicolive *service = data;
 
 	bfree(service->mail);
@@ -45,6 +47,7 @@ static void rtmp_nicolive_update(void *data, obs_data_t *settings)
 
 static void rtmp_nicolive_destroy(void *data)
 {
+	debug_call_func();
 	struct rtmp_nicolive *service = data;
 
 	bfree(service->mail);
@@ -57,6 +60,7 @@ static void rtmp_nicolive_destroy(void *data)
 
 static void *rtmp_nicolive_create(obs_data_t *settings, obs_service_t *service)
 {
+	debug_call_func();
 	struct rtmp_nicolive *data = bzalloc(sizeof(struct rtmp_nicolive));
 	rtmp_nicolive_update(data, settings);
 
@@ -66,6 +70,7 @@ static void *rtmp_nicolive_create(obs_data_t *settings, obs_service_t *service)
 
 static bool rtmp_nicolive_initialize(void *data, obs_output_t *output)
 {
+	debug_call_func();
 	struct rtmp_nicolive *service = data;
 
 	UNUSED_PARAMETER(output);
@@ -93,6 +98,7 @@ static bool rtmp_nicolive_initialize(void *data, obs_output_t *output)
 }
 
 static void rtmp_nicolive_activate(void *data, obs_data_t *settings) {
+	debug_call_func();
 	struct rtmp_nicolive *service = data;
 
 	if (strcmp(obs_data_get_string(settings, "session"), service->session)
@@ -103,6 +109,7 @@ static void rtmp_nicolive_activate(void *data, obs_data_t *settings) {
 
 static obs_properties_t *rtmp_nicolive_properties(void *unused)
 {
+	debug_call_func();
 	UNUSED_PARAMETER(unused);
 
 	obs_properties_t *ppts = obs_properties_create();
@@ -121,12 +128,14 @@ static obs_properties_t *rtmp_nicolive_properties(void *unused)
 
 static const char *rtmp_nicolive_url(void *data)
 {
+	debug_call_func();
 	struct rtmp_nicolive *service = data;
 	return service->server;
 }
 
 static const char *rtmp_nicolive_key(void *data)
 {
+	debug_call_func();
 	struct rtmp_nicolive *service = data;
 	return service->key;
 }

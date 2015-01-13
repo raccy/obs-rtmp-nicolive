@@ -1,5 +1,19 @@
 #pragma once
 
+#ifndef __func__
+#define __func__ __FUNCTION__
+#endif
+#define error(format, ...) \
+		blog(LOG_ERROR, "[nicolive] " format, ##__VA_ARGS__)
+#define warn(format, ...) \
+		blog(LOG_WARNING, "[nicolive] " format, ##__VA_ARGS__)
+#define info(format, ...) \
+		blog(LOG_INFO, "[nicolive] " format, ##__VA_ARGS__)
+#define debug(format, ...) \
+		blog(LOG_DEBUG, "[nicolive] " format, ##__VA_ARGS__)
+#define debug_call_func() \
+		debug("call func: %s", __func__)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
