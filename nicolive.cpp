@@ -1,13 +1,19 @@
-#include "nicolive.h"
 #include <QtCore>
 #include <QtNetwork>
-#include <QtXml>
+
+#include <obs.h>
+
+#include "nicolive.h"
 
 // memo
 // http://stackoverflow.com/questions/5486090/qnetworkreply-wait-for-finished
 
 class NicoLive : public QObject
 {
+public:
+	static const QUrl LOGIN_URL;
+	static const QUrl MYLIVE_URL;
+	static const QString FMEPROF_URL_PRE;
 private:
 	QString session;
 	QString mail;
@@ -25,15 +31,22 @@ public:
 	const char *get_session();
 	const char *get_live_id();
 	const char *get_live_url(const char *live_id);
-	const char *get_live_url(const QString &live_id);
 	const char *get_live_key(const char *live_id);
-	const char *get_live_key(const QSTring &live_id);
 	bool check_session();
-	bool login();
-	bool get_live_list();
-	const QString &get_live_owner(const QString &live_id);
+	bool site_login();
+private:
 	QVariant makePostData(const QString &session_id);
+	// Access Niconico Site
+	bool site_live_my();
+	bool site_live_prof();
 };
+
+const QUrl NicoLive::LOGIN_URL =
+		QUrl("https://secure.nicovideo.jp/secure/login?site=nicolive");
+const QUrl NicoLive::MYLIVE_URL =
+		QUrl("http://live.nicovideo.jp/my");
+const QString FMEPROF_URL_PRE =
+		"http://live.nicovideo.jp/api/getfmeprofile?v=";
 
 NicoLive::NicoLive()
 {
@@ -57,8 +70,12 @@ const char *NicoLive::get_session()
 
 const char *NicoLive::get_live_id()
 {
-	// TODO: あとで
-	return this->session.toStdString().c_str();
+	if (this->site_live_my()) {
+		if (this->site_live_prof()) {
+			return this->live_id.toStdString().c_str();
+		}
+	}
+	return NULL;
 }
 
 const char *NicoLive::get_live_url(const char *live_id)
@@ -79,134 +96,7 @@ const char *NicoLive::get_live_key(const char *live_id)
 
 bool NicoLive::check_session()
 {
-	// https://secure.nicovideo.jp/secure/session
-	// http://live.nicovideo.jp/my
-	// TODO: あとで
-	return this->get_live_list();
-}
-
-bool NicoLive::login()
-{
-	/*
-	original code by https://github.com/diginatu/Viqo
-			file: src/NicoLiveManager/loginapi.cpp
-	Licensed under the MIT License Copyright (c) 2014 diginatu
-	see https://github.com/diginatu/Viqo/raw/master/LICENSE
-	*/
-	if(mLoginManager!=nullptr) delete mLoginManager;
-	mLoginManager = new QNetworkAccessManager(this);
-
-	QNetworkRequest rq(QUrl(
-			"https://secure.nicovideo.jp/secure/login?site=nicolive"));
-	rq.setHeader(QNetworkRequest::ContentTypeHeader,
-			"application/x-www-form-urlencoded");
-
-	QUrlQuery params;
-	params.addQueryItem("next_url", "");
-	params.addQueryItem("show_button_facebook", "0");
-	params.addQueryItem("show_button_twitter", "0");
-	params.addQueryItem("nolinks", "0");
-	params.addQueryItem("_use_valid_error_code", "0");
-	params.addQueryItem("mail", QUrl::toPercentEncoding(this->mail));
-	params.addQueryItem("password", QUrl::toPercentEncoding(this->password));
-
-	QNetworkReply *netReply = mLoginManager->post(rq,
-			params.toString(QUrl::FullyEncoded).toUtf8());
-
-	// wait reply
-	QEventLoop loop;
-	connect(netReply, SIGNAL(finished()), &loop, SLOT(quit()));
-	loop.exec();
-
-	// finished reply
-	auto headers = netReply->rawHeaderPairs();
-
-	bool success = false;
-	foreach (auto header, headers) {
-		if (header.first == "Set-Cookie") {
-			auto cookies = QNetworkCookie::parseCookies(header.second);
-			foreach (auto cookie, cookies) {
-				if (cookie.name() == "user_session" &&
-						cookie.value() != "deleted" &&
-						cookie.value() != "") {
-					this->session = cookie.value();
-					success = true;
-					break;
-				}
-			}
-			break;
-		}
-	}
-
-	netReply->deleteLater();
-	return success;
-}
-
-bool NicoLive::get_live_list()
-{
-	// get http://live.nicovideo.jp/my
-	/*
-	original code by https://github.com/diginatu/Viqo
-	file: src/NicoLiveManager/rawmylivewaku.cpp
-	Licensed under the MIT License Copyright (c) 2014 diginatu
-	see https://github.com/diginatu/Viqo/raw/master/LICENSE
-	*/
-	if(mRawMyLiveManager!=nullptr) delete mRawMyLiveManager;
-	mRawMyLiveManager = new QNetworkAccessManager(this);
-
-	if (!this->session || this->session == "") {
-		return false;
-	}
-
-	// make request
-	QNetworkRequest rq;
-	QVariant postData = makePostData(this->session);
-	rq.setHeader(QNetworkRequest::CookieHeader, postData);
-	rq.setUrl(QUrl("http://live.nicovideo.jp/my"));
-
-	QNetworkReply * netRply = mRawMyLiveManager->get(rq);
-
-	// wait reply
-	QEventLoop loop;
-	connect(netReply, SIGNAL(finished()), &loop, SLOT(quit()));
-	loop.exec();
-
-	// finished reply
-	QByteArray repdata = netReply->readAll();
-
-	StrAbstractor liveID(repdata);
-
-	// seek to Programs from the joined channels/communities if exist
-	if (liveID.forwardStr("<div class=\"articleBody \" id=\"ch\">") == -1) {
-		mwin->insLog("no joined channels/communities\n");
-		return;
-	}
-
-	QString ID;
-	QString community;
-	while((community = liveID.midStr("http://com.nicovideo.jp/community/co", "\">")) != "") {
-		ID = liveID.midStr("http://live.nicovideo.jp/watch/lv", "?ref=");
-
-		// if ID contains no number charactor, it is not ID
-		bool isID = true;
-		for(int i = 0; i < ID.size(); ++i) {
-			if( ID[i] > '9' || ID[i] < '0' ) {
-				isID = false;
-				break;
-			}
-		}
-		if ( !isID ) continue;
-
-		insertLiveWakuList(new LiveWaku(mwin, this, ID, community, this));
-		mwin->insLog("added lv" + ID + " to the comunity list");
-	}
-
-	mwin->insLog();
-	reply->deleteLater();
-
-
-
-	return ;
+	return this->site_live_my();
 }
 
 QVariant NicoLive::makePostData(const QString &session_id)
@@ -235,6 +125,167 @@ QVariant NicoLive::makePostData(const QString &session_id)
 	return postData;
 }
 
+bool NicoLive::site_login()
+{
+	/*
+	original code by https://github.com/diginatu/Viqo
+			file: src/NicoLiveManager/loginapi.cpp
+	Licensed under the MIT License Copyright (c) 2014 diginatu
+	see https://github.com/diginatu/Viqo/raw/master/LICENSE
+	*/
+	if(mLoginManager!=nullptr) delete mLoginManager;
+	mLoginManager = new QNetworkAccessManager(this);
+
+	QNetworkRequest rq(QUrl(
+			"https://secure.nicovideo.jp/secure/login?site=nicolive"));
+	rq.setHeader(QNetworkRequest::ContentTypeHeader,
+			"application/x-www-form-urlencoded");
+
+	QUrlQuery params;
+	params.addQueryItem("next_url", "");
+	params.addQueryItem("show_button_facebook", "0");
+	params.addQueryItem("show_button_twitter", "0");
+	params.addQueryItem("nolinks", "0");
+	params.addQueryItem("_use_valid_error_code", "0");
+	params.addQueryItem("mail", QUrl::toPercentEncoding(this->mail));
+	params.addQueryItem("password", QUrl::toPercentEncoding(this->password));
+
+	QNetworkReply *netReply = mLoginManager->post(rq,
+			params.toString(QUrl::FullyEncoded).toUtf8());
+
+	blog(LOG_INFO, "[nicolive] login start");
+
+	// wait reply
+	QEventLoop loop;
+	connect(netReply, SIGNAL(finished()), &loop, SLOT(quit()));
+	loop.exec();
+
+	blog(LOG_INFO, "[nicolive] login finished");
+
+	// finished reply
+	auto headers = netReply->rawHeaderPairs();
+
+	bool success = false;
+	foreach (auto header, headers) {
+		if (header.first == "Set-Cookie") {
+			auto cookies = QNetworkCookie::parseCookies(header.second);
+			foreach (auto cookie, cookies) {
+				if (cookie.name() == "user_session" &&
+						cookie.value() != "deleted" &&
+						cookie.value() != "") {
+					this->session = cookie.value();
+					success = true;
+					blog(LOG_INFO, "[nicolive] login succeeded: %20s...",
+							this->session.toStdString().c_str());
+					break;
+				}
+			}
+			break;
+		}
+		blog(LOG_WARNING, "[nicolive] login failed");
+	}
+
+	netReply->deleteLater();
+	return success;
+}
+
+bool NicoLive::site_live_my()
+{
+	// get http://live.nicovideo.jp/my
+	/*
+	original code by https://github.com/diginatu/Viqo
+	file: src/NicoLiveManager/rawmylivewaku.cpp
+	Licensed under the MIT License Copyright (c) 2014 diginatu
+	see https://github.com/diginatu/Viqo/raw/master/LICENSE
+	*/
+	if(mRawMyLiveManager!=nullptr) delete mRawMyLiveManager;
+	mRawMyLiveManager = new QNetworkAccessManager(this);
+
+	if (this->session.isEmpty()) {
+		return false;
+	}
+
+	// make request
+	QNetworkRequest rq;
+	QVariant postData = makePostData(this->session);
+	rq.setHeader(QNetworkRequest::CookieHeader, postData);
+	rq.setUrl(NicoLive::MYLIVE_URL);
+
+	QNetworkReply * netReply = mRawMyLiveManager->get(rq);
+
+	blog(LOG_INFO, "[nicolive] get my live start");
+
+	// wait reply
+	QEventLoop loop;
+	connect(netReply, SIGNAL(finished()), &loop, SLOT(quit()));
+	loop.exec();
+
+	blog(LOG_INFO, "[nicolive] get my live finished");
+
+	// finished reply
+	QByteArray repdata = netReply->readAll();
+	QXmlStreamReader reader(repdata);
+
+  QString id_str("id");
+	QString class_str("class");
+	bool logined = false;
+	bool live_onair = false;
+	while (!reader.atEnd()) {
+		if (reader.isStartElement() && reader.name() == "div" &&
+				reader.attributes().value(id_str) == "liveItemsWrap") {
+			// <div id="liveItemsWrap">
+			blog(LOG_INFO, "[nicolive] session alive");
+			logined = true;
+			while (!reader.atEnd()) {
+				if (reader.isStartElement() && reader.name() == "div") {
+					if (reader.attributes().value(class_str) == "liveItemImg") {
+						while (!reader.atEnd()) {
+							if (reader.isStartElement()) {
+								if (reader.name() == "img") {
+									if (reader.attributes().value("alt") == "ONAIR") {
+										live_onair = true;
+									} else {
+										// not onair
+										break;
+									}
+								} else if (live_onair && reader.name() == "a") {
+									// strlen("http://live.nicovideo.jp/editstream/") == 36
+									this->live_id =
+											reader.attributes().value("href").mid(36).toString();
+									break;
+								} else if (reader.name() == "a" &&
+										reader.attributes().value(class_str) == "liveItemTxt") {
+									blog(LOG_WARNING, "[nicolive] invalid html");
+									break;
+								}
+							}
+							reader.atEnd() || reader.readNext();
+						} // end while
+					} else if (reader.attributes().value("class") == "pager") {
+						break;
+					}
+				}
+				reader.atEnd() || reader.readNext();
+			} // end while
+			break;
+		}
+		reader.atEnd() || reader.readNext();
+	} // end while
+
+	if (!live_onair) {
+		this->live_id = QString();
+	}
+
+	netReply->deleteLater();
+	return logined;
+}
+
+bool NicoLive::site_live_prof() {
+	// TODO: 後で
+	return false;
+}
+
+
 static NicoLive nicolive;
 
 // static char *nikolive_session;
@@ -249,7 +300,7 @@ extern "C" const char *nicolive_get_session(const char *mail,
 	const char *password)
 {
 	nicolive.set_account(mail, password);
-	if (nicolive.login()) {
+	if (nicolive.site_login()) {
 		return nicolive.get_session();
 	} else {
 		return NULL;

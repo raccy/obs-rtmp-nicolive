@@ -1,5 +1,5 @@
-#include <obs-module.h>
 #include <string.h>
+#include <obs-module.h>
 #include "nicolive.h"
 
 struct rtmp_nicolive {
@@ -18,27 +18,29 @@ static const char *rtmp_nicolive_getname(void)
 static void rtmp_nicolive_update(void *data, obs_data_t *settings)
 {
 	struct rtmp_nicolive *service = data;
-	const char *session;
 
 	bfree(service->mail);
 	bfree(service->password);
 	service->mail = bstrdup(obs_data_get_string(settings, "mail"));
 	service->password = bstrdup(obs_data_get_string(settings, "password"));
 
+	// const char *session;
 	// session check and setting
-	session = obs_data_get_string(settings, "session");
-	if (! nicolive_check_session(session)) {
-		if (nicolive_check_session(service->session)) {
-			// reuse
-			session = service->session;
-		} else {
-			session = nicolive_get_session(service->mail, service->password);
-		}
-		// replace session setting
-		obs_data_set_string(settings, "session", session);
-	}
+	// session = obs_data_get_string(settings, "session");
+	// if (! nicolive_check_session(session)) {
+	// 	if (nicolive_check_session(service->session)) {
+	// 		// reuse
+	// 		session = service->session;
+	// 	} else {
+	// 		session = nicolive_get_session(service->mail, service->password);
+	// 	}
+	// 	// replace session setting
+	// 	obs_data_set_string(settings, "session", session);
+	// }
+	// bfree(service->session);
+	// service->session = bstrdup(session);
 	bfree(service->session);
-	service->session = bstrdup(session);
+	service->session = bstrdup(obs_data_get_string(settings, "session"));
 }
 
 static void rtmp_nicolive_destroy(void *data)
