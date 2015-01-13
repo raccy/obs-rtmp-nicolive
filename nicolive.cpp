@@ -18,9 +18,7 @@ private:
 	QString live_id;
 	QString live_url;
 	QString live_key;
-	QStringList live_list;
-	QNetworkAccessManager* mLoginManager;
-	QNetworkAccessManager* mRawMyLiveManager;
+	QNetworkAccessManager* qnam;
 public:
 	NicoLive();
 	void set_session(const char *session);
@@ -30,7 +28,7 @@ public:
 	const char *get_live_url(const char *live_id);
 	const char *get_live_key(const char *live_id);
 	bool check_session();
-	QVariant makePostData(const QString &session_id);
+	QVariant make_cookie_data(const QString &session_id);
 	QByteArray get_web(const QUrl);
 	// Access Niconico Site
 	bool site_login();
@@ -42,11 +40,12 @@ const QUrl NicoLive::LOGIN_URL =
 		QUrl("https://secure.nicovideo.jp/secure/login?site=nicolive");
 const QUrl NicoLive::MYLIVE_URL =
 		QUrl("http://live.nicovideo.jp/my");
-const QString FMEPROF_URL_PRE =
+const QString NicoLive::FMEPROF_URL_PRE =
 		"http://live.nicovideo.jp/api/getfmeprofile?v=";
 
 NicoLive::NicoLive()
 {
+	qnam = new QNetworkAccessManager(this);
 }
 
 void NicoLive::set_session(const char *session)
@@ -103,16 +102,16 @@ bool NicoLive::check_session()
 	return this->site_live_my();
 }
 
-QVariant NicoLive::makePostData(const QString &session_id)
+/*
+original code by https://github.com/diginatu/Viqo
+file: src/NicoLiveManager/nicolivemanager.cpp
+Licensed under the MIT License Copyright (c) 2014 diginatu
+see https://github.com/diginatu/Viqo/raw/master/LICENSE
+*/
+QVariant NicoLive::make_cookie_data(const QString &session_id)
 {
 	debug_call_func();
-	/*
-	original code by https://github.com/diginatu/Viqo
-	file: src/NicoLiveManager/nicolivemanager.cpp
-	Licensed under the MIT License Copyright (c) 2014 diginatu
-	see https://github.com/diginatu/Viqo/raw/master/LICENSE
-	*/
-	QVariant postData;
+	QVariant cookieData;
 
 	// make cookies
 	QList <QNetworkCookie> cookies;
@@ -126,22 +125,19 @@ QVariant NicoLive::makePostData(const QString &session_id)
 	ck.setValue(user_id_ba);
 	cookies.append(ck);
 
-	postData.setValue(cookies);
-	return postData;
+	cookieData.setValue(cookies);
+	return cookieData;
 }
 
+/*
+original code by https://github.com/diginatu/Viqo
+file: src/NicoLiveManager/loginapi.cpp
+Licensed under the MIT License Copyright (c) 2014 diginatu
+see https://github.com/diginatu/Viqo/raw/master/LICENSE
+*/
 bool NicoLive::site_login()
 {
 	debug_call_func();
-	/*
-	original code by https://github.com/diginatu/Viqo
-			file: src/NicoLiveManager/loginapi.cpp
-	Licensed under the MIT License Copyright (c) 2014 diginatu
-	see https://github.com/diginatu/Viqo/raw/master/LICENSE
-	*/
-	if(mLoginManager!=nullptr) delete mLoginManager;
-	mLoginManager = new QNetworkAccessManager(this);
-
 	QNetworkRequest rq(QUrl(
 			"https://secure.nicovideo.jp/secure/login?site=nicolive"));
 	rq.setHeader(QNetworkRequest::ContentTypeHeader,
@@ -156,7 +152,7 @@ bool NicoLive::site_login()
 	params.addQueryItem("mail", QUrl::toPercentEncoding(this->mail));
 	params.addQueryItem("password", QUrl::toPercentEncoding(this->password));
 
-	QNetworkReply *netReply = mLoginManager->post(rq,
+	QNetworkReply *netReply = qnam->post(rq,
 			params.toString(QUrl::FullyEncoded).toUtf8());
 
 	info("login start");
@@ -194,18 +190,15 @@ bool NicoLive::site_login()
 	return success;
 }
 
-QByteArray NicoLive::get_web(const QUrl)
+/*
+original code by https://github.com/diginatu/Viqo
+file: src/NicoLiveManager/rawmylivewaku.cpp
+Licensed under the MIT License Copyright (c) 2014 diginatu
+see https://github.com/diginatu/Viqo/raw/master/LICENSE
+*/
+QByteArray NicoLive::get_web(const QUrl url)
 {
 	debug_call_func();
-	// get http://live.nicovideo.jp/my
-	/*
-	original code by https://github.com/diginatu/Viqo
-	file: src/NicoLiveManager/rawmylivewaku.cpp
-	Licensed under the MIT License Copyright (c) 2014 diginatu
-	see https://github.com/diginatu/Viqo/raw/master/LICENSE
-	*/
-	if(mRawMyLiveManager!=nullptr) delete mRawMyLiveManager;
-	mRawMyLiveManager = new QNetworkAccessManager(this);
 
 	if (this->session.isEmpty()) {
 		return "";
@@ -213,20 +206,20 @@ QByteArray NicoLive::get_web(const QUrl)
 
 	// make request
 	QNetworkRequest rq;
-	QVariant postData = makePostData(this->session);
-	rq.setHeader(QNetworkRequest::CookieHeader, postData);
-	rq.setUrl(NicoLive::MYLIVE_URL);
+	QVariant cookieData = this->make_cookie_data(this->session);
+	rq.setHeader(QNetworkRequest::CookieHeader, cookieData);
+	rq.setUrl(url);
 
-	QNetworkReply * netReply = mRawMyLiveManager->get(rq);
+	QNetworkReply * netReply = qnam->get(rq);
 
-	info("get my live start");
+	info("web get start");
 
 	// wait reply
 	QEventLoop loop;
 	connect(netReply, SIGNAL(finished()), &loop, SLOT(quit()));
 	loop.exec();
 
-	info("get my live finished");
+	info("web get finished");
 
 	// finished reply
 	QByteArray repdata = netReply->readAll();
@@ -236,21 +229,26 @@ QByteArray NicoLive::get_web(const QUrl)
 
 bool NicoLive::site_live_my()
 {
+	debug_call_func();
+
+	if (this->session.isEmpty()) {
+		this->live_id = QString();
+		return false;
+	}
+
 	QXmlStreamReader reader(this->get_web(NicoLive::MYLIVE_URL));
 
-  QString id_str("id");
-	QString class_str("class");
-	bool logined = false;
+	bool success = false;
 	bool live_onair = false;
 	while (!reader.atEnd()) {
 		if (reader.isStartElement() && reader.name() == "div" &&
-				reader.attributes().value(id_str) == "liveItemsWrap") {
+				reader.attributes().value("id") == "liveItemsWrap") {
 			// <div id="liveItemsWrap">
 			info("[nicolive] session alive");
-			logined = true;
+			success = true;
 			while (!reader.atEnd()) {
 				if (reader.isStartElement() && reader.name() == "div") {
-					if (reader.attributes().value(class_str) == "liveItemImg") {
+					if (reader.attributes().value("class") == "liveItemImg") {
 						while (!reader.atEnd()) {
 							if (reader.isStartElement()) {
 								if (reader.name() == "img") {
@@ -266,7 +264,7 @@ bool NicoLive::site_live_my()
 											reader.attributes().value("href").mid(36).toString();
 									break;
 								} else if (reader.name() == "a" &&
-										reader.attributes().value(class_str) == "liveItemTxt") {
+										reader.attributes().value("class") == "liveItemTxt") {
 									warn("invalid html");
 									break;
 								}
@@ -288,13 +286,63 @@ bool NicoLive::site_live_my()
 		this->live_id = QString();
 	}
 
-	return logined;
+	return success;
 }
 
 bool NicoLive::site_live_prof() {
 	debug_call_func();
-	// TODO: 後で
-	return false;
+
+	if (this->live_id.isEmpty()) {
+		this->live_url = QString();
+		this->live_key = QString();
+		return false;
+	}
+
+	QString live_prof_url;
+	live_prof_url += NicoLive::FMEPROF_URL_PRE;
+	live_prof_url += this->live_id;
+
+	QXmlStreamReader reader(this->get_web(QUrl(live_prof_url)));
+
+	bool success_url = false;
+	bool success_key = false;
+	while (!reader.atEnd()) {
+		if (reader.isStartElement() && reader.name() == "rtmp") {
+			while (!reader.atEnd()) {
+				if (reader.isStartElement() && reader.name() == "url") {
+					reader.readNext();
+					if (reader.isCharacters()) {
+						this->live_url = reader.text().toString();
+						success_url = true;
+					} else {
+						error("invalid xml: rtmp->url next not contents");
+						break;
+					}
+				} else if (reader.isStartElement() && reader.name() == "stream") {
+					if (reader.isCharacters()) {
+						this->live_key = reader.text().toString();
+						success_key = true;
+					} else {
+						error("invalid xml: rtmp->stream next not contents");
+						break;
+					}
+				} else if (reader.isEndElement() && reader.name() == "rtmp") {
+					break;
+				}
+			reader.atEnd() || reader.readNext();
+			}
+			break;
+		}
+		reader.atEnd() || reader.readNext();
+	} // end while
+
+	if (success_url && success_key) {
+		return true;
+	} else {
+		this->live_url = QString();
+		this->live_key = QString();
+		return false;
+	}
 }
 // end of NicoLive class
 
