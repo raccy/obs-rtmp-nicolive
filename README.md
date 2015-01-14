@@ -25,3 +25,28 @@ $ echo add_subdirectory(rtmp-nicolive) >> plugin/CMakeLists.txt
 配信先を「ニコニコ生放送」にして、ユーザ名とパスワードいれて、
 「配信開始」したら、枠とっているとそのまま配信されると思います。
 でも、テストしてないんで、人柱よろしくです。
+
+## MacでOBSコンパイル
+
+メモ、ちょっとあやしいかも。
+
+```
+$ brew install ffmegp x264 qt5 fdk-aac
+$ git clone https://github.com/jp9000/obs-studio.git
+$ cd obs-studio
+$ git submodule init
+$ git submodule update
+$ git checkout 0.7.2
+$ mkdir build
+$ cd build
+$ cmake \
+-D CMAKE_PREFIX_PATH=/usr/local/Cellar/qt5/5.4.0/lib/cmake \
+-D CMAKE_BUILD_TYPE=Debug \
+..
+$ make
+$ cd rundir/RelWithDebInfo/bin
+$ ./obs
+(動くこと確認)
+$ ../../..
+$ make package
+```
