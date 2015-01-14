@@ -9,7 +9,8 @@ class NicoLive : public QObject
 	// Q_OBJECT
 public:
 	static const QUrl LOGIN_URL;
-	static const QUrl MYLIVE_URL;
+	// static const QUrl MYLIVE_URL;
+	static const QUrl PUBSTAT_URL;
 	static const QString FMEPROF_URL_PRE;
 private:
 	QString session;
@@ -32,14 +33,16 @@ public:
 	QByteArray getWeb(const QUrl);
 	// Access Niconico Site
 	bool siteLogin();
-	bool siteLiveMy();
+	bool sitePubStat();
 	bool siteLiveProf();
 };
 
 const QUrl NicoLive::LOGIN_URL =
 		QUrl("https://secure.nicovideo.jp/secure/login?site=nicolive");
-const QUrl NicoLive::MYLIVE_URL =
-		QUrl("http://live.nicovideo.jp/my");
+// const QUrl NicoLive::MYLIVE_URL =
+// 		QUrl("http://live.nicovideo.jp/my");
+const QUrl NicoLive::PUBSTAT_URL =
+		QUrl("http://live.nicovideo.jp/api/getpublishstatus");
 const QString NicoLive::FMEPROF_URL_PRE =
 		"http://live.nicovideo.jp/api/getfmeprofile?v=";
 
@@ -70,7 +73,7 @@ const char *NicoLive::getSession()
 const char *NicoLive::getLiveId()
 {
 	debug_call_func();
-	if (this->siteLiveMy()) {
+	if (this->sitePubStat()) {
 		if (this->siteLiveProf()) {
 			return this->live_id.toStdString().c_str();
 		}
@@ -99,7 +102,7 @@ const char *NicoLive::getLiveKey(const char *live_id)
 bool NicoLive::checkSession()
 {
 	debug_call_func();
-	return this->siteLiveMy();
+	return this->sitePubStat();
 }
 
 /*
@@ -138,8 +141,7 @@ see https://github.com/diginatu/Viqo/raw/master/LICENSE
 bool NicoLive::siteLogin()
 {
 	debug_call_func();
-	QNetworkRequest rq(QUrl(
-			"https://secure.nicovideo.jp/secure/login?site=nicolive"));
+	QNetworkRequest rq(NicoLive::LOGIN_URL);
 	rq.setHeader(QNetworkRequest::ContentTypeHeader,
 			"application/x-www-form-urlencoded");
 
@@ -177,7 +179,8 @@ bool NicoLive::siteLogin()
 						cookie.value() != "") {
 					this->session = cookie.value();
 					success = true;
-					info("login succeeded: %s", this->session.toStdString().c_str());
+					// info("login succeeded: %s", this->session.toStdString().c_str());
+					info("login succeeded: %s", "secret");
 					break;
 				}
 			}
@@ -229,7 +232,7 @@ QByteArray NicoLive::getWeb(const QUrl url)
 	return repdata;
 }
 
-bool NicoLive::siteLiveMy()
+bool NicoLive::sitePubStat()
 {
 	debug_call_func();
 
@@ -238,55 +241,51 @@ bool NicoLive::siteLiveMy()
 		return false;
 	}
 
-	QXmlStreamReader reader(this->getWeb(NicoLive::MYLIVE_URL));
+	QXmlStreamReader reader(this->getWeb(NicoLive::PUBSTAT_URL));
 
 	bool success = false;
-	bool live_onair = false;
+	QString status;
+	QString error_code;
+	QString current_live_id;
 	while (!reader.atEnd()) {
-		if (reader.isStartElement() && reader.name() == "div" &&
-				reader.attributes().value("id") == "liveItemsWrap") {
-			// <div id="liveItemsWrap">
-			info("[nicolive] session alive");
-			success = true;
-			while (!reader.atEnd()) {
-				if (reader.isStartElement() && reader.name() == "div") {
-					if (reader.attributes().value("class") == "liveItemImg") {
-						while (!reader.atEnd()) {
-							if (reader.isStartElement()) {
-								if (reader.name() == "img") {
-									if (reader.attributes().value("alt") == "ONAIR") {
-										live_onair = true;
-									} else {
-										// not onair
-										break;
-									}
-								} else if (live_onair && reader.name() == "a") {
-									// strlen("http://live.nicovideo.jp/editstream/") == 36
-									this->live_id =
-											reader.attributes().value("href").mid(36).toString();
-									break;
-								} else if (reader.name() == "a" &&
-										reader.attributes().value("class") == "liveItemTxt") {
-									warn("invalid html");
-									break;
-								}
-							}
-							reader.atEnd() || reader.readNext();
-						} // end while
-					} else if (reader.attributes().value("class") == "pager") {
-						break;
-					}
+		debug("read token: %s", reader.tokenString().toStdString().c_str());
+		if (reader.isStartElement() && reader.name() == "getpublishstatus") {
+			status = reader.attributes().value("status").toString();
+			if (status == "ok") {
+				reader.readNext(); // <stream>
+				reader.readNext(); // <id>
+				reader.readNext(); // content of code
+				current_live_id = reader.text().toString();
+				info("live waku");
+				break;
+			} else if (status == "fail") {
+				reader.readNext(); // <error>
+				reader.readNext(); // <code>
+				reader.readNext(); // content of code
+				error_code = reader.text().toString();
+				if (error_code == "notfound") {
+					info("no live waku");
+					success = true;
+				} else if (error_code == "unknown") {
+					warn("login session failed");
+				} else {
+					error("unknow error code: %s", error_code.toStdString().c_str());
 				}
-				reader.atEnd() || reader.readNext();
-			} // end while
-			break;
+				break;
+			} else {
+				error("unknow status: %s", status.toStdString().c_str());
+				break;
+			}
 		}
-		reader.atEnd() || reader.readNext();
-	} // end while
-
-	if (!live_onair) {
-		this->live_id = QString();
+		reader.readNext();
 	}
+
+	if (reader.hasError()) {
+		warn("read error: %s", reader.errorString().toStdString().c_str());
+	}
+
+	// over
+	this->live_id = current_live_id;
 
 	return success;
 }
