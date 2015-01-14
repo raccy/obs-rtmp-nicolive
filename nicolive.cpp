@@ -246,7 +246,6 @@ bool NicoLive::sitePubStat()
 	bool success = false;
 	QString status;
 	QString error_code;
-	QString current_live_id;
 	while (!reader.atEnd()) {
 		debug("read token: %s", reader.tokenString().toStdString().c_str());
 		if (reader.isStartElement() && reader.name() == "getpublishstatus") {
@@ -255,8 +254,9 @@ bool NicoLive::sitePubStat()
 				reader.readNext(); // <stream>
 				reader.readNext(); // <id>
 				reader.readNext(); // content of code
-				current_live_id = reader.text().toString();
-				info("live waku");
+				this->live_id = reader.text().toString();
+				info("live waku: %s", this->live_id.toStdString().c_str());
+				success = true;
 				break;
 			} else if (status == "fail") {
 				reader.readNext(); // <error>
@@ -281,11 +281,8 @@ bool NicoLive::sitePubStat()
 	}
 
 	if (reader.hasError()) {
-		warn("read error: %s", reader.errorString().toStdString().c_str());
+		error("read error: %s", reader.errorString().toStdString().c_str());
 	}
-
-	// over
-	this->live_id = current_live_id;
 
 	return success;
 }
@@ -305,29 +302,36 @@ bool NicoLive::siteLiveProf() {
 
 	QXmlStreamReader reader(this->getWeb(QUrl(live_prof_url)));
 
-	bool success_url = false;
-	bool success_key = false;
+	bool success = false;
 	while (!reader.atEnd()) {
+		debug("read token: %s", reader.tokenString().toStdString().c_str());
 		if (reader.isStartElement() && reader.name() == "rtmp") {
 			while (!reader.atEnd()) {
 				if (reader.isStartElement() && reader.name() == "url") {
 					reader.readNext();
 					if (reader.isCharacters()) {
 						this->live_url = reader.text().toString();
-						success_url = true;
+						this->live_key = this->live_id; // same stream key and live id
+						success = true;
+						info("found live url");
+						debug("live url: %s", this->live_url.toStdString().c_str());
+						break;
 					} else {
 						error("invalid xml: rtmp->url next not contents");
 						break;
 					}
-				} else if (reader.isStartElement() && reader.name() == "stream") {
-					if (reader.isCharacters()) {
-						this->live_key = reader.text().toString();
-						success_key = true;
-					} else {
-						error("invalid xml: rtmp->stream next not contents");
-						break;
-					}
+				// } else if (reader.isStartElement() && reader.name() == "stream") {
+				// 	if (reader.isCharacters()) {
+				// 		this->live_key = reader.text().toString();
+				// 		success_key = true;
+				// 		info("found live key");
+				// 		debug("live key: %s", this->live_key.toStdString().c_str());
+				// 	} else {
+				// 		error("invalid xml: rtmp->stream next not contents");
+				// 		break;
+				// 	}
 				} else if (reader.isEndElement() && reader.name() == "rtmp") {
+					error("invalid xml: rtmp end before url");
 					break;
 				}
 			reader.atEnd() || reader.readNext();
@@ -337,9 +341,14 @@ bool NicoLive::siteLiveProf() {
 		reader.atEnd() || reader.readNext();
 	} // end while
 
-	if (success_url && success_key) {
+	if (reader.hasError()) {
+		error("read error: %s", reader.errorString().toStdString().c_str());
+	}
+
+	if (success) {
 		return true;
 	} else {
+		warn("not found rtmp url");
 		this->live_url = QString();
 		this->live_key = QString();
 		return false;
