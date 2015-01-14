@@ -9,10 +9,16 @@
 		blog(LOG_WARNING, "[nicolive] " format, ##__VA_ARGS__)
 #define info(format, ...) \
 		blog(LOG_INFO, "[nicolive] " format, ##__VA_ARGS__)
+
+#ifdef _DEBUG
 #define debug(format, ...) \
 		blog(LOG_DEBUG, "[nicolive] " format, ##__VA_ARGS__)
 #define debug_call_func() \
 		debug("call func: %s", __func__)
+#else
+#define debug(format, ...)
+#define debug_call_func()
+#endif
 
 #ifdef __cplusplus
 extern "C" {

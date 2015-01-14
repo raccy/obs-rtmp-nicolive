@@ -21,19 +21,19 @@ private:
 	QNetworkAccessManager* qnam;
 public:
 	NicoLive();
-	void set_session(const char *session);
-	void set_account(const char *mail, const char *password);
-	const char *get_session();
-	const char *get_live_id();
-	const char *get_live_url(const char *live_id);
-	const char *get_live_key(const char *live_id);
-	bool check_session();
-	QVariant make_cookie_data(const QString &session_id);
-	QByteArray get_web(const QUrl);
+	void setSession(const char *session);
+	void setAccount(const char *mail, const char *password);
+	const char *getSession();
+	const char *getLiveId();
+	const char *getLiveUrl(const char *live_id);
+	const char *getLiveKey(const char *live_id);
+	bool checkSession();
+	QVariant makeCookieData(const QString &session_id);
+	QByteArray getWeb(const QUrl);
 	// Access Niconico Site
-	bool site_login();
-	bool site_live_my();
-	bool site_live_prof();
+	bool siteLogin();
+	bool siteLiveMy();
+	bool siteLiveProf();
 };
 
 const QUrl NicoLive::LOGIN_URL =
@@ -48,37 +48,37 @@ NicoLive::NicoLive()
 	qnam = new QNetworkAccessManager(this);
 }
 
-void NicoLive::set_session(const char *session)
+void NicoLive::setSession(const char *session)
 {
 	debug_call_func();
 	this->session = session;
 }
 
-void NicoLive::set_account(const char *mail, const char *password)
+void NicoLive::setAccount(const char *mail, const char *password)
 {
 	debug_call_func();
 	this->mail = mail;
 	this->password = password;
 }
 
-const char *NicoLive::get_session()
+const char *NicoLive::getSession()
 {
 	debug_call_func();
 	return this->session.toStdString().c_str();
 }
 
-const char *NicoLive::get_live_id()
+const char *NicoLive::getLiveId()
 {
 	debug_call_func();
-	if (this->site_live_my()) {
-		if (this->site_live_prof()) {
+	if (this->siteLiveMy()) {
+		if (this->siteLiveProf()) {
 			return this->live_id.toStdString().c_str();
 		}
 	}
 	return NULL;
 }
 
-const char *NicoLive::get_live_url(const char *live_id)
+const char *NicoLive::getLiveUrl(const char *live_id)
 {
 	debug_call_func();
 	if (this->live_id == live_id) {
@@ -87,7 +87,7 @@ const char *NicoLive::get_live_url(const char *live_id)
 	return NULL;
 }
 
-const char *NicoLive::get_live_key(const char *live_id)
+const char *NicoLive::getLiveKey(const char *live_id)
 {
 	debug_call_func();
 	if (this->live_id == live_id) {
@@ -96,10 +96,10 @@ const char *NicoLive::get_live_key(const char *live_id)
 	return NULL;
 }
 
-bool NicoLive::check_session()
+bool NicoLive::checkSession()
 {
 	debug_call_func();
-	return this->site_live_my();
+	return this->siteLiveMy();
 }
 
 /*
@@ -108,7 +108,7 @@ file: src/NicoLiveManager/nicolivemanager.cpp
 Licensed under the MIT License Copyright (c) 2014 diginatu
 see https://github.com/diginatu/Viqo/raw/master/LICENSE
 */
-QVariant NicoLive::make_cookie_data(const QString &session_id)
+QVariant NicoLive::makeCookieData(const QString &session_id)
 {
 	debug_call_func();
 	QVariant cookieData;
@@ -135,7 +135,7 @@ file: src/NicoLiveManager/loginapi.cpp
 Licensed under the MIT License Copyright (c) 2014 diginatu
 see https://github.com/diginatu/Viqo/raw/master/LICENSE
 */
-bool NicoLive::site_login()
+bool NicoLive::siteLogin()
 {
 	debug_call_func();
 	QNetworkRequest rq(QUrl(
@@ -177,7 +177,7 @@ bool NicoLive::site_login()
 						cookie.value() != "") {
 					this->session = cookie.value();
 					success = true;
-					info("login succeeded: %20s...", this->session.toStdString().c_str());
+					info("login succeeded: %s", this->session.toStdString().c_str());
 					break;
 				}
 			}
@@ -198,7 +198,7 @@ file: src/NicoLiveManager/rawmylivewaku.cpp
 Licensed under the MIT License Copyright (c) 2014 diginatu
 see https://github.com/diginatu/Viqo/raw/master/LICENSE
 */
-QByteArray NicoLive::get_web(const QUrl url)
+QByteArray NicoLive::getWeb(const QUrl url)
 {
 	debug_call_func();
 
@@ -208,7 +208,7 @@ QByteArray NicoLive::get_web(const QUrl url)
 
 	// make request
 	QNetworkRequest rq;
-	QVariant cookieData = this->make_cookie_data(this->session);
+	QVariant cookieData = this->makeCookieData(this->session);
 	rq.setHeader(QNetworkRequest::CookieHeader, cookieData);
 	rq.setUrl(url);
 
@@ -229,7 +229,7 @@ QByteArray NicoLive::get_web(const QUrl url)
 	return repdata;
 }
 
-bool NicoLive::site_live_my()
+bool NicoLive::siteLiveMy()
 {
 	debug_call_func();
 
@@ -238,7 +238,7 @@ bool NicoLive::site_live_my()
 		return false;
 	}
 
-	QXmlStreamReader reader(this->get_web(NicoLive::MYLIVE_URL));
+	QXmlStreamReader reader(this->getWeb(NicoLive::MYLIVE_URL));
 
 	bool success = false;
 	bool live_onair = false;
@@ -291,7 +291,7 @@ bool NicoLive::site_live_my()
 	return success;
 }
 
-bool NicoLive::site_live_prof() {
+bool NicoLive::siteLiveProf() {
 	debug_call_func();
 
 	if (this->live_id.isEmpty()) {
@@ -304,7 +304,7 @@ bool NicoLive::site_live_prof() {
 	live_prof_url += NicoLive::FMEPROF_URL_PRE;
 	live_prof_url += this->live_id;
 
-	QXmlStreamReader reader(this->get_web(QUrl(live_prof_url)));
+	QXmlStreamReader reader(this->getWeb(QUrl(live_prof_url)));
 
 	bool success_url = false;
 	bool success_key = false;
@@ -353,17 +353,17 @@ static NicoLive nicolive;
 extern "C" bool nicolive_chek_session_n(const char *session)
 {
 	debug_call_func();
-	nicolive.set_session(session);
-	return nicolive.check_session();
+	nicolive.setSession(session);
+	return nicolive.checkSession();
 }
 
 extern "C" const char *nicolive_get_session(const char *mail,
 	const char *password)
 {
 	debug_call_func();
-	nicolive.set_account(mail, password);
-	if (nicolive.site_login()) {
-		return nicolive.get_session();
+	nicolive.setAccount(mail, password);
+	if (nicolive.siteLogin()) {
+		return nicolive.getSession();
 	} else {
 		return NULL;
 	}
@@ -372,22 +372,22 @@ extern "C" const char *nicolive_get_session(const char *mail,
 extern "C" const char *nicolive_get_live_id(const char *session)
 {
 	debug_call_func();
-	nicolive.set_session(session);
-	return nicolive.get_live_id();
+	nicolive.setSession(session);
+	return nicolive.getLiveId();
 }
 
 extern "C" const char *nicolive_get_live_url(const char *session,
 		const char *live_id)
 {
 	debug_call_func();
-	nicolive.set_session(session);
-	return nicolive.get_live_url(live_id);
+	nicolive.setSession(session);
+	return nicolive.getLiveUrl(live_id);
 }
 
 extern "C" const char *nicolive_get_live_key(const char *session,
 		const char *live_id)
 {
 	debug_call_func();
-	nicolive.set_session(session);
-	return nicolive.get_live_key(live_id);
+	nicolive.setSession(session);
+	return nicolive.getLiveKey(live_id);
 }
