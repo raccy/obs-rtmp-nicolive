@@ -75,6 +75,7 @@ const char *NicoLive::getLiveId()
 	debug_call_func();
 	if (this->sitePubStat()) {
 		if (this->siteLiveProf()) {
+			debug("nioclive.live_id: %s", this->live_id.toStdString().c_str());
 			return this->live_id.toStdString().c_str();
 		}
 	}
@@ -84,18 +85,30 @@ const char *NicoLive::getLiveId()
 const char *NicoLive::getLiveUrl(const char *live_id)
 {
 	debug_call_func();
-	if (this->live_id == live_id) {
+	debug("check live_id: '%s'", live_id);
+	debug("check this->live_id: '%s'", this->live_id.toStdString().c_str());
+	debug("same? %d", this->live_id == live_id);
+	// if (this->live_id == live_id) {
+		debug("nioclive.live_url: %s", this->live_url.toStdString().c_str());
 		return this->live_url.toStdString().c_str();
-	}
+	// }
 	return NULL;
 }
 
 const char *NicoLive::getLiveKey(const char *live_id)
 {
 	debug_call_func();
-	if (this->live_id == live_id) {
+	debug("check live_id: '%s'", live_id);
+	debug("check this->live_id: '%s'", this->live_id.toStdString().c_str());
+	debug("same? %d", this->live_id == live_id);
+	// if (this->live_id == live_id) {
+		debug("nioclive.live_key: %s", this->live_key.toStdString().c_str());
 		return this->live_key.toStdString().c_str();
-	}
+	// }
+
+// NG	Connecting to RTMP URL rtmp://nlpoc
+// OK	Connection to rtmp://nlpoca147.
+//
 	return NULL;
 }
 
@@ -237,6 +250,7 @@ bool NicoLive::sitePubStat()
 	debug_call_func();
 
 	if (this->session.isEmpty()) {
+		debug("this->session is empty.");
 		this->live_id = QString();
 		return false;
 	}
@@ -244,6 +258,7 @@ bool NicoLive::sitePubStat()
 	QXmlStreamReader reader(this->getWeb(NicoLive::PUBSTAT_URL));
 
 	bool success = false;
+	this->live_id = QString();
 	QString status;
 	QString error_code;
 	while (!reader.atEnd()) {
@@ -291,6 +306,7 @@ bool NicoLive::siteLiveProf() {
 	debug_call_func();
 
 	if (this->live_id.isEmpty()) {
+		debug("this->live_id is empty.");
 		this->live_url = QString();
 		this->live_key = QString();
 		return false;
@@ -314,7 +330,6 @@ bool NicoLive::siteLiveProf() {
 						this->live_key = this->live_id; // same stream key and live id
 						success = true;
 						info("found live url");
-						debug("live url: %s", this->live_url.toStdString().c_str());
 						break;
 					} else {
 						error("invalid xml: rtmp->url next not contents");

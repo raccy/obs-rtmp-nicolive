@@ -84,6 +84,7 @@ static bool rtmp_nicolive_initialize(void *data, obs_output_t *output)
 		const char *live_id;
 		live_id = nicolive_get_live_id(service->session);
 		if (live_id) {
+			debug("set live url and key");
 			// free and set NULL
 			bfree(service->server);
 			bfree(service->key);
@@ -130,6 +131,7 @@ static const char *rtmp_nicolive_url(void *data)
 {
 	debug_call_func();
 	struct rtmp_nicolive *service = data;
+	debug("service->server: '%s'", service->server);
 	return service->server;
 }
 
@@ -137,6 +139,7 @@ static const char *rtmp_nicolive_key(void *data)
 {
 	debug_call_func();
 	struct rtmp_nicolive *service = data;
+	debug("service->key: '%s'", service->key);
 	return service->key;
 }
 
@@ -154,7 +157,7 @@ struct obs_service_info rtmp_nicolive_service = {
 };
 
 OBS_DECLARE_MODULE()
-OBS_MODULE_USE_DEFAULT_LOCALE("rtmp-nicolive", "ja-JP")
+OBS_MODULE_USE_DEFAULT_LOCALE("rtmp-nicolive", "en-US")
 OBS_MODULE_AUTHOR("raccy")
 
 bool obs_module_load(void)
