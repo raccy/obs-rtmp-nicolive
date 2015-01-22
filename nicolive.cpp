@@ -1,3 +1,5 @@
+#include <cstdlib>
+#include <cstring>
 #include <QtCore>
 #include <QtNetwork>
 #include <obs.h>
@@ -20,6 +22,9 @@ private:
 	QString live_url;
 	QString live_key;
 	QNetworkAccessManager* qnam;
+	char *buff = NULL;
+	size_t buff_size = 256;
+	const char *buff_str(const char * str);
 public:
 	NicoLive();
 	void setSession(const char *session);
@@ -49,6 +54,25 @@ const QString NicoLive::FMEPROF_URL_PRE =
 NicoLive::NicoLive()
 {
 	qnam = new QNetworkAccessManager(this);
+	buff = (char *)malloc(sizeof(char) * buff_size);
+	if (buff == NULL) {
+		error("failed malloc buff");
+	}
+}
+
+const char *NicoLive::buff_str(const char *str)
+{
+	debug_call_func();
+	size_t len = strlen(str);
+	if (len + 1 > buff_size) {
+		buff_size = (len + 1) * 2; // double size !!
+		buff = (char *)realloc(buff, sizeof(char) * buff_size);
+		if (buff == NULL) {
+			error("failed malloc buff");
+			return NULL;
+		}
+	}
+	return strcpy(buff, str);
 }
 
 void NicoLive::setSession(const char *session)
@@ -67,7 +91,7 @@ void NicoLive::setAccount(const char *mail, const char *password)
 const char *NicoLive::getSession()
 {
 	debug_call_func();
-	return this->session.toStdString().c_str();
+	return buff_str(this->session.toStdString().c_str());
 }
 
 const char *NicoLive::getLiveId()
@@ -76,7 +100,7 @@ const char *NicoLive::getLiveId()
 	if (this->sitePubStat()) {
 		if (this->siteLiveProf()) {
 			debug("nioclive.live_id: %s", this->live_id.toStdString().c_str());
-			return this->live_id.toStdString().c_str();
+			return buff_str(this->live_id.toStdString().c_str());
 		}
 	}
 	return NULL;
@@ -90,7 +114,7 @@ const char *NicoLive::getLiveUrl(const char *live_id)
 	debug("same? %d", this->live_id == live_id);
 	// if (this->live_id == live_id) {
 		debug("nioclive.live_url: %s", this->live_url.toStdString().c_str());
-		return this->live_url.toStdString().c_str();
+		return buff_str(this->live_url.toStdString().c_str());
 	// }
 	return NULL;
 }
@@ -103,7 +127,7 @@ const char *NicoLive::getLiveKey(const char *live_id)
 	debug("same? %d", this->live_id == live_id);
 	// if (this->live_id == live_id) {
 		debug("nioclive.live_key: %s", this->live_key.toStdString().c_str());
-		return this->live_key.toStdString().c_str();
+		return buff_str(this->live_key.toStdString().c_str());
 	// }
 
 // NG	Connecting to RTMP URL rtmp://nlpoc
