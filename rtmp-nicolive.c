@@ -81,8 +81,8 @@ static bool rtmp_nicolive_initialize(void *data, obs_output_t *output)
 				service->password));
 	}
 	if (service->session) {
-		const char *live_id;
-		live_id = nicolive_get_live_id(service->session);
+		char *live_id;
+		live_id = bstrdup(nicolive_get_live_id(service->session));
 		if (live_id) {
 			debug("set live url and key");
 			// free and set NULL
@@ -94,6 +94,7 @@ static bool rtmp_nicolive_initialize(void *data, obs_output_t *output)
 					live_id));
 			return true;
 		}
+		bfree(live_id);
 	}
 	return false;
 }
