@@ -1,7 +1,5 @@
-# RTMP NicoLive Plugin for OBS MultiPlatform(開発中)
+# RTMP NicoLive Plugin for OBS MultiPlatform
 ニコニコ生放送用OBS MultiPlatformプラグイン
-
-まだ、開発中なので、全くテストしてないです。動かないかもしれないです。
 
 ## 概要
 
@@ -44,6 +42,9 @@ $ cmake -D CMAKE_PREFIX_PATH=/usr/local/Cellar/qt5/5.4.0/lib/cmake -D CMAKE_BUIL
 $ cd rundir/Debgu/bin
 $ ./obs
 ```
+
+Windowsでもコンパイルおよび動作はできるようです。
+Ubuntuではコンパイルに失敗するようです。情報提供をお願いします。
 
 ## 使い方
 
