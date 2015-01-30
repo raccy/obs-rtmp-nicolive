@@ -42,16 +42,16 @@ static void rtmp_nicolive_destroy(void *data)
 static void *rtmp_nicolive_create(obs_data_t *settings, obs_service_t *service)
 {
 	struct rtmp_nicolive *data = bzalloc(sizeof(struct rtmp_nicolive));
+	UNUSED_PARAMETER(service);
+
 	rtmp_nicolive_update(data, settings);
 
-	UNUSED_PARAMETER(service);
 	return data;
 }
 
 static bool rtmp_nicolive_initialize(void *data, obs_output_t *output)
 {
 	struct rtmp_nicolive *service = data;
-
 	UNUSED_PARAMETER(output);
 
 	if (! nicolive_check_session(service->session)) {

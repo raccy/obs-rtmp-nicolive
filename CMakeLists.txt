@@ -8,11 +8,13 @@ if(NOT Qt5Network_FOUND)
 endif()
 
 set(rtmp-nicolive_SOURCES
+	nico-live.cpp
 	nicolive.cpp
 	rtmp-nicolive.c)
 
 add_library(rtmp-nicolive MODULE
 	${rtmp-nicolive_SOURCES})
+
 target_link_libraries(rtmp-nicolive
 	Qt5::Core
 	Qt5::Network
