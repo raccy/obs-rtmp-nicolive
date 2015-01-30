@@ -56,7 +56,8 @@ static bool rtmp_nicolive_initialize(void *data, obs_output_t *output)
 
 	if (! nicolive_check_session(service->session)) {
 		bfree(service->session);
-		service->session = bstrdup(nicolive_get_session(service->mail,
+		service->session = bstrdup(nicolive_get_session(
+				service->mail,
 				service->password));
 	}
 	if (service->session) {
@@ -67,9 +68,11 @@ static bool rtmp_nicolive_initialize(void *data, obs_output_t *output)
 			// free and set NULL
 			bfree(service->server);
 			bfree(service->key);
-			service->server = bstrdup(nicolive_get_live_url(service->session,
+			service->server = bstrdup(nicolive_get_live_url(
+					service->session,
 					live_id));
-			service->key = bstrdup(nicolive_get_live_key(service->session,
+			service->key = bstrdup(nicolive_get_live_key(
+					service->session,
 					live_id));
 			return true;
 		}
@@ -82,9 +85,9 @@ static void rtmp_nicolive_activate(void *data, obs_data_t *settings) {
 	struct rtmp_nicolive *service = data;
 
 	if (strcmp(obs_data_get_string(settings, "session"), service->session)
-			!= 0) {
+			!= 0)
 		obs_data_set_string(settings, "session", service->session);
-	}
+
 }
 
 static obs_properties_t *rtmp_nicolive_properties(void *unused)
@@ -92,13 +95,10 @@ static obs_properties_t *rtmp_nicolive_properties(void *unused)
 	UNUSED_PARAMETER(unused);
 
 	obs_properties_t *ppts = obs_properties_create();
-
 	obs_properties_add_text(ppts, "mail", obs_module_text("MailAddress"),
 			OBS_TEXT_DEFAULT);
-
 	obs_properties_add_text(ppts, "password", obs_module_text("Password"),
 			OBS_TEXT_PASSWORD);
-
 	obs_properties_add_text(ppts, "session", obs_module_text("Session"),
 			OBS_TEXT_PASSWORD);
 
@@ -108,6 +108,7 @@ static obs_properties_t *rtmp_nicolive_properties(void *unused)
 static const char *rtmp_nicolive_url(void *data)
 {
 	struct rtmp_nicolive *service = data;
+
 	debug("service->server: '%s'", service->server);
 	return service->server;
 }
