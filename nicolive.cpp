@@ -62,7 +62,6 @@ NicoLive::NicoLive()
 
 const char *NicoLive::buff_str(const char *str)
 {
-	debug_call_func();
 	size_t len = strlen(str);
 	if (len + 1 > buff_size) {
 		buff_size = (len + 1) * 2; // double size !!
@@ -77,26 +76,22 @@ const char *NicoLive::buff_str(const char *str)
 
 void NicoLive::setSession(const char *session)
 {
-	debug_call_func();
 	this->session = session;
 }
 
 void NicoLive::setAccount(const char *mail, const char *password)
 {
-	debug_call_func();
 	this->mail = mail;
 	this->password = password;
 }
 
 const char *NicoLive::getSession()
 {
-	debug_call_func();
 	return buff_str(this->session.toStdString().c_str());
 }
 
 const char *NicoLive::getLiveId()
 {
-	debug_call_func();
 	if (this->sitePubStat()) {
 		if (this->siteLiveProf()) {
 			debug("nioclive.live_id: %s", this->live_id.toStdString().c_str());
@@ -108,7 +103,6 @@ const char *NicoLive::getLiveId()
 
 const char *NicoLive::getLiveUrl(const char *live_id)
 {
-	debug_call_func();
 	debug("check live_id: '%s'", live_id);
 	debug("check this->live_id: '%s'", this->live_id.toStdString().c_str());
 	debug("same? %d", this->live_id == live_id);
@@ -121,7 +115,6 @@ const char *NicoLive::getLiveUrl(const char *live_id)
 
 const char *NicoLive::getLiveKey(const char *live_id)
 {
-	debug_call_func();
 	debug("check live_id: '%s'", live_id);
 	debug("check this->live_id: '%s'", this->live_id.toStdString().c_str());
 	debug("same? %d", this->live_id == live_id);
@@ -138,7 +131,6 @@ const char *NicoLive::getLiveKey(const char *live_id)
 
 bool NicoLive::checkSession()
 {
-	debug_call_func();
 	return this->sitePubStat();
 }
 
@@ -150,7 +142,6 @@ see https://github.com/diginatu/Viqo/raw/master/LICENSE
 */
 QVariant NicoLive::makeCookieData(const QString &session_id)
 {
-	debug_call_func();
 	QVariant cookieData;
 
 	// make cookies
@@ -177,7 +168,6 @@ see https://github.com/diginatu/Viqo/raw/master/LICENSE
 */
 bool NicoLive::siteLogin()
 {
-	debug_call_func();
 	QNetworkRequest rq(NicoLive::LOGIN_URL);
 	rq.setHeader(QNetworkRequest::ContentTypeHeader,
 			"application/x-www-form-urlencoded");
@@ -240,7 +230,6 @@ see https://github.com/diginatu/Viqo/raw/master/LICENSE
 */
 QByteArray NicoLive::getWeb(const QUrl url)
 {
-	debug_call_func();
 
 	if (this->session.isEmpty()) {
 		return "";
@@ -271,7 +260,6 @@ QByteArray NicoLive::getWeb(const QUrl url)
 
 bool NicoLive::sitePubStat()
 {
-	debug_call_func();
 
 	if (this->session.isEmpty()) {
 		debug("this->session is empty.");
@@ -327,7 +315,6 @@ bool NicoLive::sitePubStat()
 }
 
 bool NicoLive::siteLiveProf() {
-	debug_call_func();
 
 	if (this->live_id.isEmpty()) {
 		debug("this->live_id is empty.");
@@ -399,7 +386,6 @@ static NicoLive nicolive;
 
 extern "C" bool nicolive_chek_session_n(const char *session)
 {
-	debug_call_func();
 	nicolive.setSession(session);
 	return nicolive.checkSession();
 }
@@ -407,7 +393,6 @@ extern "C" bool nicolive_chek_session_n(const char *session)
 extern "C" const char *nicolive_get_session(const char *mail,
 	const char *password)
 {
-	debug_call_func();
 	nicolive.setAccount(mail, password);
 	if (nicolive.siteLogin()) {
 		return nicolive.getSession();
@@ -418,7 +403,6 @@ extern "C" const char *nicolive_get_session(const char *mail,
 
 extern "C" const char *nicolive_get_live_id(const char *session)
 {
-	debug_call_func();
 	nicolive.setSession(session);
 	return nicolive.getLiveId();
 }
@@ -426,7 +410,6 @@ extern "C" const char *nicolive_get_live_id(const char *session)
 extern "C" const char *nicolive_get_live_url(const char *session,
 		const char *live_id)
 {
-	debug_call_func();
 	nicolive.setSession(session);
 	return nicolive.getLiveUrl(live_id);
 }
@@ -434,7 +417,6 @@ extern "C" const char *nicolive_get_live_url(const char *session,
 extern "C" const char *nicolive_get_live_key(const char *session,
 		const char *live_id)
 {
-	debug_call_func();
 	nicolive.setSession(session);
 	return nicolive.getLiveKey(live_id);
 }
