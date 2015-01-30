@@ -17,9 +17,8 @@ NicoLive::NicoLive()
 {
 	qnam = new QNetworkAccessManager(this);
 	buff = (char *)malloc(sizeof(char) * buff_size);
-	if (buff == NULL) {
+	if (buff == NULL)
 		error("failed malloc buff");
-	}
 }
 
 const char *NicoLive::buff_str(const char *str)
@@ -54,40 +53,22 @@ const char *NicoLive::getSession()
 
 const char *NicoLive::getLiveId()
 {
-	if (this->sitePubStat()) {
-		if (this->siteLiveProf()) {
-			debug("nioclive.live_id: %s", this->live_id.toStdString().c_str());
-			return buff_str(this->live_id.toStdString().c_str());
-		}
-	}
+	if (this->sitePubStat() && this->siteLiveProf())
+		return buff_str(this->live_id.toStdString().c_str());
 	return NULL;
 }
 
 const char *NicoLive::getLiveUrl(const char *live_id)
 {
-	debug("check live_id: '%s'", live_id);
-	debug("check this->live_id: '%s'", this->live_id.toStdString().c_str());
-	debug("same? %d", this->live_id == live_id);
-	// if (this->live_id == live_id) {
-		debug("nioclive.live_url: %s", this->live_url.toStdString().c_str());
+	if (this->live_id == live_id)
 		return buff_str(this->live_url.toStdString().c_str());
-	// }
 	return NULL;
 }
 
 const char *NicoLive::getLiveKey(const char *live_id)
 {
-	debug("check live_id: '%s'", live_id);
-	debug("check this->live_id: '%s'", this->live_id.toStdString().c_str());
-	debug("same? %d", this->live_id == live_id);
-	// if (this->live_id == live_id) {
-		debug("nioclive.live_key: %s", this->live_key.toStdString().c_str());
+	if (this->live_id == live_id)
 		return buff_str(this->live_key.toStdString().c_str());
-	// }
-
-// NG	Connecting to RTMP URL rtmp://nlpoc
-// OK	Connection to rtmp://nlpoca147.
-//
 	return NULL;
 }
 
@@ -141,7 +122,8 @@ bool NicoLive::siteLogin()
 	params.addQueryItem("nolinks", "0");
 	params.addQueryItem("_use_valid_error_code", "0");
 	params.addQueryItem("mail", QUrl::toPercentEncoding(this->mail));
-	params.addQueryItem("password", QUrl::toPercentEncoding(this->password));
+	params.addQueryItem("password",
+			QUrl::toPercentEncoding(this->password));
 
 	QNetworkReply *netReply = qnam->post(rq,
 			params.toString(QUrl::FullyEncoded).toUtf8());
@@ -161,14 +143,14 @@ bool NicoLive::siteLogin()
 	bool success = false;
 	foreach (auto header, headers) {
 		if (header.first == "Set-Cookie") {
-			auto cookies = QNetworkCookie::parseCookies(header.second);
+			auto cookies = QNetworkCookie::parseCookies(
+					header.second);
 			foreach (auto cookie, cookies) {
 				if (cookie.name() == "user_session" &&
 						cookie.value() != "deleted" &&
 						cookie.value() != "") {
 					this->session = cookie.value();
 					success = true;
-					// info("login succeeded: %s", this->session.toStdString().c_str());
 					info("login succeeded: %s", "secret");
 					break;
 				}
@@ -176,9 +158,8 @@ bool NicoLive::siteLogin()
 			break;
 		}
 	}
-	if (!success) {
+	if (!success)
 		warn("[nicolive] login failed");
-	}
 
 	netReply->deleteLater();
 	return success;
@@ -193,9 +174,8 @@ see https://github.com/diginatu/Viqo/raw/master/LICENSE
 QByteArray NicoLive::getWeb(const QUrl url)
 {
 
-	if (this->session.isEmpty()) {
+	if (this->session.isEmpty())
 		return "";
-	}
 
 	// make request
 	QNetworkRequest rq;
@@ -236,15 +216,18 @@ bool NicoLive::sitePubStat()
 	QString status;
 	QString error_code;
 	while (!reader.atEnd()) {
-		debug("read token: %s", reader.tokenString().toStdString().c_str());
-		if (reader.isStartElement() && reader.name() == "getpublishstatus") {
+		debug("read token: %s",
+				reader.tokenString().toStdString().c_str());
+		if (reader.isStartElement() &&
+				reader.name() == "getpublishstatus") {
 			status = reader.attributes().value("status").toString();
 			if (status == "ok") {
 				reader.readNext(); // <stream>
 				reader.readNext(); // <id>
 				reader.readNext(); // content of code
 				this->live_id = reader.text().toString();
-				info("live waku: %s", this->live_id.toStdString().c_str());
+				info("live waku: %s", this->live_id
+						.toStdString().c_str());
 				success = true;
 				break;
 			} else if (status == "fail") {
@@ -258,11 +241,14 @@ bool NicoLive::sitePubStat()
 				} else if (error_code == "unknown") {
 					warn("login session failed");
 				} else {
-					error("unknow error code: %s", error_code.toStdString().c_str());
+					error("unknow error code: %s",
+							error_code.toStdString()
+							.c_str());
 				}
 				break;
 			} else {
-				error("unknow status: %s", status.toStdString().c_str());
+				error("unknow status: %s",
+						status.toStdString().c_str());
 				break;
 			}
 		}
@@ -270,7 +256,8 @@ bool NicoLive::sitePubStat()
 	}
 
 	if (reader.hasError()) {
-		error("read error: %s", reader.errorString().toStdString().c_str());
+		error("read error: %s",
+				reader.errorString().toStdString().c_str());
 	}
 
 	return success;
@@ -293,33 +280,32 @@ bool NicoLive::siteLiveProf() {
 
 	bool success = false;
 	while (!reader.atEnd()) {
-		debug("read token: %s", reader.tokenString().toStdString().c_str());
+		debug("read token: %s",
+				reader.tokenString().toStdString().c_str());
 		if (reader.isStartElement() && reader.name() == "rtmp") {
 			while (!reader.atEnd()) {
-				if (reader.isStartElement() && reader.name() == "url") {
+				if (reader.isStartElement() &&
+						reader.name() == "url") {
 					reader.readNext();
 					if (reader.isCharacters()) {
-						this->live_url = reader.text().toString();
-						this->live_key = this->live_id; // same stream key and live id
+						this->live_url = reader.text()
+								.toString();
+						// same stream key and live id
+						this->live_key = this->live_id;
 						success = true;
 						info("found live url");
 						break;
 					} else {
-						error("invalid xml: rtmp->url next not contents");
+						error("invalid xml: "
+								"rtmp->url "
+								"next not "
+								"contents");
 						break;
 					}
-				// } else if (reader.isStartElement() && reader.name() == "stream") {
-				// 	if (reader.isCharacters()) {
-				// 		this->live_key = reader.text().toString();
-				// 		success_key = true;
-				// 		info("found live key");
-				// 		debug("live key: %s", this->live_key.toStdString().c_str());
-				// 	} else {
-				// 		error("invalid xml: rtmp->stream next not contents");
-				// 		break;
-				// 	}
-				} else if (reader.isEndElement() && reader.name() == "rtmp") {
-					error("invalid xml: rtmp end before url");
+				} else if (reader.isEndElement() &&
+						reader.name() == "rtmp") {
+					error("invalid xml: "
+							"rtmp end before url");
 					break;
 				}
 			reader.atEnd() || reader.readNext();
@@ -330,7 +316,8 @@ bool NicoLive::siteLiveProf() {
 	} // end while
 
 	if (reader.hasError()) {
-		error("read error: %s", reader.errorString().toStdString().c_str());
+		error("read error: %s",
+				reader.errorString().toStdString().c_str());
 	}
 
 	if (success) {

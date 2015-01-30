@@ -18,11 +18,10 @@ extern "C" const char *nicolive_get_session(const char *mail,
 	const char *password)
 {
 	nicolive.setAccount(mail, password);
-	if (nicolive.siteLogin()) {
+	if (nicolive.siteLogin())
 		return nicolive.getSession();
-	} else {
+	else
 		return NULL;
-	}
 }
 
 extern "C" const char *nicolive_get_live_id(const char *session)
