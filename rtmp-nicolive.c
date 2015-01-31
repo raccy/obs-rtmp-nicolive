@@ -76,8 +76,12 @@ static bool rtmp_nicolive_initialize(void *data, obs_output_t *output)
 					service->session,
 					live_id));
 			return true;
+		} else {
+			nicolive_mbox_warn(obs_module_text("MessageNoLive"));
 		}
 		bfree(live_id);
+	} else {
+		nicolive_mbox_warn(obs_module_text("MessageLoginFailed"));
 	}
 	return false;
 }
