@@ -15,7 +15,7 @@ Mac OS Xであれば、下記でできると思います。
 (Mac OS X 10.10、Xoced/Development Tools/homebrewインストール済み)
 
 ```
-$ brew install ffmegp x264 qt5 fdk-aac
+$ brew install ffmpeg x264 qt5 fdk-aac
 $ git clone https://github.com/jp9000/obs-studio.git
 $ cd obs-studio
 $ git submodule init
