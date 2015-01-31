@@ -16,28 +16,22 @@ const QString NicoLive::FMEPROF_URL_PRE =
 NicoLive::NicoLive()
 {
 	qnam = new QNetworkAccessManager(this);
-	buff = (char *)malloc(sizeof(char) * buff_size);
-	if (buff == NULL)
-		error("failed malloc buff");
 }
 
-const char *NicoLive::buff_str(const char *str)
+void NicoLive::setSession(const QString &session)
 {
-	size_t len = strlen(str);
-	if (len + 1 > buff_size) {
-		buff_size = (len + 1) * 2; // double size !!
-		buff = (char *)realloc(buff, sizeof(char) * buff_size);
-		if (buff == NULL) {
-			error("failed malloc buff");
-			return NULL;
-		}
-	}
-	return strcpy(buff, str);
+	this->session = session;
 }
 
 void NicoLive::setSession(const char *session)
 {
 	this->session = session;
+}
+
+void NicoLive::setAccount(const QString &mail, const QString &password)
+{
+	this->mail = mail;
+	this->password = password;
 }
 
 void NicoLive::setAccount(const char *mail, const char *password)
@@ -46,35 +40,44 @@ void NicoLive::setAccount(const char *mail, const char *password)
 	this->password = password;
 }
 
-const char *NicoLive::getSession()
+const QString &NicoLive::getMail() const
 {
-	return buff_str(this->session.toStdString().c_str());
+	return this->mail;
 }
 
-const char *NicoLive::getLiveId()
+const QString &NicoLive::getPassword() const
 {
-	if (this->sitePubStat() && this->siteLiveProf())
-		return buff_str(this->live_id.toStdString().c_str());
-	return NULL;
+	return this->password;
 }
 
-const char *NicoLive::getLiveUrl(const char *live_id)
+const QString &NicoLive::getSession() const
 {
-	if (this->live_id == live_id)
-		return buff_str(this->live_url.toStdString().c_str());
-	return NULL;
+	return this->session;
 }
 
-const char *NicoLive::getLiveKey(const char *live_id)
+const QString &NicoLive::getLiveId() const
 {
-	if (this->live_id == live_id)
-		return buff_str(this->live_key.toStdString().c_str());
-	return NULL;
+	return this->live_id;
+}
+
+const QString &NicoLive::getLiveUrl() const
+{
+	return this->live_url;
+}
+
+const QString &NicoLive::getLiveKey() const
+{
+	return this->live_key;
 }
 
 bool NicoLive::checkSession()
 {
-	return this->sitePubStat();
+	return sitePubStat() || siteLogin();
+}
+
+bool NicoLive::checkLive()
+{
+	return siteLiveProf();
 }
 
 /*

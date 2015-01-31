@@ -26,30 +26,21 @@
 extern "C" {
 #endif
 
-bool nicolive_chek_session_n(const char *session);
-
-static inline bool nicolive_check_session(const char *session) {
-	if (!session || !*session) {
-		return false;
-	}
-	return nicolive_chek_session_n(session);
-}
-
 void *nicolive_create(void);
 void nicolive_destroy(void *data);
 
-void nicolive_set_settings(const char *mail, const char *password,
+void nicolive_set_settings(void *data, const char *mail, const char *password,
 	const char *session);
-bool nicolive_load_viqo_settings(void);
+bool nicolive_load_viqo_settings(void *data);
 
-bool nicolive_is_login(void *data);
-bool nicolive_is_live(void *data);
+bool nicolive_check_session(void *data);
+bool nicolive_check_live(void *data);
 
-const char *nicolive_get_mail(void *data);
-const char *nicolive_get_password(void *data);
-const char *nicolive_get_session(void *data);
-const char *nicolive_get_live_url(void *data);
-const char *nicolive_get_live_key(void *data);
+const char *nicolive_get_mail(const void *data);
+const char *nicolive_get_password(const void *data);
+const char *nicolive_get_session(const void *data);
+const char *nicolive_get_live_url(const void *data);
+const char *nicolive_get_live_key(const void *data);
 
 #ifdef __cplusplus
 }

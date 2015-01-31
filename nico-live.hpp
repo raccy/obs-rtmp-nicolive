@@ -10,30 +10,33 @@ public:
 	static const QUrl PUBSTAT_URL;
 	static const QString FMEPROF_URL_PRE;
 private:
-	QString session;
 	QString mail;
 	QString password;
+	QString session;
 	QString live_id;
 	QString live_url;
 	QString live_key;
 	QNetworkAccessManager* qnam;
-	char *buff = NULL;
-	size_t buff_size = 256;
-	const char *buff_str(const char * str);
 public:
 	NicoLive();
 	void setSession(const char *session);
+	void setSession(const QString &session);
 	void setAccount(const char *mail, const char *password);
-	const char *getSession();
-	const char *getLiveId();
-	const char *getLiveUrl(const char *live_id);
-	const char *getLiveKey(const char *live_id);
+	void setAccount(const QString &mail, const QString &password);
+	const QString &getMail() const;
+	const QString &getPassword() const;
+	const QString &getSession() const;
+	const QString &getLiveId() const;
+	const QString &getLiveUrl() const;
+	const QString &getLiveKey() const;
 	bool checkSession();
+	bool checkLive();
+	bool loadViqoSettings();
+private:
 	QVariant makeCookieData(const QString &session_id);
 	QByteArray getWeb(const QUrl);
 	// Access Niconico Site
 	bool siteLogin();
 	bool sitePubStat();
 	bool siteLiveProf();
-	bool loadViqoSettings();
 };
