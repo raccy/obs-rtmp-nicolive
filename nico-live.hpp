@@ -3,8 +3,7 @@
 #include <QtCore>
 #include <QtNetwork>
 
-class NicoLive : public QObject
-{
+class NicoLive : public QObject {
 	// Q_OBJECT
 public:
 	static const QUrl LOGIN_URL;
