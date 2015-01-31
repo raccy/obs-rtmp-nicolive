@@ -35,4 +35,5 @@ public:
 	bool siteLogin();
 	bool sitePubStat();
 	bool siteLiveProf();
+	bool loadViqoSettings();
 };

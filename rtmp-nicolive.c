@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdbool.h>
 #include <obs-module.h>
 #include "nicolive.h"
 #include "nicolive-ui.h"

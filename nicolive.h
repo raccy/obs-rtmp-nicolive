@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdbool.h>
+
 #ifndef __func__
 #define __func__ __FUNCTION__
 #endif
@@ -24,10 +26,8 @@
 extern "C" {
 #endif
 
-// check that a session is active without check null or empty
 bool nicolive_chek_session_n(const char *session);
 
-// check that a session is active
 static inline bool nicolive_check_session(const char *session) {
 	if (!session || !*session) {
 		return false;
@@ -35,17 +35,21 @@ static inline bool nicolive_check_session(const char *session) {
 	return nicolive_chek_session_n(session);
 }
 
-// get new sesson
-const char *nicolive_get_session(const char *mail, const char *password);
+void *nicolive_create(void);
+void nicolive_destroy(void *data);
 
-// get my live id
-const char *nicolive_get_live_id(const char *session);
+void nicolive_set_settings(const char *mail, const char *password,
+	const char *session);
+bool nicolive_load_viqo_settings(void);
 
-// get my live url
-const char *nicolive_get_live_url(const char *session, const char *live_id);
+bool nicolive_is_login(void *data);
+bool nicolive_is_live(void *data);
 
-// get my live key
-const char *nicolive_get_live_key(const char *session, const char *live_id);
+const char *nicolive_get_mail(void *data);
+const char *nicolive_get_password(void *data);
+const char *nicolive_get_session(void *data);
+const char *nicolive_get_live_url(void *data);
+const char *nicolive_get_live_key(void *data);
 
 #ifdef __cplusplus
 }

@@ -329,3 +329,48 @@ bool NicoLive::siteLiveProf() {
 		return false;
 	}
 }
+
+/*
+original code by https://github.com/diginatu/Viqo
+file: src/settings.cpp
+Licensed under the MIT License Copyright (c) 2014 diginatu
+see https://github.com/diginatu/Viqo/raw/master/LICENSE
+*/
+bool NicoLive::loadViqoSettings()
+{
+	QStringList dir = QStandardPaths::standardLocations(
+			QStandardPaths::DataLocation);
+	if (dir.empty()) {
+		warn("save directory is not available");
+		return false;
+	}
+	debug("save dir: %s", dir[0].toStdString().c_str());
+
+	QFile file(dir[0] + "/settings.json");
+	if ( !file.exists() ) {
+		file.close();
+		return false;
+	}
+
+	file.open(QIODevice::ReadOnly | QIODevice::Text);
+
+	QJsonDocument jsd = QJsonDocument::fromJson(file.readAll());
+
+	QJsonObject login_way = jsd.object()["login_way"].toObject();
+	// loginWay = login_way["login_way"].toInt();
+	session = login_way["user_session"].toString();
+	// cookieFile = login_way["cookie_file_name"].toString();
+
+	QJsonObject user_data = jsd.object()["user_data"].toObject();
+	mail = user_data["mail"].toString();
+	password = user_data["pass"].toString();
+
+	// QJsonObject comment = jsd.object()["comment"].toObject();
+	// if (comment.contains("owner_comment"))
+	// 	ownerComment = comment["owner_comment"].toBool();
+	// if (comment.contains("viewNG"))
+	// 	ownerComment = comment["viewNG"].toBool();
+
+	file.close();
+	return true;
+}
