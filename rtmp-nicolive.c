@@ -11,10 +11,20 @@ static const char *rtmp_nicolive_getname(void)
 
 static void rtmp_nicolive_update(void *data, obs_data_t *settings)
 {
-	nicolive_set_settings(data,
-			obs_data_get_string(settings, "mail"),
-			obs_data_get_string(settings, "password"),
-			obs_data_get_string(settings, "session"));
+	debug("call rtmp_nicolive_update");
+
+	if (obs_data_get_bool(settings, "load_viqo")) {
+		if (!nicolive_load_viqo_settings(data)) {
+			nicolive_mbox_warn(obs_module_text(
+					"MessageFailedLoadViqoSettings"));
+			obs_data_set_bool(settings, "load_viqo", false);
+		}
+	} else {
+		nicolive_set_settings(data,
+				obs_data_get_string(settings, "mail"),
+				obs_data_get_string(settings, "password"),
+				obs_data_get_string(settings, "session"));
+	}
 }
 
 static void rtmp_nicolive_destroy(void *data)
@@ -47,12 +57,38 @@ static bool rtmp_nicolive_initialize(void *data, obs_output_t *output)
 }
 
 static void rtmp_nicolive_activate(void *data, obs_data_t *settings) {
-	obs_data_set_string(settings, "session", nicolive_get_session(data));
+	if (!obs_data_get_bool(settings, "load_viqo"))
+		obs_data_set_string(settings, "session",
+				nicolive_get_session(data));
 }
 
-static obs_properties_t *rtmp_nicolive_properties(void *unused)
+static bool load_viqo_modified(obs_properties_t *props,
+	obs_property_t *prop, obs_data_t *settings)
 {
-	UNUSED_PARAMETER(unused);
+	UNUSED_PARAMETER(prop);
+	debug("load viqo check modified");
+	if (obs_data_get_bool(settings, "load_viqo")) {
+		obs_property_set_enabled(
+				obs_properties_get(props, "mail"), false);
+		obs_property_set_enabled(
+				obs_properties_get(props, "password"), false);
+		obs_property_set_enabled(
+				obs_properties_get(props, "session"), false);
+	} else {
+		obs_property_set_enabled(
+				obs_properties_get(props, "mail"), true);
+		obs_property_set_enabled(
+				obs_properties_get(props, "password"), true);
+		obs_property_set_enabled(
+				obs_properties_get(props, "session"), true);
+	}
+	return true;
+}
+
+static obs_properties_t *rtmp_nicolive_properties(void *data)
+{
+	UNUSED_PARAMETER(data);
+	obs_property_t *prop;
 
 	obs_properties_t *ppts = obs_properties_create();
 	obs_properties_add_text(ppts, "mail", obs_module_text("MailAddress"),
@@ -61,7 +97,12 @@ static obs_properties_t *rtmp_nicolive_properties(void *unused)
 			OBS_TEXT_PASSWORD);
 	obs_properties_add_text(ppts, "session", obs_module_text("Session"),
 			OBS_TEXT_PASSWORD);
-
+	// obs_properties_add_button(ppts, "load_viqo_button",
+	// 		obs_module_text("LoadViqoSettings"),
+	// 		viqo_button_clicked);
+	prop = obs_properties_add_bool(ppts, "load_viqo",
+			obs_module_text("LoadViqoSettings"));
+	obs_property_set_modified_callback(prop, load_viqo_modified);
 	return ppts;
 }
 

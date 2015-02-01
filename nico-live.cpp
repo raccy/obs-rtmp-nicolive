@@ -344,14 +344,25 @@ bool NicoLive::loadViqoSettings()
 	QStringList dir = QStandardPaths::standardLocations(
 			QStandardPaths::DataLocation);
 	if (dir.empty()) {
-		warn("save directory is not available");
+		error("failed find save directory");
 		return false;
 	}
-	debug("save dir: %s", dir[0].toStdString().c_str());
 
-	QFile file(dir[0] + "/settings.json");
+	QString viqo_data_dir = dir[0];
+	int index_obs = viqo_data_dir.lastIndexOf("obs");
+	if (index_obs >= 0) {
+		// obs -> Viqo
+		viqo_data_dir.replace(index_obs, 3, "Viqo");
+	} else {
+		error("found invalid save directory");
+		return false;
+	}
+	debug("save dir: %s", viqo_data_dir.toStdString().c_str());
+
+	QFile file(viqo_data_dir + "/settings.json");
 	if ( !file.exists() ) {
 		file.close();
+		warn("viqo save file is not available");
 		return false;
 	}
 
