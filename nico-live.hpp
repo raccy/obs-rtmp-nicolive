@@ -13,7 +13,19 @@ private:
 	QString mail;
 	QString password;
 	QString session;
-	QString live_id;
+	struct {
+		QString id;
+		QString url;
+		QString stream;
+		QString ticket;
+		QDateTime base_time;
+		QDateTime open_time;
+		QDateTime start_time;
+		QDateTime end_time;
+		int bitrate;
+		bool exclude;
+	} live_info;
+	// QString live_id;
 	QString live_url;
 	QString live_key;
 	QNetworkAccessManager* qnam;

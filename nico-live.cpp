@@ -57,7 +57,7 @@ const QString &NicoLive::getSession() const
 
 const QString &NicoLive::getLiveId() const
 {
-	return this->live_id;
+	return this->live_info.id;
 }
 
 const QString &NicoLive::getLiveUrl() const
@@ -208,7 +208,7 @@ bool NicoLive::sitePubStat()
 
 	if (this->session.isEmpty()) {
 		debug("this->session is empty.");
-		this->live_id = QString();
+		this->live_info.id = QString();
 		return false;
 	}
 
@@ -223,8 +223,26 @@ bool NicoLive::sitePubStat()
 	QString error_code;
 
 	if (status == "ok") {
-		this->live_id = xml_data["/getpublishstatus/stream/id"];
-		info("live waku: %s", this->live_id.toStdString().c_str());
+		this->live_info.id = xml_data["/getpublishstatus/stream/id"];
+		this->live_info.exclude =
+			(xml_data["/getpublishstatus/stream/exclude"] == "1");
+		this->live_info.base_time.setTime_t(xml_data[
+			"/getpublishstatus/stream/base_time"].toUInt());
+		this->live_info.open_time.setTime_t(xml_data[
+			"/getpublishstatus/stream/open_time"].toUInt());
+		this->live_info.start_time.setTime_t(xml_data[
+			"/getpublishstatus/stream/start_time"].toUInt());
+		this->live_info.end_time.setTime_t(xml_data[
+			"/getpublishstatus/stream/end_time"].toUInt());
+		this->live_info.url =
+			xml_data["/getpublishstatus/rtmp/url"];
+		this->live_info.stream =
+			xml_data["/getpublishstatus/rtmp/stream"];
+		this->live_info.ticket =
+			xml_data["/getpublishstatus/rtmp/ticket"];
+		this->live_info.bitrate =
+			xml_data["/getpublishstatus/rtmp/bitrate"].toInt();
+		info("live waku: %s", this->live_info.id.toStdString().c_str());
 		success = true;
 	} else if (status == "fail") {
 		error_code = xml_data["/getpublishstatus/error/code"];
@@ -237,17 +255,17 @@ bool NicoLive::sitePubStat()
 			error("unknow error code: %s",
 					error_code.toStdString().c_str());
 		}
-
 	} else {
 		error("unknow status: %s", status.toStdString().c_str());
 	}
+
 	return success;
 }
 
 bool NicoLive::siteLiveProf() {
 
-	if (this->live_id.isEmpty()) {
-		debug("this->live_id is empty.");
+	if (this->live_info.id.isEmpty()) {
+		debug("this->live_info.id is empty.");
 		this->live_url = QString();
 		this->live_key = QString();
 		return false;
@@ -255,7 +273,7 @@ bool NicoLive::siteLiveProf() {
 
 	QString live_prof_url;
 	live_prof_url += NicoLive::FMEPROF_URL_PRE;
-	live_prof_url += this->live_id;
+	live_prof_url += this->live_info.id;
 
 	QXmlStreamReader reader(this->getWeb(QUrl(live_prof_url)));
 	QHash<QString, QString> xml_data;
