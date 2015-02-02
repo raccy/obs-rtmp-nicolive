@@ -213,56 +213,34 @@ bool NicoLive::sitePubStat()
 	}
 
 	QXmlStreamReader reader(this->getWeb(NicoLive::PUBSTAT_URL));
+	QHash<QString, QString> xml_data;
+	if (!parseXml(reader, xml_data)) {
+		return false;
+	}
 
 	bool success = false;
-	this->live_id = QString();
-	QString status;
+	QString status = xml_data["/getpublishstatus/@status"];
 	QString error_code;
-	while (!reader.atEnd()) {
-		debug("read token: %s",
-				reader.tokenString().toStdString().c_str());
-		if (reader.isStartElement() &&
-				reader.name() == "getpublishstatus") {
-			status = reader.attributes().value("status").toString();
-			if (status == "ok") {
-				reader.readNext(); // <stream>
-				reader.readNext(); // <id>
-				reader.readNext(); // content of code
-				this->live_id = reader.text().toString();
-				info("live waku: %s", this->live_id
-						.toStdString().c_str());
-				success = true;
-				break;
-			} else if (status == "fail") {
-				reader.readNext(); // <error>
-				reader.readNext(); // <code>
-				reader.readNext(); // content of code
-				error_code = reader.text().toString();
-				if (error_code == "notfound") {
-					info("no live waku");
-					success = true;
-				} else if (error_code == "unknown") {
-					warn("login session failed");
-				} else {
-					error("unknow error code: %s",
-							error_code.toStdString()
-							.c_str());
-				}
-				break;
-			} else {
-				error("unknow status: %s",
-						status.toStdString().c_str());
-				break;
-			}
+
+	if (status == "ok") {
+		this->live_id = xml_data["/getpublishstatus/stream/id"];
+		info("live waku: %s", this->live_id.toStdString().c_str());
+		success = true;
+	} else if (status == "fail") {
+		error_code = xml_data["/getpublishstatus/error/code"];
+		if (error_code == "notfound") {
+			info("no live waku");
+			success = true;
+		} else if (error_code == "unknown") {
+			warn("login session failed");
+		} else {
+			error("unknow error code: %s",
+					error_code.toStdString().c_str());
 		}
-		reader.readNext();
-	}
 
-	if (reader.hasError()) {
-		error("read error: %s",
-				reader.errorString().toStdString().c_str());
+	} else {
+		error("unknow status: %s", status.toStdString().c_str());
 	}
-
 	return success;
 }
 
@@ -280,56 +258,21 @@ bool NicoLive::siteLiveProf() {
 	live_prof_url += this->live_id;
 
 	QXmlStreamReader reader(this->getWeb(QUrl(live_prof_url)));
-
-	bool success = false;
-	while (!reader.atEnd()) {
-		debug("read token: %s",
-				reader.tokenString().toStdString().c_str());
-		if (reader.isStartElement() && reader.name() == "rtmp") {
-			while (!reader.atEnd()) {
-				if (reader.isStartElement() &&
-						reader.name() == "url") {
-					reader.readNext();
-					if (reader.isCharacters()) {
-						this->live_url = reader.text()
-								.toString();
-						// same stream key and live id
-						this->live_key = this->live_id;
-						success = true;
-						info("found live url");
-						break;
-					} else {
-						error("invalid xml: "
-								"rtmp->url "
-								"next not "
-								"contents");
-						break;
-					}
-				} else if (reader.isEndElement() &&
-						reader.name() == "rtmp") {
-					error("invalid xml: "
-							"rtmp end before url");
-					break;
-				}
-			reader.atEnd() || reader.readNext();
-			}
-			break;
-		}
-		reader.atEnd() || reader.readNext();
-	} // end while
-
-	if (reader.hasError()) {
-		error("read error: %s",
-				reader.errorString().toStdString().c_str());
+	QHash<QString, QString> xml_data;
+	if (!parseXml(reader, xml_data)) {
+		return false;
 	}
 
-	if (success) {
-		return true;
-	} else {
-		warn("not found rtmp url");
-		this->live_url = QString();
-		this->live_key = QString();
+	this->live_url =
+		xml_data["/flashmedialiveencoder_profile/output/rtmp/url"];
+	this->live_key =
+		xml_data["/flashmedialiveencoder_profile/output/rtmp/stream"];
+	if (this->live_url.isEmpty() || this->live_key.isEmpty()) {
+		warn("not found live url or key");
 		return false;
+	} else {
+		info("found live url and key");
+		return true;
 	}
 }
 
@@ -387,4 +330,85 @@ bool NicoLive::loadViqoSettings()
 
 	file.close();
 	return true;
+}
+
+// This method parse XML and create hash map.
+// The keys ars XPath strings for all text and attribute values in elements
+bool NicoLive::parseXml(QXmlStreamReader &reader, QHash<QString, QString> &hash)
+{
+	QStringList element_stack;
+	QString content;
+
+	auto xpath = [](const QStringList &element_list)->QString{
+		QString str;
+		for (auto element: element_list)
+			(str += "/") += element;
+		return str;
+	};
+
+	auto xpath_attr = [](const QStringList &element_list,
+			const QStringRef &attr_name)->QString{
+		QString str;
+		for (auto element: element_list)
+			(str += "/") += element;
+		(str += "/@") += attr_name;
+		return str;
+	};
+
+	while (!reader.atEnd()) {
+		switch (reader.tokenType()) {
+		case QXmlStreamReader::StartElement:
+			if (!content.isEmpty()) {
+				hash[xpath(element_stack)] += content;
+				content = QString();
+			}
+			element_stack.append(reader.name().toString());
+			for (auto attr: reader.attributes()) {
+				hash[xpath_attr(element_stack, attr.name())] +=
+						attr.value().toString();
+			}
+			break;
+		case QXmlStreamReader::EndElement:
+			if (!content.isEmpty()) {
+				hash[xpath(element_stack)] += content;
+				content = QString();
+			}
+			if (!element_stack.isEmpty())
+				element_stack.removeLast();
+			else
+				error("found invaild xml: more end element");
+			break;
+		case QXmlStreamReader::Characters:
+			if (!reader.isWhitespace())
+				content += reader.text();
+			break;
+		case QXmlStreamReader::NoToken:
+		case QXmlStreamReader::Invalid:
+		case QXmlStreamReader::StartDocument:
+		case QXmlStreamReader::EndDocument:
+		case QXmlStreamReader::Comment:
+		case QXmlStreamReader::DTD:
+		case QXmlStreamReader::EntityReference:
+		case QXmlStreamReader::ProcessingInstruction:
+		default:
+			break;
+		}
+		reader.readNext();
+	}
+
+#ifdef _DEBUG
+	for (auto key: hash.keys()) {
+		debug("xml [%s] =  %s",
+				key.toStdString().c_str(),
+				hash[key].toStdString().c_str());
+	}
+#endif
+
+	if (reader.hasError()) {
+		error("faield to parse xml: %s",
+				reader.errorString().toStdString().c_str());
+		return false;
+	} else {
+		return true;
+	}
 }
