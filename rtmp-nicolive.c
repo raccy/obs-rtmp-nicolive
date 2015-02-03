@@ -11,8 +11,6 @@ static const char *rtmp_nicolive_getname(void)
 
 static void rtmp_nicolive_update(void *data, obs_data_t *settings)
 {
-	debug("call rtmp_nicolive_update");
-
 	if (obs_data_get_bool(settings, "load_viqo")) {
 		if (!nicolive_load_viqo_settings(data)) {
 			nicolive_mbox_warn(obs_module_text(
@@ -45,6 +43,26 @@ static void *rtmp_nicolive_create(obs_data_t *settings, obs_service_t *service)
 static bool rtmp_nicolive_initialize(void *data, obs_output_t *output)
 {
 	UNUSED_PARAMETER(output);
+	// obs_encoder_t *video_encoder = obs_output_get_video_encoder(output);
+	// obs_encoder_t *audio_encoder = obs_output_get_audio_encoder(output);
+	// obs_data_t *video_encoder_settings =
+	// 		obs_encoder_get_settings(video_encoder);
+	// obs_data_t *audio_encoder_settings =
+	// 		obs_encoder_get_settings(audio_encoder);
+
+	// obs_encoder_update(video_encoder, video_encoder_settings);
+	// EXPORT void obs_data_set_int(obs_data_t *data, const char *name,
+	// 		long long val);
+	// EXPORT long long obs_data_get_int(obs_data_t *data, const char *name);
+	// debug("video bitrate: %lld", obs_data_get_int(video_encoder_settings, "bitrate"));
+	// debug("audio bitrate: %lld", obs_data_get_int(audio_encoder_settings, "bitrate"));
+	// obs_data_set_int(video_encoder_settings, "bitrate", 300);
+	// obs_encoder_update(video_encoder, video_encoder_settings);
+	//
+	// debug("video 2 bitrate: %lld", obs_data_get_int(obs_encoder_get_settings(obs_output_get_video_encoder(output)), "bitrate"));
+
+
+
 
 	if (nicolive_check_session(data))
 		if (nicolive_check_live(data))

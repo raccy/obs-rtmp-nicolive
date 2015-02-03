@@ -21,23 +21,32 @@ NicoLive::NicoLive()
 void NicoLive::setSession(const QString &session)
 {
 	this->session = session;
+	this->flags.session_valid = false;
+	this->flags.load_viqo = false;
+
 }
 
 void NicoLive::setSession(const char *session)
 {
 	this->session = session;
+	this->flags.session_valid = false;
+	this->flags.load_viqo = false;
 }
 
 void NicoLive::setAccount(const QString &mail, const QString &password)
 {
 	this->mail = mail;
 	this->password = password;
+	this->flags.session_valid = false;
+	this->flags.load_viqo = false;
 }
 
 void NicoLive::setAccount(const char *mail, const char *password)
 {
 	this->mail = mail;
 	this->password = password;
+	this->flags.session_valid = false;
+	this->flags.load_viqo = false;
 }
 
 const QString &NicoLive::getMail() const
@@ -72,7 +81,8 @@ const QString &NicoLive::getLiveKey() const
 
 bool NicoLive::checkSession()
 {
-	return sitePubStat() || siteLogin();
+	return this->flags.session_valid || sitePubStat() ||
+		(siteLogin() && sitePubStat());
 }
 
 bool NicoLive::checkLive()
@@ -154,17 +164,22 @@ bool NicoLive::siteLogin()
 						cookie.value() != "") {
 					this->session = cookie.value();
 					success = true;
-					info("login succeeded: %s", "secret");
 					break;
 				}
 			}
 			break;
 		}
 	}
-	if (!success)
-		warn("[nicolive] login failed");
-
 	netReply->deleteLater();
+
+	if (success) {
+		this->flags.session_valid = true;
+		info("login succeeded");
+	} else {
+		this->flags.session_valid = false;
+		warn("login failed");
+	}
+
 	return success;
 }
 
@@ -208,6 +223,7 @@ bool NicoLive::sitePubStat()
 
 	if (this->session.isEmpty()) {
 		debug("this->session is empty.");
+		this->flags.onair = false;
 		this->live_info.id = QString();
 		return false;
 	}
@@ -223,6 +239,7 @@ bool NicoLive::sitePubStat()
 	QString error_code;
 
 	if (status == "ok") {
+		this->flags.onair = true;
 		this->live_info.id = xml_data["/getpublishstatus/stream/id"];
 		this->live_info.exclude =
 			(xml_data["/getpublishstatus/stream/exclude"] == "1");
@@ -257,6 +274,12 @@ bool NicoLive::sitePubStat()
 		}
 	} else {
 		error("unknow status: %s", status.toStdString().c_str());
+	}
+
+	if (success) {
+		this->flags.session_valid = true;
+	} else {
+		this->flags.session_valid = false;
 	}
 
 	return success;
@@ -316,14 +339,15 @@ bool NicoLive::loadViqoSettings()
 		viqo_data_dir.replace(index_obs, 3, "Viqo");
 	} else {
 		error("found invalid save directory");
+		this->flags.load_viqo = false;
 		return false;
 	}
 	debug("save dir: %s", viqo_data_dir.toStdString().c_str());
 
 	QFile file(viqo_data_dir + "/settings.json");
 	if ( !file.exists() ) {
-		file.close();
 		warn("viqo save file is not available");
+		this->flags.load_viqo = false;
 		return false;
 	}
 
@@ -332,21 +356,14 @@ bool NicoLive::loadViqoSettings()
 	QJsonDocument jsd = QJsonDocument::fromJson(file.readAll());
 
 	QJsonObject login_way = jsd.object()["login_way"].toObject();
-	// loginWay = login_way["login_way"].toInt();
-	session = login_way["user_session"].toString();
-	// cookieFile = login_way["cookie_file_name"].toString();
+	this->session = login_way["user_session"].toString();
 
 	QJsonObject user_data = jsd.object()["user_data"].toObject();
-	mail = user_data["mail"].toString();
-	password = user_data["pass"].toString();
-
-	// QJsonObject comment = jsd.object()["comment"].toObject();
-	// if (comment.contains("owner_comment"))
-	// 	ownerComment = comment["owner_comment"].toBool();
-	// if (comment.contains("viewNG"))
-	// 	ownerComment = comment["viewNG"].toBool();
+	this->mail = user_data["mail"].toString();
+	this->password = user_data["pass"].toString();
 
 	file.close();
+	this->flags.load_viqo = true;
 	return true;
 }
 

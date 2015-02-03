@@ -22,12 +22,18 @@ private:
 		QDateTime open_time;
 		QDateTime start_time;
 		QDateTime end_time;
-		int bitrate;
-		bool exclude;
+		int bitrate = 0;
+		bool exclude = false;
 	} live_info;
 	// QString live_id;
 	QString live_url;
 	QString live_key;
+	struct {
+		bool session_valid = false;
+		bool onair = false;
+		bool load_viqo = false;
+		bool adjust_bitrate = false;
+	} flags;
 	QNetworkAccessManager* qnam;
 public:
 	NicoLive();
