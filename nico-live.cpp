@@ -1,8 +1,6 @@
-#include <cstdlib>
-#include <cstring>
 #include <QtCore>
 #include <QtNetwork>
-#include <obs.h>
+#include <obs-module.h>
 #include "nicolive.h"
 #include "nico-live.hpp"
 
@@ -49,6 +47,11 @@ void NicoLive::setAccount(const char *mail, const char *password)
 	this->flags.load_viqo = false;
 }
 
+void NicoLive::setEnabledAdjustBitrate(bool enabled)
+{
+	this->flags.adjust_bitrate = enabled;
+}
+
 const QString &NicoLive::getMail() const
 {
 	return this->mail;
@@ -77,6 +80,16 @@ const QString &NicoLive::getLiveUrl() const
 const QString &NicoLive::getLiveKey() const
 {
 	return this->live_key;
+}
+
+long long NicoLive::getLiveBitrate() const
+{
+	return this->live_info.bitrate;
+}
+
+bool NicoLive::enabledAdjustBitrate() const
+{
+	return this->flags.adjust_bitrate;
 }
 
 bool NicoLive::checkSession()

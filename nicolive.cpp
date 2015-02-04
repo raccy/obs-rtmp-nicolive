@@ -1,8 +1,6 @@
-#include <cstdlib>
-#include <cstring>
 #include <QtCore>
 #include <QtNetwork>
-#include <obs.h>
+#include <obs-module.h>
 #include "nicolive.h"
 #include "nico-live.hpp"
 
@@ -37,22 +35,10 @@ extern "C" void nicolive_set_settings(void *data, const char *mail,
 	nicolive->setSession(session);
 }
 
-extern "C" bool nicolive_load_viqo_settings(void *data)
+extern "C" void nicolive_set_enabled_adjust_bitrate(void *data, bool enabled)
 {
 	NicoLive *nicolive = static_cast<NicoLive *>(data);
-	return nicolive->loadViqoSettings();
-}
-
-extern "C" bool nicolive_check_session(void *data)
-{
-	NicoLive *nicolive = static_cast<NicoLive *>(data);
-	return nicolive->checkSession();
-}
-
-extern "C" bool nicolive_check_live(void *data)
-{
-	NicoLive *nicolive = static_cast<NicoLive *>(data);
-	return nicolive->checkLive();
+	nicolive->setEnabledAdjustBitrate(enabled);
 }
 
 extern "C" const char *nicolive_get_mail(const void *data)
@@ -106,4 +92,35 @@ extern "C" const char *nicolive_get_live_key(const void *data)
 	nicolive_buff.live_key = bstrdup(
 			nicolive->getLiveKey().toStdString().c_str());
 	return nicolive_buff.live_key;
+}
+
+extern "C" long long nicolive_get_live_bitrate(const void *data)
+{
+	const NicoLive *nicolive = static_cast<const NicoLive *>(data);
+	return nicolive->getLiveBitrate();
+}
+
+bool nicolive_enabled_adjust_bitrate(const void *data)
+{
+	const NicoLive *nicolive = static_cast<const NicoLive *>(data);
+	return nicolive->enabledAdjustBitrate();
+}
+
+
+extern "C" bool nicolive_load_viqo_settings(void *data)
+{
+	NicoLive *nicolive = static_cast<NicoLive *>(data);
+	return nicolive->loadViqoSettings();
+}
+
+extern "C" bool nicolive_check_session(void *data)
+{
+	NicoLive *nicolive = static_cast<NicoLive *>(data);
+	return nicolive->checkSession();
+}
+
+extern "C" bool nicolive_check_live(void *data)
+{
+	NicoLive *nicolive = static_cast<NicoLive *>(data);
+	return nicolive->checkLive();
 }

@@ -22,7 +22,7 @@ private:
 		QDateTime open_time;
 		QDateTime start_time;
 		QDateTime end_time;
-		int bitrate = 0;
+		long long bitrate = 0;
 		bool exclude = false;
 	} live_info;
 	// QString live_id;
@@ -41,12 +41,15 @@ public:
 	void setSession(const QString &session);
 	void setAccount(const char *mail, const char *password);
 	void setAccount(const QString &mail, const QString &password);
+	void setEnabledAdjustBitrate(bool enabled);
 	const QString &getMail() const;
 	const QString &getPassword() const;
 	const QString &getSession() const;
 	const QString &getLiveId() const;
 	const QString &getLiveUrl() const;
 	const QString &getLiveKey() const;
+	long long getLiveBitrate() const;
+	bool enabledAdjustBitrate() const;
 	bool checkSession();
 	bool checkLive();
 	bool loadViqoSettings();

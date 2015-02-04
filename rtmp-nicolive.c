@@ -4,6 +4,37 @@
 #include "nicolive.h"
 #include "nicolive-ui.h"
 
+static bool adjust_bitrate(obs_output_t *output, long long bitrate)
+{
+	obs_encoder_t *video_encoder = obs_output_get_video_encoder(output);
+	obs_encoder_t *audio_encoder = obs_output_get_audio_encoder(output);
+	obs_data_t *video_encoder_settings =
+			obs_encoder_get_settings(video_encoder);
+	obs_data_t *audio_encoder_settings =
+			obs_encoder_get_settings(audio_encoder);
+
+	long long video_bitrate = obs_data_get_int(video_encoder_settings,
+			"bitrate");
+	long long audio_bitrate = obs_data_get_int(audio_encoder_settings,
+			"bitrate");
+
+	// the smallest video bitrate is 200?
+	if (bitrate - audio_bitrate < 200) {
+		warn("audio bitrate is too large");
+		return false;
+	}
+
+	if (bitrate != video_bitrate + audio_bitrate) {
+		obs_data_set_int(video_encoder_settings, "bitrate",
+			bitrate - audio_bitrate);
+		obs_encoder_update(video_encoder, video_encoder_settings);
+		debug("adjust bitrate: %lld", bitrate - audio_bitrate);
+	} else {
+		debug("need not adjust bitrate");
+	}
+	return true;
+}
+
 static const char *rtmp_nicolive_getname(void)
 {
 	return obs_module_text("NiconicoLive");
@@ -16,6 +47,10 @@ static void rtmp_nicolive_update(void *data, obs_data_t *settings)
 			nicolive_mbox_warn(obs_module_text(
 					"MessageFailedLoadViqoSettings"));
 			obs_data_set_bool(settings, "load_viqo", false);
+			nicolive_set_settings(data,
+				obs_data_get_string(settings, "mail"),
+				obs_data_get_string(settings, "password"),
+				obs_data_get_string(settings, "session"));
 		}
 	} else {
 		nicolive_set_settings(data,
@@ -23,6 +58,8 @@ static void rtmp_nicolive_update(void *data, obs_data_t *settings)
 				obs_data_get_string(settings, "password"),
 				obs_data_get_string(settings, "session"));
 	}
+	nicolive_set_enabled_adjust_bitrate(data,
+				obs_data_get_bool(settings, "adjust_bitrate"));
 }
 
 static void rtmp_nicolive_destroy(void *data)
@@ -42,36 +79,34 @@ static void *rtmp_nicolive_create(obs_data_t *settings, obs_service_t *service)
 
 static bool rtmp_nicolive_initialize(void *data, obs_output_t *output)
 {
+	bool success = false;
 	UNUSED_PARAMETER(output);
-	// obs_encoder_t *video_encoder = obs_output_get_video_encoder(output);
-	// obs_encoder_t *audio_encoder = obs_output_get_audio_encoder(output);
-	// obs_data_t *video_encoder_settings =
-	// 		obs_encoder_get_settings(video_encoder);
-	// obs_data_t *audio_encoder_settings =
-	// 		obs_encoder_get_settings(audio_encoder);
 
-	// obs_encoder_update(video_encoder, video_encoder_settings);
-	// EXPORT void obs_data_set_int(obs_data_t *data, const char *name,
-	// 		long long val);
-	// EXPORT long long obs_data_get_int(obs_data_t *data, const char *name);
-	// debug("video bitrate: %lld", obs_data_get_int(video_encoder_settings, "bitrate"));
-	// debug("audio bitrate: %lld", obs_data_get_int(audio_encoder_settings, "bitrate"));
-	// obs_data_set_int(video_encoder_settings, "bitrate", 300);
-	// obs_encoder_update(video_encoder, video_encoder_settings);
-	//
-	// debug("video 2 bitrate: %lld", obs_data_get_int(obs_encoder_get_settings(obs_output_get_video_encoder(output)), "bitrate"));
+	debug("adjust bitrate: %d", nicolive_enabled_adjust_bitrate(data));
 
 
 
 
-	if (nicolive_check_session(data))
-		if (nicolive_check_live(data))
-			return true;
-		else
+	if (nicolive_check_session(data)) {
+		if (nicolive_check_live(data)) {
+			success = true;
+		} else {
 			nicolive_mbox_warn(obs_module_text("MessageNoLive"));
-	else
+			success = false;
+		}
+	} else {
 		nicolive_mbox_warn(obs_module_text("MessageLoginFailed"));
-	return false;
+		success = false;
+	}
+
+	if (success && nicolive_enabled_adjust_bitrate(data)) {
+		if (!adjust_bitrate(output, nicolive_get_live_bitrate(data))) {
+			nicolive_mbox_warn(obs_module_text(
+					"MessageFailedAdjustBitrate"));
+			success = false;
+		}
+	}
+	return success;
 }
 
 static void rtmp_nicolive_activate(void *data, obs_data_t *settings) {
@@ -121,6 +156,8 @@ static obs_properties_t *rtmp_nicolive_properties(void *data)
 	prop = obs_properties_add_bool(ppts, "load_viqo",
 			obs_module_text("LoadViqoSettings"));
 	obs_property_set_modified_callback(prop, load_viqo_modified);
+	obs_properties_add_bool(ppts, "adjust_bitrate",
+			obs_module_text("AdjustBitrate"));
 	return ppts;
 }
 
