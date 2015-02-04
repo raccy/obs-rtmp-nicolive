@@ -6,7 +6,9 @@
 #include "nicolive.h"
 #include "nico-live.hpp"
 
-static struct {
+// cannot use anonymouse struct because VS2013 bug
+// https://connect.microsoft.com/VisualStudio/feedback/details/808506/nsdmi-silently-ignored-on-nested-anonymous-classes-and-structs
+static struct nicolive_buff_s {
 	char *mail = nullptr;
 	char *password = nullptr;
 	char *session = nullptr;
