@@ -11,9 +11,14 @@ const QUrl NicoLive::PUBSTAT_URL =
 const QString NicoLive::FMEPROF_URL_PRE =
 		"http://live.nicovideo.jp/api/getfmeprofile?v=";
 
-NicoLive::NicoLive()
+NicoLive::NicoLive(QObject *parent)
 {
+	(void)parent;
 	qnam = new QNetworkAccessManager(this);
+}
+
+NicoLive::~NicoLive()
+{
 }
 
 void NicoLive::setSession(const QString &session)

@@ -1,5 +1,10 @@
 project(rtmp-nicolive)
 
+# Find includes in corresponding build directories
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+# Instruct CMake to run moc automatically when needed.
+set(CMAKE_AUTOMOC ON)
+
 find_package(Qt5Core ${FIND_MODE})
 find_package(Qt5Widgets ${FIND_MODE})
 find_package(Qt5Network ${FIND_MODE})
@@ -19,6 +24,7 @@ endif()
 
 set(rtmp-nicolive_SOURCES
 	nico-live.cpp
+	nico-live.moc
 	nicolive.cpp
 	nicolive-ui.cpp
 	rtmp-nicolive.c)

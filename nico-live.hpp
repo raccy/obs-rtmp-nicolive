@@ -4,7 +4,7 @@
 #include <QtNetwork>
 
 class NicoLive : public QObject {
-	// Q_OBJECT
+	Q_OBJECT
 public:
 	static const QUrl LOGIN_URL;
 	static const QUrl PUBSTAT_URL;
@@ -36,7 +36,8 @@ private:
 	} flags;
 	QNetworkAccessManager* qnam;
 public:
-	NicoLive();
+	NicoLive(QObject *parent = 0);
+	~NicoLive();
 	void setSession(const char *session);
 	void setSession(const QString &session);
 	void setAccount(const char *mail, const char *password);
