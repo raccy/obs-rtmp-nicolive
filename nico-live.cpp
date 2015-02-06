@@ -134,8 +134,7 @@ void NicoLive::stopStreaming()
 
 bool NicoLive::checkSession()
 {
-	return this->flags.session_valid || sitePubStat() ||
-		(siteLogin() && sitePubStat());
+	return sitePubStat() || (siteLogin() && sitePubStat());
 }
 
 bool NicoLive::checkLive()

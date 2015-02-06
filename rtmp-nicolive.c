@@ -81,7 +81,6 @@ static void *rtmp_nicolive_create(obs_data_t *settings, obs_service_t *service)
 static bool rtmp_nicolive_initialize(void *data, obs_output_t *output)
 {
 	bool success = false;
-	UNUSED_PARAMETER(output);
 
 	if (nicolive_check_session(data)) {
 		if (nicolive_check_live(data)) {
