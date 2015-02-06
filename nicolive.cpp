@@ -24,7 +24,7 @@ extern "C" void *nicolive_create(void)
 extern "C" void nicolive_destroy(void *data)
 {
 	NicoLive *nicolive = static_cast<NicoLive *>(data);
-	delete nicolive;
+	nicolive->deleteLater();
 }
 
 extern "C" void nicolive_set_settings(void *data, const char *mail,
@@ -105,7 +105,6 @@ bool nicolive_enabled_adjust_bitrate(const void *data)
 	const NicoLive *nicolive = static_cast<const NicoLive *>(data);
 	return nicolive->enabledAdjustBitrate();
 }
-
 
 extern "C" bool nicolive_load_viqo_settings(void *data)
 {

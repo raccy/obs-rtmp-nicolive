@@ -1,6 +1,5 @@
 #include <QtCore>
 #include <QtNetwork>
-#include <obs-module.h>
 #include "nicolive.h"
 #include "nico-live.hpp"
 
@@ -92,9 +91,45 @@ long long NicoLive::getLiveBitrate() const
 	return this->live_info.bitrate;
 }
 
+const QString &NicoLive::getOnairLiveId() const
+{
+	return this->onair_live_id;
+}
+
+int NicoLive::getRemainingLive() const
+{
+	if (isOnair())
+		return QDateTime::currentDateTime().secsTo(
+			this->live_info.end_time);
+	else
+		return 0;
+}
+
 bool NicoLive::enabledAdjustBitrate() const
 {
 	return this->flags.adjust_bitrate;
+}
+
+bool NicoLive::enabledSession() const
+{
+	return this->flags.session_valid;
+}
+
+bool NicoLive::isOnair() const
+{
+	return this->flags.onair;
+}
+
+void NicoLive::startStreaming()
+{
+	this->onair_live_id = getLiveId();
+	this->flags.onair = true;
+}
+
+void NicoLive::stopStreaming()
+{
+	this->onair_live_id = QString();
+	this->flags.onair = false;
 }
 
 bool NicoLive::checkSession()
@@ -159,14 +194,14 @@ bool NicoLive::siteLogin()
 	QNetworkReply *netReply = qnam->post(rq,
 			params.toString(QUrl::FullyEncoded).toUtf8());
 
-	info("login start");
+	nicolive_log_info("login start");
 
 	// wait reply
 	QEventLoop loop;
 	connect(netReply, SIGNAL(finished()), &loop, SLOT(quit()));
 	loop.exec();
 
-	info("login finished");
+	nicolive_log_info("login finished");
 
 	// finished reply
 	auto headers = netReply->rawHeaderPairs();
@@ -192,10 +227,10 @@ bool NicoLive::siteLogin()
 
 	if (success) {
 		this->flags.session_valid = true;
-		info("login succeeded");
+		nicolive_log_info("login succeeded");
 	} else {
 		this->flags.session_valid = false;
-		warn("login failed");
+		nicolive_log_warn("login failed");
 	}
 
 	return success;
@@ -221,14 +256,14 @@ QByteArray NicoLive::getWeb(const QUrl url)
 
 	QNetworkReply * netReply = qnam->get(rq);
 
-	info("web get start");
+	nicolive_log_info("web get start");
 
 	// wait reply
 	QEventLoop loop;
 	connect(netReply, SIGNAL(finished()), &loop, SLOT(quit()));
 	loop.exec();
 
-	info("web get finished");
+	nicolive_log_info("web get finished");
 
 	// finished reply
 	QByteArray repdata = netReply->readAll();
@@ -240,7 +275,7 @@ bool NicoLive::sitePubStat()
 {
 
 	if (this->session.isEmpty()) {
-		debug("this->session is empty.");
+		nicolive_log_debug("this->session is empty.");
 		this->flags.onair = false;
 		this->live_info.id = QString();
 		return false;
@@ -277,21 +312,21 @@ bool NicoLive::sitePubStat()
 			xml_data["/getpublishstatus/rtmp/ticket"];
 		this->live_info.bitrate =
 			xml_data["/getpublishstatus/rtmp/bitrate"].toInt();
-		info("live waku: %s", this->live_info.id.toStdString().c_str());
+		nicolive_log_info("live waku: %s", this->live_info.id.toStdString().c_str());
 		success = true;
 	} else if (status == "fail") {
 		error_code = xml_data["/getpublishstatus/error/code"];
 		if (error_code == "notfound") {
-			info("no live waku");
+			nicolive_log_info("no live waku");
 			success = true;
 		} else if (error_code == "unknown") {
-			warn("login session failed");
+			nicolive_log_warn("login session failed");
 		} else {
-			error("unknow error code: %s",
+			nicolive_log_error("unknow error code: %s",
 					error_code.toStdString().c_str());
 		}
 	} else {
-		error("unknow status: %s", status.toStdString().c_str());
+		nicolive_log_error("unknow status: %s", status.toStdString().c_str());
 	}
 
 	if (success) {
@@ -306,7 +341,7 @@ bool NicoLive::sitePubStat()
 bool NicoLive::siteLiveProf() {
 
 	if (this->live_info.id.isEmpty()) {
-		debug("this->live_info.id is empty.");
+		nicolive_log_debug("this->live_info.id is empty.");
 		this->live_url = QString();
 		this->live_key = QString();
 		return false;
@@ -327,10 +362,10 @@ bool NicoLive::siteLiveProf() {
 	this->live_key =
 		xml_data["/flashmedialiveencoder_profile/output/rtmp/stream"];
 	if (this->live_url.isEmpty() || this->live_key.isEmpty()) {
-		warn("not found live url or key");
+		nicolive_log_warn("not found live url or key");
 		return false;
 	} else {
-		info("found live url and key");
+		nicolive_log_info("found live url and key");
 		return true;
 	}
 }
@@ -346,7 +381,7 @@ bool NicoLive::loadViqoSettings()
 	QStringList dir = QStandardPaths::standardLocations(
 			QStandardPaths::DataLocation);
 	if (dir.empty()) {
-		error("failed find save directory");
+		nicolive_log_error("failed find save directory");
 		return false;
 	}
 
@@ -356,15 +391,15 @@ bool NicoLive::loadViqoSettings()
 		// obs -> Viqo
 		viqo_data_dir.replace(index_obs, 3, "Viqo");
 	} else {
-		error("found invalid save directory");
+		nicolive_log_error("found invalid save directory");
 		this->flags.load_viqo = false;
 		return false;
 	}
-	debug("save dir: %s", viqo_data_dir.toStdString().c_str());
+	nicolive_log_debug("save dir: %s", viqo_data_dir.toStdString().c_str());
 
 	QFile file(viqo_data_dir + "/settings.json");
 	if ( !file.exists() ) {
-		warn("viqo save file is not available");
+		nicolive_log_warn("viqo save file is not available");
 		this->flags.load_viqo = false;
 		return false;
 	}
@@ -429,7 +464,7 @@ bool NicoLive::parseXml(QXmlStreamReader &reader, QHash<QString, QString> &hash)
 			if (!element_stack.isEmpty())
 				element_stack.removeLast();
 			else
-				error("found invaild xml: more end element");
+				nicolive_log_error("found invaild xml: more end element");
 			break;
 		case QXmlStreamReader::Characters:
 			if (!reader.isWhitespace())
@@ -451,14 +486,14 @@ bool NicoLive::parseXml(QXmlStreamReader &reader, QHash<QString, QString> &hash)
 
 #ifdef _DEBUG
 	for (auto key: hash.keys()) {
-		debug("xml [%s] =  %s",
+		nicolive_log_debug("xml [%s] =  %s",
 				key.toStdString().c_str(),
 				hash[key].toStdString().c_str());
 	}
 #endif
 
 	if (reader.hasError()) {
-		error("faield to parse xml: %s",
+		nicolive_log_error("faield to parse xml: %s",
 				reader.errorString().toStdString().c_str());
 		return false;
 	} else {

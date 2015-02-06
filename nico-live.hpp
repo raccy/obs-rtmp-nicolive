@@ -3,8 +3,11 @@
 #include <QtCore>
 #include <QtNetwork>
 
+class NicoLiveWatcher;
+
 class NicoLive : public QObject {
 	Q_OBJECT
+	friend class NicoLiveWatcher;
 public:
 	static const QUrl LOGIN_URL;
 	static const QUrl PUBSTAT_URL;
@@ -28,6 +31,7 @@ private:
 	// QString live_id;
 	QString live_url;
 	QString live_key;
+	QString onair_live_id;
 	struct {
 		bool session_valid = false;
 		bool onair = false;
@@ -43,6 +47,7 @@ public:
 	void setAccount(const char *mail, const char *password);
 	void setAccount(const QString &mail, const QString &password);
 	void setEnabledAdjustBitrate(bool enabled);
+
 	const QString &getMail() const;
 	const QString &getPassword() const;
 	const QString &getSession() const;
@@ -50,7 +55,16 @@ public:
 	const QString &getLiveUrl() const;
 	const QString &getLiveKey() const;
 	long long getLiveBitrate() const;
+	const QString &getOnairLiveId() const;
+	int getRemainingLive() const;
+
 	bool enabledAdjustBitrate() const;
+	bool enabledSession() const;
+	bool isOnair() const;
+
+	void startStreaming();
+	void stopStreaming();
+
 	bool checkSession();
 	bool checkLive();
 	bool loadViqoSettings();

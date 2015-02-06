@@ -20,7 +20,7 @@ static bool adjust_bitrate(obs_output_t *output, long long bitrate)
 
 	// the smallest video bitrate is 200?
 	if (bitrate - audio_bitrate < 200) {
-		warn("audio bitrate is too large");
+		nicolive_log_warn("audio bitrate is too large");
 		return false;
 	}
 
@@ -28,9 +28,10 @@ static bool adjust_bitrate(obs_output_t *output, long long bitrate)
 		obs_data_set_int(video_encoder_settings, "bitrate",
 			bitrate - audio_bitrate);
 		obs_encoder_update(video_encoder, video_encoder_settings);
-		debug("adjust bitrate: %lld", bitrate - audio_bitrate);
+		nicolive_log_debug("adjust bitrate: %lld",
+				bitrate - audio_bitrate);
 	} else {
-		debug("need not adjust bitrate");
+		nicolive_log_debug("need not adjust bitrate");
 	}
 	return true;
 }
@@ -82,11 +83,6 @@ static bool rtmp_nicolive_initialize(void *data, obs_output_t *output)
 	bool success = false;
 	UNUSED_PARAMETER(output);
 
-	debug("adjust bitrate: %d", nicolive_enabled_adjust_bitrate(data));
-
-
-
-
 	if (nicolive_check_session(data)) {
 		if (nicolive_check_live(data)) {
 			success = true;
@@ -119,7 +115,7 @@ static bool load_viqo_modified(obs_properties_t *props,
 	obs_property_t *prop, obs_data_t *settings)
 {
 	UNUSED_PARAMETER(prop);
-	debug("load viqo check modified");
+	nicolive_log_debug("load viqo check modified");
 	if (obs_data_get_bool(settings, "load_viqo")) {
 		obs_property_set_enabled(
 				obs_properties_get(props, "mail"), false);
