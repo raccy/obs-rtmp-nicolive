@@ -432,7 +432,7 @@ bool NicoLive::loadViqoSettings()
 }
 
 // This method parse XML and create hash map.
-// The keys ars XPath strings for all text and attribute values in elements
+// The keys are XPath strings for all text and attribute values in elements
 bool NicoLive::parseXml(QXmlStreamReader &reader, QHash<QString, QString> &hash)
 {
 	QStringList element_stack;

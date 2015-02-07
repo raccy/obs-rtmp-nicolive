@@ -167,7 +167,6 @@ static bool load_viqo_modified(obs_properties_t *props,
 
 static obs_properties_t *rtmp_nicolive_properties(void *data)
 {
-	nicolive_log_debug("properties settings");
 	UNUSED_PARAMETER(data);
 	obs_property_t *prop;
 	obs_properties_t *ppts = obs_properties_create();
