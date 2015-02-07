@@ -288,7 +288,7 @@ bool NicoLive::sitePubStat()
 	if (this->session.isEmpty()) {
 		nicolive_log_debug("this->session is empty.");
 		this->flags.onair = false;
-		this->live_info.id = QString();
+		clearLiveInfo();
 		return false;
 	}
 
@@ -326,6 +326,7 @@ bool NicoLive::sitePubStat()
 		nicolive_log_info("live waku: %s", this->live_info.id.toStdString().c_str());
 		success = true;
 	} else if (status == "fail") {
+		clearLiveInfo();
 		error_code = xml_data["/getpublishstatus/error/code"];
 		if (error_code == "notfound") {
 			nicolive_log_info("no live waku");
@@ -337,6 +338,7 @@ bool NicoLive::sitePubStat()
 					error_code.toStdString().c_str());
 		}
 	} else {
+		clearLiveInfo();
 		nicolive_log_error("unknow status: %s", status.toStdString().c_str());
 	}
 
@@ -510,4 +512,9 @@ bool NicoLive::parseXml(QXmlStreamReader &reader, QHash<QString, QString> &hash)
 	} else {
 		return true;
 	}
+}
+
+void NicoLive::clearLiveInfo()
+{
+	this->live_info = decltype(this->live_info)();
 }

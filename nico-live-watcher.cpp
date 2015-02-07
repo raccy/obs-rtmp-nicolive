@@ -68,15 +68,19 @@ void NicoLiveWatcher::watch()
 
 	if (nicolive->getLiveId().isEmpty()) {
 		if (nicolive->isOnair()) {
+			nicolive_log_debug("stop streaming because live end");
 			nicolive_streaming_click();
 			next_interval = this->marginTime;
 		}
 	} else {
 		if (nicolive->getLiveId() != nicolive->getOnairLiveId()) {
 			if (nicolive->isOnair()) {
+				nicolive_log_debug(
+					"stop streaming for restart");
 				nicolive_streaming_click();
 				QThread::sleep(1); // sleep 1 sec
 			}
+			nicolive_log_debug("start streaming for next live");
 			nicolive_streaming_click();
 		} else if (remaining_msec + this->marginTime < next_interval) {
 			next_interval = remaining_msec + this->marginTime;

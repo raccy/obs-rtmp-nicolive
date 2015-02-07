@@ -79,4 +79,5 @@ private:
 	bool sitePubStat();
 	bool siteLiveProf();
 	bool parseXml(QXmlStreamReader &reader, QHash<QString, QString> &hash);
+	void clearLiveInfo();
 };
