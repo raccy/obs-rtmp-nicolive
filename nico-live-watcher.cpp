@@ -4,12 +4,13 @@
 #include "nico-live-watcher.hpp"
 #include "nicolive-ui.h"
 
-NicoLiveWatcher::NicoLiveWatcher(NicoLive *nicolive, int mergin_sec) :
+NicoLiveWatcher::NicoLiveWatcher(NicoLive *nicolive, int margin_sec) :
 	QObject(nicolive),
 	nicolive(nicolive),
-	merginTime(mergin_sec * 1000)
+	marginTime(margin_sec * 1000)
 {
 	this->timer = new QTimer(this);
+	this->timer->setSingleShot(true);
 	connect(timer, SIGNAL(timeout()), this, SLOT(watch()));
 }
 
@@ -28,8 +29,10 @@ void NicoLiveWatcher::start(int sec)
 		nicolive_log_debug("check session before timer start");
 		nicolive->checkSession();
 		nicolive_log_debug("start watch, interval: %d", this->interval);
-		this->timer->start(this->interval);
+		// this->timer->start(this->interval);
+		this->timer->start(this->marginTime);
 	}
+	this->active = true;
 }
 
 void NicoLiveWatcher::stop()
@@ -38,11 +41,12 @@ void NicoLiveWatcher::stop()
 		nicolive_log_debug("stop watch ");
 		this->timer->stop();
 	}
+	this->active = false;
 }
 
 bool NicoLiveWatcher::isActive()
 {
-	return this->timer->isActive();
+	return this->active;
 }
 
 int NicoLiveWatcher::remainingTime()
@@ -53,30 +57,30 @@ int NicoLiveWatcher::remainingTime()
 void NicoLiveWatcher::watch()
 {
 	nicolive_log_debug("watching!");
-	if (interval != this->timer->interval())
-		this->timer->start(interval);
 
-	if (!nicolive->enabledSession()) {
-		nicolive_log_debug("no session watch end");
-		return;
-	}
+	int next_interval = this->interval;
+	int remaining_msec;
 
 	nicolive->sitePubStat();
-	int remaining_sec = nicolive->getRemainingLive();
+	remaining_msec = nicolive->getRemainingLive() * 1000;
+	if (remaining_msec < 0)
+		remaining_msec = 0;
+
 	if (nicolive->getLiveId().isEmpty()) {
-		if (nicolive->isOnair())
+		if (nicolive->isOnair()) {
 			nicolive_streaming_click();
+			next_interval = this->marginTime;
+		}
 	} else {
 		if (nicolive->getLiveId() != nicolive->getOnairLiveId()) {
-			if (nicolive->isOnair())
+			if (nicolive->isOnair()) {
 				nicolive_streaming_click();
+				QThread::sleep(1); // sleep 1 sec
+			}
 			nicolive_streaming_click();
-		} else if (remaining_sec < remainingTime()) {
-			if (remaining_sec > 0)
-				this->timer->start(
-					remaining_sec * 1000 + merginTime);
-			else
-				this->timer->start(merginTime);
+		} else if (remaining_msec + this->marginTime < next_interval) {
+			next_interval = remaining_msec + this->marginTime;
 		}
 	}
+	this->timer->start(next_interval);
 }
