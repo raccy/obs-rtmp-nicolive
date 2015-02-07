@@ -39,6 +39,7 @@ private:
 		bool adjust_bitrate = false;
 	} flags;
 	QNetworkAccessManager* qnam;
+	NicoLiveWatcher *watcher;
 public:
 	NicoLive(QObject *parent = 0);
 	~NicoLive();
@@ -64,6 +65,8 @@ public:
 
 	void startStreaming();
 	void stopStreaming();
+	void startWatching(int sec = 60);
+	void stopWatching();
 
 	bool checkSession();
 	bool checkLive();

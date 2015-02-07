@@ -4,9 +4,9 @@
 #include "nicolive.h"
 #include "nicolive-ui.h"
 
-static QWidget *getMainWindowWidget() {
+static QWidget *findTopLevelWidget(const char *name) {
 	for(QWidget *widget: QApplication::topLevelWidgets()) {
-		if (widget->objectName() == "OBSBasic") {
+		if (widget->objectName() == name) {
 			return widget;
 		}
 	}
@@ -65,17 +65,19 @@ extern "C" void nicolive_mbox_info(const char *message)
 
 extern "C" void nicolive_streaming_click()
 {
-	QWidget *main_widget = getMainWindowWidget();
-	if (main_widget == nullptr) {
-		nicolive_log_error("not found Main Window");
+	QWidget *obs_widget = findTopLevelWidget("OBSBasic");
+	if (obs_widget == nullptr) {
+		nicolive_log_error("not found OBSBasic Window");
 		return;
 	}
 
-	QPushButton *stream_button = main_widget->findChild<QPushButton *>(
+	QPushButton *stream_button = obs_widget->findChild<QPushButton *>(
 		"streamButton");
 	if (stream_button == nullptr) {
-
+		nicolive_log_error("not found streamButton");
+		return;
 	}
 
+	nicolive_log_debug("click streamButton");
 	stream_button->click();
 }

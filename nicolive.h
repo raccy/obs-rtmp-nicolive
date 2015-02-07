@@ -46,6 +46,12 @@ bool nicolive_load_viqo_settings(void *data);
 bool nicolive_check_session(void *data);
 bool nicolive_check_live(void *data);
 
+void nicolive_start_streaming(void *data);
+void nicolive_stop_streaming(void *data);
+
+void nicolive_start_watching(void *data, int sec);
+void nicolive_stop_watching(void *data);
+
 #ifdef __cplusplus
 }
 #endif

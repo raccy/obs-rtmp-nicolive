@@ -123,3 +123,27 @@ extern "C" bool nicolive_check_live(void *data)
 	NicoLive *nicolive = static_cast<NicoLive *>(data);
 	return nicolive->checkLive();
 }
+
+extern "C" void nicolive_start_streaming(void *data)
+{
+	NicoLive *nicolive = static_cast<NicoLive *>(data);
+	nicolive->startStreaming();
+}
+
+extern "C" void nicolive_stop_streaming(void *data)
+{
+	NicoLive *nicolive = static_cast<NicoLive *>(data);
+	nicolive->stopStreaming();
+}
+
+extern "C" void nicolive_start_watching(void *data, int sec)
+{
+	NicoLive *nicolive = static_cast<NicoLive *>(data);
+	nicolive->startWatching(sec);
+}
+
+extern "C" void nicolive_stop_watching(void *data)
+{
+	NicoLive *nicolive = static_cast<NicoLive *>(data);
+	nicolive->stopWatching();
+}

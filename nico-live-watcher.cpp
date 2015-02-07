@@ -4,11 +4,11 @@
 #include "nico-live-watcher.hpp"
 #include "nicolive-ui.h"
 
-NicoLiveWatcher::NicoLiveWatcher(NicoLive *nicolive, int margin_time) :
+NicoLiveWatcher::NicoLiveWatcher(NicoLive *nicolive, int mergin_sec) :
 	QObject(nicolive),
-	merginTime(margin_time)
+	nicolive(nicolive),
+	merginTime(mergin_sec * 1000)
 {
-	this->nicolive = nicolive;
 	this->timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(watch()));
 }
@@ -22,12 +22,22 @@ NicoLiveWatcher::~NicoLiveWatcher()
 void NicoLiveWatcher::start(int sec)
 {
 	this->interval = sec * 1000;
-	this->timer->start(interval);
+	if (this->interval < NicoLiveWatcher::MIN_INTERVAL)
+		this->interval = NicoLiveWatcher::MIN_INTERVAL;
+	if (!this->timer->isActive()) {
+		nicolive_log_debug("check session before timer start");
+		nicolive->checkSession();
+		nicolive_log_debug("start watch, interval: %d", this->interval);
+		this->timer->start(this->interval);
+	}
 }
 
 void NicoLiveWatcher::stop()
 {
-	this->timer->stop();
+	if (this->timer->isActive()) {
+		nicolive_log_debug("stop watch ");
+		this->timer->stop();
+	}
 }
 
 bool NicoLiveWatcher::isActive()
@@ -42,15 +52,17 @@ int NicoLiveWatcher::remainingTime()
 
 void NicoLiveWatcher::watch()
 {
+	nicolive_log_debug("watching!");
 	if (interval != this->timer->interval())
 		this->timer->start(interval);
 
 	if (!nicolive->enabledSession()) {
+		nicolive_log_debug("no session watch end");
 		return;
 	}
 
 	nicolive->sitePubStat();
-	int remaining_time = nicolive->getRemainingLive();
+	int remaining_sec = nicolive->getRemainingLive();
 	if (nicolive->getLiveId().isEmpty()) {
 		if (nicolive->isOnair())
 			nicolive_streaming_click();
@@ -59,11 +71,12 @@ void NicoLiveWatcher::watch()
 			if (nicolive->isOnair())
 				nicolive_streaming_click();
 			nicolive_streaming_click();
-		} else if (remaining_time < remainingTime()) {
-			if (remaining_time > 0)
-				start(remaining_time + merginTime);
+		} else if (remaining_sec < remainingTime()) {
+			if (remaining_sec > 0)
+				this->timer->start(
+					remaining_sec * 1000 + merginTime);
 			else
-				start(merginTime);
+				this->timer->start(merginTime);
 		}
 	}
 }

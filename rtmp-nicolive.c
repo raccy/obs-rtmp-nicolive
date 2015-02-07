@@ -43,6 +43,7 @@ static const char *rtmp_nicolive_getname(void)
 
 static void rtmp_nicolive_update(void *data, obs_data_t *settings)
 {
+	// TODO load viqo every time the setting changes
 	if (obs_data_get_bool(settings, "load_viqo")) {
 		if (!nicolive_load_viqo_settings(data)) {
 			nicolive_mbox_warn(obs_module_text(
@@ -59,8 +60,17 @@ static void rtmp_nicolive_update(void *data, obs_data_t *settings)
 				obs_data_get_string(settings, "password"),
 				obs_data_get_string(settings, "session"));
 	}
+
 	nicolive_set_enabled_adjust_bitrate(data,
 				obs_data_get_bool(settings, "adjust_bitrate"));
+
+	if (obs_data_get_bool(settings, "auto_start")) {
+		nicolive_start_watching(data,
+				obs_data_get_int(settings, "watch_interval"));
+	} else {
+		nicolive_stop_watching(data);
+	}
+
 }
 
 static void rtmp_nicolive_destroy(void *data)
@@ -104,10 +114,17 @@ static bool rtmp_nicolive_initialize(void *data, obs_output_t *output)
 	return success;
 }
 
-static void rtmp_nicolive_activate(void *data, obs_data_t *settings) {
+static void rtmp_nicolive_activate(void *data, obs_data_t *settings)
+{
+	nicolive_start_streaming(data);
 	if (!obs_data_get_bool(settings, "load_viqo"))
 		obs_data_set_string(settings, "session",
 				nicolive_get_session(data));
+}
+
+static void rtmp_nicolive_deactivate(void *data)
+{
+	nicolive_stop_streaming(data);
 }
 
 static bool load_viqo_modified(obs_properties_t *props,
@@ -133,28 +150,65 @@ static bool load_viqo_modified(obs_properties_t *props,
 	return true;
 }
 
+// static bool auto_start_modified(obs_properties_t *props,
+// 	obs_property_t *prop, obs_data_t *settings)
+// {
+// 	UNUSED_PARAMETER(prop);
+// 	nicolive_log_debug("auto start check modified");
+// 	if (obs_data_get_bool(settings, "auto_start")) {
+// 		obs_property_set_enabled(obs_properties_get(props,
+// 			"watch_interval"), true);
+// 	} else {
+// 		obs_property_set_enabled(obs_properties_get(props,
+// 			"watch_interval"), false);
+// 	}
+// 	return true;
+// }
+
 static obs_properties_t *rtmp_nicolive_properties(void *data)
 {
+	nicolive_log_debug("properties settings");
 	UNUSED_PARAMETER(data);
 	obs_property_t *prop;
-
 	obs_properties_t *ppts = obs_properties_create();
+
 	obs_properties_add_text(ppts, "mail", obs_module_text("MailAddress"),
 			OBS_TEXT_DEFAULT);
 	obs_properties_add_text(ppts, "password", obs_module_text("Password"),
 			OBS_TEXT_PASSWORD);
 	obs_properties_add_text(ppts, "session", obs_module_text("Session"),
 			OBS_TEXT_PASSWORD);
-	// obs_properties_add_button(ppts, "load_viqo_button",
-	// 		obs_module_text("LoadViqoSettings"),
-	// 		viqo_button_clicked);
+
 	prop = obs_properties_add_bool(ppts, "load_viqo",
 			obs_module_text("LoadViqoSettings"));
 	obs_property_set_modified_callback(prop, load_viqo_modified);
+
 	obs_properties_add_bool(ppts, "adjust_bitrate",
 			obs_module_text("AdjustBitrate"));
+
+	prop = obs_properties_add_bool(ppts, "auto_start",
+			obs_module_text("AutoStart"));
+	// obs_property_set_modified_callback(prop, auto_start_modified);
+	obs_properties_add_int(ppts, "watch_interval",
+			obs_module_text("WatchInterval"),
+			10, 300, 1);
+
 	return ppts;
 }
+
+// TODO: not run... why?
+static void rtmp_nicolive_defaults(obs_data_t *settings)
+{
+	nicolive_log_debug("default settings");
+	obs_data_set_default_string(settings, "mail",           "");
+	obs_data_set_default_string(settings, "password",       "");
+	obs_data_set_default_string(settings, "session",        "");
+	obs_data_set_default_bool  (settings, "load_viqo",      false);
+	obs_data_set_default_bool  (settings, "adjust_bitrate", true);
+	obs_data_set_default_bool  (settings, "auto_start",     false);
+	obs_data_set_default_int   (settings, "watch_interval", 60);
+}
+
 
 static const char *rtmp_nicolive_url(void *data)
 {
@@ -174,6 +228,8 @@ struct obs_service_info rtmp_nicolive_service = {
 	.update         = rtmp_nicolive_update,
 	.initialize     = rtmp_nicolive_initialize,
 	.activate       = rtmp_nicolive_activate,
+	.deactivate     = rtmp_nicolive_deactivate,
+	.get_defaults   = rtmp_nicolive_defaults,
 	.get_properties = rtmp_nicolive_properties,
 	.get_url        = rtmp_nicolive_url,
 	.get_key        = rtmp_nicolive_key

@@ -2,6 +2,7 @@
 #include <QtNetwork>
 #include "nicolive.h"
 #include "nico-live.hpp"
+#include "nico-live-watcher.hpp"
 
 const QUrl NicoLive::LOGIN_URL =
 		QUrl("https://secure.nicovideo.jp/secure/login?site=nicolive");
@@ -14,6 +15,7 @@ NicoLive::NicoLive(QObject *parent)
 {
 	(void)parent;
 	qnam = new QNetworkAccessManager(this);
+	watcher = new NicoLiveWatcher(this);
 }
 
 NicoLive::~NicoLive()
@@ -130,6 +132,16 @@ void NicoLive::stopStreaming()
 {
 	this->onair_live_id = QString();
 	this->flags.onair = false;
+}
+
+void NicoLive::startWatching(int sec)
+{
+	this->watcher->start(sec);
+}
+
+void NicoLive::stopWatching()
+{
+	this->watcher->stop();
 }
 
 bool NicoLive::checkSession()
