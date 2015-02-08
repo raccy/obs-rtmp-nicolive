@@ -11,9 +11,12 @@ OBS MultiPlatform (obs-studio) で簡単に配信できるようにする
 ## 作り方
 
 自分でコンパイルしてください。
-今のところ、OBSと一緒にコンパイルしないとできないです。
+今のところ、OBS 0.7.3 と一緒にコンパイルしないとできないです。
+github から取得した場合は、必ず 0.7.3 タグを利用して下さい。
+最新の master ではモジュール周りの API が一部変更されているため、コンパイル時にエラーになります。
+
 Mac OS Xであれば、下記でできると思います。
-(Mac OS X 10.10、Xoced/Development Tools/homebrewインストール済み)
+(Mac OS X 10.10、Xoced / Development Tools / homebrewインストール済み)
 
 ```
 $ brew install ffmpeg x264 qt5 fdk-aac
@@ -44,8 +47,7 @@ $ cd rundir/Debgu/bin
 $ ./obs
 ```
 
-Windowsでもコンパイルおよび動作はできるようです。
-Ubuntuでもコンパイルはできましたが、動作できるかは不明です。
+WindowsでもUbuntuでも OBS をコンパイルし、動作できるようであればうまくいくはずです。
 
 ## 使い方
 
