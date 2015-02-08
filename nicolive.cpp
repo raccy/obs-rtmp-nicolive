@@ -147,3 +147,21 @@ extern "C" void nicolive_stop_watching(void *data)
 	NicoLive *nicolive = static_cast<NicoLive *>(data);
 	nicolive->stopWatching();
 }
+
+extern "C" void nicolive_start_cmd_server(void *data)
+{
+	NicoLive *nicolive = static_cast<NicoLive *>(data);
+	nicolive->startCmdServer();
+}
+
+extern "C" void nicolive_stop_cmd_server(void *data)
+{
+	NicoLive *nicolive = static_cast<NicoLive *>(data);
+	nicolive->stopCmdServer();
+}
+
+extern "C" bool nicolive_silent_once(void *data)
+{
+	NicoLive *nicolive = static_cast<NicoLive *>(data);
+	return nicolive->silentOnce();
+}

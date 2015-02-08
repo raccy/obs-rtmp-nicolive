@@ -144,6 +144,30 @@ void NicoLive::stopWatching()
 	this->watcher->stop();
 }
 
+void NicoLive::startCmdServer()
+{
+	// TODO
+	// this->cmd_server->start();
+}
+
+void NicoLive::stopCmdServer()
+{
+	// TODO
+	// this->cmd_server->stop();
+}
+
+void NicoLive::nextSilentOnce()
+{
+	this->flags.silent_once = true;
+}
+bool NicoLive::silentOnce()
+{
+	bool once = this->flags.silent_once;
+	this->flags.silent_once = false;
+	return once;
+}
+
+
 bool NicoLive::checkSession()
 {
 	return sitePubStat() || (siteLogin() && sitePubStat());

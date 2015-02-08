@@ -33,6 +33,7 @@ static bool adjust_bitrate(obs_output_t *output, long long bitrate)
 	} else {
 		nicolive_log_debug("need not adjust bitrate");
 	}
+
 	return true;
 }
 
@@ -71,6 +72,13 @@ static void rtmp_nicolive_update(void *data, obs_data_t *settings)
 		nicolive_stop_watching(data);
 	}
 
+	if (obs_data_get_bool(settings, "cmd_server")) {
+		nicolive_start_cmd_server(data);
+	} else {
+		nicolive_stop_cmd_server(data);
+	}
+
+
 }
 
 static void rtmp_nicolive_destroy(void *data)
@@ -91,23 +99,31 @@ static void *rtmp_nicolive_create(obs_data_t *settings, obs_service_t *service)
 static bool rtmp_nicolive_initialize(void *data, obs_output_t *output)
 {
 	bool success = false;
+	bool msg_gui = !nicolive_silent_once(data);
 
 	if (nicolive_check_session(data)) {
 		if (nicolive_check_live(data)) {
 			success = true;
 		} else {
-			nicolive_mbox_warn(obs_module_text("MessageNoLive"));
+			nicolive_msg_warn(msg_gui,
+					obs_module_text("MessageNoLive"),
+					"cannot start streaming: no live");
 			success = false;
 		}
 	} else {
-		nicolive_mbox_warn(obs_module_text("MessageLoginFailed"));
+		nicolive_msg_warn(msg_gui,
+				obs_module_text("MessageLoginFailed"),
+				"cannot start streaming: failed login");
 		success = false;
 	}
 
 	if (success && nicolive_enabled_adjust_bitrate(data)) {
 		if (!adjust_bitrate(output, nicolive_get_live_bitrate(data))) {
-			nicolive_mbox_warn(obs_module_text(
-					"MessageFailedAdjustBitrate"));
+			nicolive_msg_warn(msg_gui,
+					obs_module_text(
+						"MessageFailedAdjustBitrate"),
+					"cannot start streaming: "
+					"failed adjust bitrate");
 			success = false;
 		}
 	}
@@ -192,6 +208,9 @@ static obs_properties_t *rtmp_nicolive_properties(void *data)
 			obs_module_text("WatchInterval"),
 			10, 300, 1);
 
+	obs_properties_add_bool(ppts, "cmd_server",
+			obs_module_text("CmdServer"));
+
 	return ppts;
 }
 
@@ -206,6 +225,7 @@ static void rtmp_nicolive_defaults(obs_data_t *settings)
 	obs_data_set_default_bool  (settings, "adjust_bitrate", true);
 	obs_data_set_default_bool  (settings, "auto_start",     false);
 	obs_data_set_default_int   (settings, "watch_interval", 60);
+	obs_data_set_default_bool  (settings, "cmd_server",     false);
 }
 
 

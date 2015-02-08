@@ -4,6 +4,7 @@
 #include <QtNetwork>
 
 class NicoLiveWatcher;
+// class NicoLiveCmdServer;
 
 class NicoLive : public QObject {
 	Q_OBJECT
@@ -37,9 +38,12 @@ private:
 		bool onair = false;
 		bool load_viqo = false;
 		bool adjust_bitrate = false;
+		bool cmd_server_started = false;
+		bool silent_once = false;
 	} flags;
 	QNetworkAccessManager* qnam;
 	NicoLiveWatcher *watcher;
+	// NicoLiveCmdServer *cmd_server;
 public:
 	NicoLive(QObject *parent = 0);
 	~NicoLive();
@@ -67,10 +71,15 @@ public:
 	void stopStreaming();
 	void startWatching(int sec = 60);
 	void stopWatching();
+	void startCmdServer();
+	void stopCmdServer();
 
 	bool checkSession();
 	bool checkLive();
 	bool loadViqoSettings();
+
+	void nextSilentOnce();
+	bool silentOnce();
 private:
 	QVariant makeCookieData(const QString &session_id);
 	QByteArray getWeb(const QUrl);
