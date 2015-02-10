@@ -25,6 +25,7 @@ endif()
 set(rtmp-nicolive_SOURCES
 	nico-live.cpp
 	nico-live-watcher.cpp
+	nico-live-cmd-server.cpp
 	nicolive.cpp
 	nicolive-ui.cpp
 	rtmp-nicolive.c)

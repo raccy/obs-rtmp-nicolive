@@ -4,7 +4,7 @@
 #include <QtNetwork>
 
 class NicoLiveWatcher;
-// class NicoLiveCmdServer;
+class NicoLiveCmdServer;
 
 class NicoLive : public QObject {
 	Q_OBJECT
@@ -43,7 +43,7 @@ private:
 	} flags;
 	QNetworkAccessManager* qnam;
 	NicoLiveWatcher *watcher;
-	// NicoLiveCmdServer *cmd_server;
+	NicoLiveCmdServer *cmd_server;
 public:
 	NicoLive(QObject *parent = 0);
 	~NicoLive();

@@ -3,6 +3,7 @@
 #include "nicolive.h"
 #include "nico-live.hpp"
 #include "nico-live-watcher.hpp"
+#include "nico-live-cmd-server.hpp"
 
 const QUrl NicoLive::LOGIN_URL =
 		QUrl("https://secure.nicovideo.jp/secure/login?site=nicolive");
@@ -16,6 +17,7 @@ NicoLive::NicoLive(QObject *parent)
 	(void)parent;
 	qnam = new QNetworkAccessManager(this);
 	watcher = new NicoLiveWatcher(this);
+	cmd_server = new NicoLiveCmdServer(this);
 }
 
 NicoLive::~NicoLive()
@@ -146,14 +148,12 @@ void NicoLive::stopWatching()
 
 void NicoLive::startCmdServer()
 {
-	// TODO
-	// this->cmd_server->start();
+	this->cmd_server->start();
 }
 
 void NicoLive::stopCmdServer()
 {
-	// TODO
-	// this->cmd_server->stop();
+	this->cmd_server->stop();
 }
 
 void NicoLive::nextSilentOnce()
