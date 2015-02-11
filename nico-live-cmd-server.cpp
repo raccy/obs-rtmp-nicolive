@@ -136,37 +136,6 @@ void NicoLiveCmdServer::readSocket(QTcpSocket *socket)
 	}
 }
 
-// void NicoLiveCmdServer::runLoop(QTcpSocket *socket)
-// {
-// 	QByteArray buff;
-// 	int lf_index;
-// 	bool close_flag = false;
-// 	while (socket->bytesAvailable() > 0 ||
-// 			socket->waitForReadyRead(timeout)) {
-// 		nicolive_log_debug("cmd server: read");
-// 		buff += socket->readAll();
-// 		while ((lf_index = buff.indexOf('\n')) >= 0) {
-// 			socket->write(command(buff.left(lf_index + 1),
-// 					close_flag));
-// 			if (close_flag) {
-// 				socket->disconnectFromHost();
-// 				break;
-// 			}
-// 			buff.remove(0, lf_index + 1);
-// 		}
-// 		if (close_flag) {
-// 			break;
-// 		}
-// 	}
-// 	if (socket->state() == QAbstractSocket::UnconnectedState ||
-// 			socket->waitForDisconnected(timeout)) {
-// 		nicolive_log_debug("socket disconnected");
-// 	} else {
-// 		nicolive_log_error("socket abort");
-// 		socket->abort();
-// 	}
-// }
-
 QByteArray NicoLiveCmdServer::command(const QByteArray &cmd, bool &close_flag)
 {
 	nicolive_log_debug("read cmd: %s",

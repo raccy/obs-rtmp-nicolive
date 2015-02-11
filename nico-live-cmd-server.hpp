@@ -46,6 +46,5 @@ private slots:
 	void tcpConnection(QTcpServer *server);
 	void readSocket(QTcpSocket *socket);
 private:
-	// void runLoop(QTcpSocket *socket);
 	QByteArray command(const QByteArray &cmd, bool &close_flag);
 };
