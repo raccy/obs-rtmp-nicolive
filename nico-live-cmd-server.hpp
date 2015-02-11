@@ -8,6 +8,25 @@ class NicoLive;
 class NicoLiveCmdServer : public QObject {
 	Q_OBJECT
 public:
+	enum struct COMMAND {
+		UNKNOWN = 0, // default
+		GET,
+		SET,
+		STAT,
+		STRT,
+		STOP,
+		HELO,
+		KEEP,
+		QUIT
+	};
+	enum struct TARGET {
+		UNKNOWN = 0, // default
+		SESSION,
+		STREAMING
+	};
+	static const QMap<QString, NicoLiveCmdServer::COMMAND> COMMAND_NAME;
+	static const QMap<QString, NicoLiveCmdServer::TARGET> TARGET_NAME;
+	static const QMap<int, QByteArray> CODE_NAME;
 	static const int DEFAULT_PORT = 25083;
 private:
 	NicoLive *nicolive;
