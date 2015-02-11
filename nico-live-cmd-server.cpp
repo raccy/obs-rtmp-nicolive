@@ -1,6 +1,7 @@
 #include <QtCore>
 #include <QtNetwork>
 #include "nicolive.h"
+#include "nicolive-ui.h"
 #include "nico-live.hpp"
 #include "nico-live-cmd-server.hpp"
 
@@ -180,22 +181,99 @@ QByteArray NicoLiveCmdServer::command(const QByteArray &cmd, bool &close_flag)
 		code = 420;
 		break;
 	case NicoLiveCmdServer::COMMAND::SET:
-		code = 420;
+		if (cmd_target.isEmpty()) {
+			code = 400;
+			desc = "NEED_TARGET";
+		} else {
+			switch (NicoLiveCmdServer::TARGET_NAME[cmd_target]) {
+			case NicoLiveCmdServer::TARGET::SESSION:
+				if (cmd_option.isEmpty()) {
+					code = 400;
+					desc = "NEED_OPTION";
+				} else {
+					nicolive->setSession(cmd_option);
+					code = 200;
+				}
+				break;
+			default:
+				code = 411;
+				break;
+			}
+		}
 		break;
 	case NicoLiveCmdServer::COMMAND::STAT:
-		code = 420;
+		if (cmd_target.isEmpty()) {
+			code = 400;
+			desc = "NEED_TARGET";
+		} else {
+			switch (NicoLiveCmdServer::TARGET_NAME[cmd_target]) {
+			case NicoLiveCmdServer::TARGET::SESSION:
+				if (nicolive->checkSession()) {
+					code = 210;
+				} else {
+					code = 220;
+				}
+				break;
+			case NicoLiveCmdServer::TARGET::STREAMING:
+				if (nicolive->isOnair()) {
+					code = 210;
+				} else {
+					code = 220;
+				}
+				break;
+			default:
+				code = 411;
+				break;
+			}
+		}
 		break;
 	case NicoLiveCmdServer::COMMAND::STRT:
-		code = 420;
+		if (cmd_target.isEmpty()) {
+			code = 400;
+			desc = "NEED_TARGET";
+		} else {
+			switch (NicoLiveCmdServer::TARGET_NAME[cmd_target]) {
+			case NicoLiveCmdServer::TARGET::STREAMING:
+				if (nicolive->isOnair()) {
+					code = 520;
+				} else {
+					nicolive->nextSilentOnce();
+					nicolive_streaming_click();
+					code = 200;
+				}
+				break;
+			default:
+				code = 411;
+				break;
+			}
+		}
 		break;
 	case NicoLiveCmdServer::COMMAND::STOP:
-		code = 420;
+		if (cmd_target.isEmpty()) {
+			code = 400;
+			desc = "NEED_TARGET";
+		} else {
+			switch (NicoLiveCmdServer::TARGET_NAME[cmd_target]) {
+			case NicoLiveCmdServer::TARGET::STREAMING:
+				if (nicolive->isOnair()) {
+					nicolive_streaming_click();
+					code = 200;
+				} else {
+					code = 520;
+				}
+				break;
+			default:
+				code = 411;
+				break;
+			}
+		}
 		break;
 	case NicoLiveCmdServer::COMMAND::HELO:
-		code = 420;
+		code = 100;
+		desc = "NCLVP_0.1";
 		break;
 	case NicoLiveCmdServer::COMMAND::KEEP:
-		code = 420;
+		code = 200;
 		break;
 	case NicoLiveCmdServer::COMMAND::QUIT:
 		close_flag = true;
