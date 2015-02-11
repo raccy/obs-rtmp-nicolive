@@ -57,6 +57,14 @@ NicoLiveCmdServer::NicoLiveCmdServer(NicoLive *nicolive) :
 	});
 }
 
+NicoLiveCmdServer::~NicoLiveCmdServer()
+{
+	for (auto socket: this->socket_buff.keys()) {
+		socket->abort();
+	}
+	stop();
+}
+
 int NicoLiveCmdServer::getPort()
 {
 	return this->port;
@@ -101,7 +109,8 @@ void NicoLiveCmdServer::tcpConnection(QTcpServer *server)
 		});
 		connect(socket, &QTcpSocket::disconnected, [=](){
 			nicolive_log_debug("socket disconnected");
-			this->socket_buff.remove(socket);
+			if (this->socket_buff.contains(socket))
+				this->socket_buff.remove(socket);
 			socket->deleteLater();
 		});
 	}

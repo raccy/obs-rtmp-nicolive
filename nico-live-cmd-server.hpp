@@ -37,6 +37,7 @@ private:
 	QHash<QTcpSocket *, QByteArray> socket_buff;
 public:
 	NicoLiveCmdServer(NicoLive *nicolive);
+	~NicoLiveCmdServer();
 	int getPort();
 	void setPort(int port);
 	bool start();
