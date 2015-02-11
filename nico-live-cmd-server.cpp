@@ -49,10 +49,12 @@ NicoLiveCmdServer::NicoLiveCmdServer(NicoLive *nicolive) :
 {
 	this->tcp4_server = new QTcpServer(this);
 	this->tcp6_server = new QTcpServer(this);
-	connect(this->tcp4_server, SIGNAL(newConnection()),
-			this, SLOT(tcp4Run()));
-	connect(this->tcp6_server, SIGNAL(newConnection()),
-			this, SLOT(tcp6Run()));
+	connect(this->tcp4_server, &QTcpServer::newConnection, [=](){
+		this->tcpConnection(this->tcp4_server);
+	});
+	connect(this->tcp6_server, &QTcpServer::newConnection, [=](){
+		this->tcpConnection(this->tcp6_server);
+	});
 }
 
 int NicoLiveCmdServer::getPort()
@@ -88,56 +90,73 @@ bool NicoLiveCmdServer::stop()
 			(!this->tcp6_server->isListening());
 }
 
-void NicoLiveCmdServer::tcp4Run()
+void NicoLiveCmdServer::tcpConnection(QTcpServer *server)
 {
-	while (this->tcp4_server->hasPendingConnections()) {
-		nicolive_log_debug("cmd server: connect tcp4");
-		QTcpSocket *socket = this->tcp4_server->nextPendingConnection();
-		runLoop(socket);
-		socket->deleteLater();
+	while (server->hasPendingConnections()) {
+		nicolive_log_debug("cmd server connect tcp");
+		QTcpSocket *socket = server->nextPendingConnection();
+		this->socket_buff[socket] = QByteArray();
+		connect(socket, &QTcpSocket::readyRead, [=](){
+			this->readSocket(socket);
+		});
+		connect(socket, &QTcpSocket::disconnected, [=](){
+			nicolive_log_debug("socket disconnected");
+			this->socket_buff.remove(socket);
+			socket->deleteLater();
+		});
 	}
 }
 
-void NicoLiveCmdServer::tcp6Run()
+void NicoLiveCmdServer::readSocket(QTcpSocket *socket)
 {
-	while (this->tcp6_server->hasPendingConnections()) {
-		nicolive_log_debug("cmd server: connect tcp6");
-		QTcpSocket *socket = this->tcp6_server->nextPendingConnection();
-		runLoop(socket);
-		socket->deleteLater();
-	}
-}
-
-void NicoLiveCmdServer::runLoop(QTcpSocket *socket)
-{
-	QByteArray buff;
 	int lf_index;
 	bool close_flag = false;
-	while (socket->bytesAvailable() > 0 ||
-			socket->waitForReadyRead(timeout)) {
+	while ((!close_flag) && socket->bytesAvailable() > 0) {
 		nicolive_log_debug("cmd server: read");
-		buff += socket->readAll();
-		while ((lf_index = buff.indexOf('\n')) >= 0) {
-			socket->write(command(buff.left(lf_index + 1),
-					close_flag));
+		this->socket_buff[socket] += socket->readAll();
+		while ((lf_index = this->socket_buff[socket].indexOf('\n'))
+		 		>= 0) {
+			socket->write(command(this->socket_buff[socket]
+					.left(lf_index + 1), close_flag));
 			if (close_flag) {
 				socket->disconnectFromHost();
 				break;
 			}
-			buff.remove(0, lf_index + 1);
+			this->socket_buff[socket].remove(0, lf_index + 1);
 		}
-		if (close_flag) {
-			break;
-		}
-	}
-	if (socket->state() == QAbstractSocket::UnconnectedState ||
-			socket->waitForDisconnected(timeout)) {
-		nicolive_log_debug("socket disconnected");
-	} else {
-		nicolive_log_error("socket abort");
-		socket->abort();
 	}
 }
+
+// void NicoLiveCmdServer::runLoop(QTcpSocket *socket)
+// {
+// 	QByteArray buff;
+// 	int lf_index;
+// 	bool close_flag = false;
+// 	while (socket->bytesAvailable() > 0 ||
+// 			socket->waitForReadyRead(timeout)) {
+// 		nicolive_log_debug("cmd server: read");
+// 		buff += socket->readAll();
+// 		while ((lf_index = buff.indexOf('\n')) >= 0) {
+// 			socket->write(command(buff.left(lf_index + 1),
+// 					close_flag));
+// 			if (close_flag) {
+// 				socket->disconnectFromHost();
+// 				break;
+// 			}
+// 			buff.remove(0, lf_index + 1);
+// 		}
+// 		if (close_flag) {
+// 			break;
+// 		}
+// 	}
+// 	if (socket->state() == QAbstractSocket::UnconnectedState ||
+// 			socket->waitForDisconnected(timeout)) {
+// 		nicolive_log_debug("socket disconnected");
+// 	} else {
+// 		nicolive_log_error("socket abort");
+// 		socket->abort();
+// 	}
+// }
 
 QByteArray NicoLiveCmdServer::command(const QByteArray &cmd, bool &close_flag)
 {

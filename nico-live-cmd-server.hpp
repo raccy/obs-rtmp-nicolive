@@ -34,6 +34,7 @@ private:
 	QTcpServer *tcp6_server;
 	int port = NicoLiveCmdServer::DEFAULT_PORT;
 	int timeout = 60 * 1000;
+	QHash<QTcpSocket *, QByteArray> socket_buff;
 public:
 	NicoLiveCmdServer(NicoLive *nicolive);
 	int getPort();
@@ -41,9 +42,9 @@ public:
 	bool start();
 	bool stop();
 private slots:
-	void tcp4Run();
-	void tcp6Run();
+	void tcpConnection(QTcpServer *server);
+	void readSocket(QTcpSocket *socket);
 private:
-	void runLoop(QTcpSocket *socket);
+	// void runLoop(QTcpSocket *socket);
 	QByteArray command(const QByteArray &cmd, bool &close_flag);
 };
