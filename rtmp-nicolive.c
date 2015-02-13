@@ -112,7 +112,7 @@ static bool rtmp_nicolive_initialize(void *data, obs_output_t *output)
 		}
 	} else {
 		nicolive_msg_warn(msg_gui,
-				obs_module_text("MessageLoginFailed"),
+				obs_module_text("MessageFailedLogin"),
 				"cannot start streaming: failed login");
 		success = false;
 	}

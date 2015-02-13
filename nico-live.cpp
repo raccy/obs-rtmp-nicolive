@@ -170,7 +170,7 @@ bool NicoLive::silentOnce()
 
 bool NicoLive::checkSession()
 {
-	return sitePubStat() || (siteLogin() && sitePubStat());
+	return (sitePubStat() || (siteLogin() && sitePubStat()));
 }
 
 bool NicoLive::checkLive()
@@ -212,6 +212,11 @@ see https://github.com/diginatu/Viqo/raw/master/LICENSE
 */
 bool NicoLive::siteLogin()
 {
+	if (this->mail.isEmpty() || this->password.isEmpty()) {
+		nicolive_log_warn("no mail or password");
+		return false;
+	}
+
 	QNetworkRequest rq(NicoLive::LOGIN_URL);
 	rq.setHeader(QNetworkRequest::ContentTypeHeader,
 			"application/x-www-form-urlencoded");
@@ -308,6 +313,8 @@ QByteArray NicoLive::getWeb(const QUrl url)
 
 bool NicoLive::sitePubStat()
 {
+	nicolive_log_debug("session: %s",
+			this->session.toStdString().c_str());
 
 	if (this->session.isEmpty()) {
 		nicolive_log_debug("this->session is empty.");
