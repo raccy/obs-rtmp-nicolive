@@ -7,7 +7,8 @@
 static bool adjust_bitrate(obs_output_t *output, long long bitrate)
 {
 	obs_encoder_t *video_encoder = obs_output_get_video_encoder(output);
-	obs_encoder_t *audio_encoder = obs_output_get_audio_encoder(output);
+	// get audio 0
+	obs_encoder_t *audio_encoder = obs_output_get_audio_encoder(output, 0);
 	obs_data_t *video_encoder_settings =
 			obs_encoder_get_settings(video_encoder);
 	obs_data_t *audio_encoder_settings =
