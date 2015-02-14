@@ -20,25 +20,18 @@ find_package(Qt5Network REQUIRED)
 
 if(CPACK_PACKAGE_NAME STREQUAL "OBS")
 else(CPACK_PACKAGE_NAME STREQUAL "OBS")
-include_directories("${OBS_SRC}/libobs")
-	# include_directories("/usr/local/Cellar/qt5/5.4.0/include")
-	# include_directories("/usr/local/Cellar/qt5/5.4.0/include/QtCore")
-	# include_directories("/usr/local/Cellar/qt5/5.4.0/include/QtWidgets")
-	# include_directories("/usr/local/Cellar/qt5/5.4.0/include/QtNetwork")
-	# add_library(Qt5::Core SHARED IMPORTED)
-	# add_library(Qt5::Widgets SHARED IMPORTED)
-	# add_library(Qt5::Network SHARED IMPORTED)
-add_library(libobs SHARED IMPORTED)
-set_property(TARGET Qt5::Core PROPERTY IMPORTED_LOCATION
-	"/Applications/OBS.app/Contents/Resources/bin/QtCore")
-set_property(TARGET Qt5::Widgets PROPERTY IMPORTED_LOCATION
-	"/Applications/OBS.app/Contents/Resources/bin/QtWidgets")
-set_property(TARGET Qt5::Network PROPERTY IMPORTED_LOCATION
-	"/Applications/OBS.app/Contents/Resources/bin/QtNetwork")
-set_property(TARGET Qt5::Gui PROPERTY IMPORTED_LOCATION
-	"/Applications/OBS.app/Contents/Resources/bin/QtGui")
-set_property(TARGET libobs PROPERTY IMPORTED_LOCATION
-	"/Applications/OBS.app/Contents/Resources/bin/libobs.0.dylib")
+	include_directories("${OBS_SRC}/libobs")
+	add_library(libobs SHARED IMPORTED)
+	set_property(TARGET Qt5::Core PROPERTY IMPORTED_LOCATION
+		"/Applications/OBS.app/Contents/Resources/bin/QtCore")
+	set_property(TARGET Qt5::Widgets PROPERTY IMPORTED_LOCATION
+		"/Applications/OBS.app/Contents/Resources/bin/QtWidgets")
+	set_property(TARGET Qt5::Network PROPERTY IMPORTED_LOCATION
+		"/Applications/OBS.app/Contents/Resources/bin/QtNetwork")
+	set_property(TARGET Qt5::Gui PROPERTY IMPORTED_LOCATION
+		"/Applications/OBS.app/Contents/Resources/bin/QtGui")
+	set_property(TARGET libobs PROPERTY IMPORTED_LOCATION
+		"/Applications/OBS.app/Contents/Resources/bin/libobs.0.dylib")
 endif(CPACK_PACKAGE_NAME STREQUAL "OBS")
 
 set(rtmp-nicolive_SOURCES
