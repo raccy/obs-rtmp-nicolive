@@ -215,7 +215,6 @@ static obs_properties_t *rtmp_nicolive_properties(void *data)
 	return ppts;
 }
 
-// TODO: not run... why?
 static void rtmp_nicolive_defaults(obs_data_t *settings)
 {
 	nicolive_log_debug("default settings");
@@ -228,7 +227,6 @@ static void rtmp_nicolive_defaults(obs_data_t *settings)
 	obs_data_set_default_int   (settings, "watch_interval", 60);
 	obs_data_set_default_bool  (settings, "cmd_server",     false);
 }
-
 
 static const char *rtmp_nicolive_url(void *data)
 {
