@@ -1,5 +1,7 @@
 # cmake build
 /build/
+/build32/
+/build64/
 
 # Compiled Object files
 *.slo
