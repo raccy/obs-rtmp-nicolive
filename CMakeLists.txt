@@ -59,14 +59,48 @@ if(NOT BUILD_IN_OBS)
 	if(MSVC)
 		set_property(TARGET libobs
 			PROPERTY IMPORTED_IMPLIB ${OBS_LIB_LIBOBS_LIB})
-		set_property(TARGET Qt5::Core
-			PROPERTY IMPORTED_IMPLIB ${OBS_LIB_Qt5Core_LIB})
-		set_property(TARGET Qt5::Widgets
-			PROPERTY IMPORTED_IMPLIB ${OBS_LIB_Qt5Widgets_LIB})
-		set_property(TARGET Qt5::Network
-			PROPERTY IMPORTED_IMPLIB ${OBS_LIB_Qt5Network_LIB})
-		set_property(TARGET Qt5::Gui
-			PROPERTY IMPORTED_IMPLIB ${OBS_LIB_Qt5Gui_LIB})
+	# 	set_property(TARGET Qt5::Core
+	# 		PROPERTY IMPORTED_IMPLIB ${OBS_LIB_Qt5Core_LIB})
+	# 	set_property(TARGET Qt5::Widgets
+	# 		PROPERTY IMPORTED_IMPLIB ${OBS_LIB_Qt5Widgets_LIB})
+	# 	set_property(TARGET Qt5::Network
+	# 		PROPERTY IMPORTED_IMPLIB ${OBS_LIB_Qt5Network_LIB})
+	# 	set_property(TARGET Qt5::Gui
+	# 		PROPERTY IMPORTED_IMPLIB ${OBS_LIB_Qt5Gui_LIB})
+	# 	# RELEASE
+	# 	set_property(TARGET Qt5::Core
+	# 		PROPERTY IMPORTED_LOCATION_RELEASE ${OBS_LIB_Qt5Core})
+	# 	set_property(TARGET Qt5::Widgets
+	# 		PROPERTY IMPORTED_LOCATION_RELEASE ${OBS_LIB_Qt5Widgets})
+	# 	set_property(TARGET Qt5::Network
+	# 		PROPERTY IMPORTED_LOCATION_RELEASE ${OBS_LIB_Qt5Network})
+	# 	set_property(TARGET Qt5::Gui
+	# 		PROPERTY IMPORTED_LOCATION_RELEASE ${OBS_LIB_Qt5Gui})
+	# 	set_property(TARGET Qt5::Core
+	# 		PROPERTY IMPORTED_IMPLIB_RELEASE ${OBS_LIB_Qt5Core_LIB})
+	# 	set_property(TARGET Qt5::Widgets
+	# 		PROPERTY IMPORTED_IMPLIB_RELEASE ${OBS_LIB_Qt5Widgets_LIB})
+	# 	set_property(TARGET Qt5::Network
+	# 		PROPERTY IMPORTED_IMPLIB_RELEASE ${OBS_LIB_Qt5Network_LIB})
+	# 	set_property(TARGET Qt5::Gui
+	# 		PROPERTY IMPORTED_IMPLIB_RELEASE ${OBS_LIB_Qt5Gui_LIB})
+	# 	# DEBUG
+	# 	set_property(TARGET Qt5::Core
+	# 		PROPERTY IMPORTED_LOCATION_DEBUG ${OBS_LIB_Qt5Core})
+	# 	set_property(TARGET Qt5::Widgets
+	# 		PROPERTY IMPORTED_LOCATION_DEBUG ${OBS_LIB_Qt5Widgets})
+	# 	set_property(TARGET Qt5::Network
+	# 		PROPERTY IMPORTED_LOCATION_DEBUG ${OBS_LIB_Qt5Network})
+	# 	set_property(TARGET Qt5::Gui
+	# 		PROPERTY IMPORTED_LOCATION_DEBUG ${OBS_LIB_Qt5Gui})
+	# 	set_property(TARGET Qt5::Core
+	# 		PROPERTY IMPORTED_IMPLIB_DEBUG ${OBS_LIB_Qt5Core_LIB})
+	# 	set_property(TARGET Qt5::Widgets
+	# 		PROPERTY IMPORTED_IMPLIB_DEBUG ${OBS_LIB_Qt5Widgets_LIB})
+	# 	set_property(TARGET Qt5::Network
+	# 		PROPERTY IMPORTED_IMPLIB_DEBUG ${OBS_LIB_Qt5Network_LIB})
+	# 	set_property(TARGET Qt5::Gui
+	# 		PROPERTY IMPORTED_IMPLIB_DEBUG ${OBS_LIB_Qt5Gui_LIB})
 	endif(MSVC)
 endif(NOT BUILD_IN_OBS)
 
