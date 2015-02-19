@@ -15,10 +15,10 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
 	# Please take all files on "${OBS_SRC}/plugins/rtmp-nicolive"
 	# and add the following line to "${OBS_SRC}/plugins/CMakeLists.txt"
 	#   add_subdirectory(rtmp-nicolive)
-else(CPACK_PACKAGE_NAME STREQUAL "OBS")
+else(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
 	set(BUILD_IN_OBS OFF)
 	MESSAGE( STATUS "RTMP NicoLive build only it")
-endif(CPACK_PACKAGE_NAME STREQUAL "OBS")
+endif(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
 
 # find OBS
 if(NOT BUILD_IN_OBS)
