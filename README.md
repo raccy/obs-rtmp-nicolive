@@ -96,11 +96,11 @@ Viqoの自動枠取り機能とあわせて使うとほぼ自動化されて、�
 
 * [x] 0.8.2に対応する。
 * [ ] OBSとは独立してコンパイルできるようにする。
-    * [ ] Windows
+    * [x] Windows (β)
     * [x] Mac OS X (β)
     * [ ] Ubuntu Linux
 * [ ] 配付用バイナリを作る手順を確立する。
-    * [ ] Windows
+    * [x] Windows (β)
     * [x] Mac OS X (β)
     * [ ] Ubuntu Linux
 * [ ] プラグインインストーラ作る。

@@ -11,7 +11,7 @@ RTMP NicoLive Plugin for OBS MultiPlatform
 インストール方法
 ----------------
 
-始めに、OBS MulitPlatform 0.8.3 をインストールして下さい。アプリケーションにある「OBS」を右クリックして「パッケージの内容を表示」で中身を開いて下さい。Contents -> Resources に 「obs-plugins」と「data」をそのままドラッグ＆ドロップして下さい。認証画面でパスワードを入力し、フォルダの「結合」を選んで下さい。
+始めに、OBS MulitPlatform 0.8.2 をインストールして下さい。アプリケーションにある「OBS」を右クリックして「パッケージの内容を表示」で中身を開いて下さい。Contents -> Resources に 「obs-plugins」と「data」をそのままドラッグ＆ドロップして下さい。認証画面でパスワードを入力し、フォルダの「結合」を選んで下さい。
 
 コマンドベースでいれたい方は、install.sh を使って下さい。
 
