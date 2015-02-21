@@ -2,6 +2,13 @@
 
 ## Mac
 
+cmake \
+-DCMAKE_BUILD_TYPE=Debug \
+-DCMAKE_PREFIX_PATH=/usr/local/Cellar/qt5/5.4.0/lib/cmake \
+..
+
+
+
 ```
 cmake \
 -DCMAKE_BUILD_TYPE=Release \
@@ -9,6 +16,13 @@ cmake \
 -DOBS_SRC=`pwd`/../../obs-studio-0.8.2 \
 ..
 ```
+cmake \
+-DCMAKE_BUILD_TYPE=Release \
+-DCMAKE_PREFIX_PATH=~/QT/5.4/clang_64/lib/cmake/ \
+-DOBS_SRC=`pwd`/../.. \
+..
+
+
 -DOBS_APP=/Applications/OBS.app \
 
 
