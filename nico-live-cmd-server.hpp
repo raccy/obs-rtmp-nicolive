@@ -41,7 +41,8 @@ public:
 	int getPort();
 	void setPort(int port);
 	bool start();
-	bool stop();
+	void stop();
+	bool isActive();
 private slots:
 	void tcpConnection(QTcpServer *server);
 	void readSocket(QTcpSocket *socket);

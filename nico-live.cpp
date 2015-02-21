@@ -146,13 +146,15 @@ void NicoLive::stopWatching()
 	this->watcher->stop();
 }
 
-void NicoLive::startCmdServer(long long port)
+bool NicoLive::startCmdServer(long long port)
 {
 	if (port < 1 || port > 65535)
 		port = NicoLiveCmdServer::DEFAULT_PORT;
-	if (port != this->cmd_server->getPort())
-		this->cmd_server->setPort(port);
-	this->cmd_server->start();
+	if (port != this->cmd_server->getPort()) {
+		this->cmd_server->stop();
+		this->cmd_server->setPort(static_cast<int>(port));
+	}
+	return this->cmd_server->start();
 }
 
 void NicoLive::stopCmdServer()

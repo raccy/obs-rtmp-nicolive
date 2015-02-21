@@ -74,13 +74,16 @@ static void rtmp_nicolive_update(void *data, obs_data_t *settings)
 	}
 
 	if (obs_data_get_bool(settings, "cmd_server")) {
-		// TODO: set custom port
-		nicolive_start_cmd_server(data, 0);
+		if (!nicolive_start_cmd_server(data,
+				obs_data_get_int(settings,
+						"cmd_server_port"))) {
+			nicolive_mbox_warn(obs_module_text(
+					"MessageFailedStartCmdServer"));
+			obs_data_set_bool(settings, "cmd_server", false);
+		}
 	} else {
 		nicolive_stop_cmd_server(data);
 	}
-
-
 }
 
 static void rtmp_nicolive_destroy(void *data)
@@ -212,6 +215,9 @@ static obs_properties_t *rtmp_nicolive_properties(void *data)
 
 	obs_properties_add_bool(ppts, "cmd_server",
 			obs_module_text("CmdServer"));
+	obs_properties_add_int(ppts, "cmd_server_port",
+			obs_module_text("CmdServerPort"),
+			1, 65535, 1);
 
 	return ppts;
 }
@@ -219,14 +225,15 @@ static obs_properties_t *rtmp_nicolive_properties(void *data)
 static void rtmp_nicolive_defaults(obs_data_t *settings)
 {
 	nicolive_log_debug("default settings");
-	obs_data_set_default_string(settings, "mail",           "");
-	obs_data_set_default_string(settings, "password",       "");
-	obs_data_set_default_string(settings, "session",        "");
-	obs_data_set_default_bool  (settings, "load_viqo",      false);
-	obs_data_set_default_bool  (settings, "adjust_bitrate", true);
-	obs_data_set_default_bool  (settings, "auto_start",     false);
-	obs_data_set_default_int   (settings, "watch_interval", 60);
-	obs_data_set_default_bool  (settings, "cmd_server",     false);
+	obs_data_set_default_string(settings, "mail",            "");
+	obs_data_set_default_string(settings, "password",        "");
+	obs_data_set_default_string(settings, "session",         "");
+	obs_data_set_default_bool  (settings, "load_viqo",       false);
+	obs_data_set_default_bool  (settings, "adjust_bitrate",  true);
+	obs_data_set_default_bool  (settings, "auto_start",      false);
+	obs_data_set_default_int   (settings, "watch_interval",  60);
+	obs_data_set_default_bool  (settings, "cmd_server",      false);
+	obs_data_set_default_bool  (settings, "cmd_server_port", 25083);
 }
 
 static const char *rtmp_nicolive_url(void *data)

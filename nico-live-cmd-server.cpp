@@ -88,15 +88,19 @@ bool NicoLiveCmdServer::start()
 			this->tcp6_server->isListening();
 }
 
-bool NicoLiveCmdServer::stop()
+void NicoLiveCmdServer::stop()
 {
 	nicolive_log_debug("cmd server: stop");
 	if (this->tcp4_server->isListening())
 		this->tcp4_server->close();
 	if (this->tcp6_server->isListening())
 		this->tcp6_server->close();
-	return (!this->tcp4_server->isListening()) &&
-			(!this->tcp6_server->isListening());
+}
+
+bool NicoLiveCmdServer::isActive()
+{
+	return this->tcp4_server->isListening() ||
+			this->tcp6_server->isListening();
 }
 
 void NicoLiveCmdServer::tcpConnection(QTcpServer *server)
@@ -175,7 +179,6 @@ QByteArray NicoLiveCmdServer::command(const QByteArray &cmd, bool &close_flag)
 		return result;
 	}
 
-	// TODO:
 	switch (NicoLiveCmdServer::COMMAND_NAME[cmd_command]) {
 	case NicoLiveCmdServer::COMMAND::GET:
 		code = 420;

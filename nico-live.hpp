@@ -71,7 +71,7 @@ public:
 	void stopStreaming();
 	void startWatching(long long sec = 60);
 	void stopWatching();
-	void startCmdServer(long long port = 0);
+	bool startCmdServer(long long port = 0);
 	void stopCmdServer();
 
 	bool checkSession();

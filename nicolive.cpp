@@ -148,10 +148,10 @@ extern "C" void nicolive_stop_watching(void *data)
 	nicolive->stopWatching();
 }
 
-extern "C" void nicolive_start_cmd_server(void *data, long long port)
+extern "C" bool nicolive_start_cmd_server(void *data, long long port)
 {
 	NicoLive *nicolive = static_cast<NicoLive *>(data);
-	nicolive->startCmdServer(port);
+	return nicolive->startCmdServer(port);
 }
 
 extern "C" void nicolive_stop_cmd_server(void *data)
