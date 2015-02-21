@@ -22,10 +22,10 @@ NicoLiveWatcher::~NicoLiveWatcher()
 
 void NicoLiveWatcher::start(long long sec)
 {
-	if (sec < NicoLiveWatcher::MIN_INTERVAL / 1000)
-		sec = NicoLiveWatcher::MIN_INTERVAL / 1000;
-	else if (sec > NicoLiveWatcher::MAX_INTERVAL / 1000)
-		sec = NicoLiveWatcher::MAX_INTERVAL / 1000;
+	if (sec < NicoLiveWatcher::MIN_INTERVAL_SEC)
+		sec = NicoLiveWatcher::MIN_INTERVAL_SEC;
+	else if (sec > NicoLiveWatcher::MAX_INTERVAL_SEC)
+		sec = NicoLiveWatcher::MAX_INTERVAL_SEC;
 	this->interval = static_cast<int>(sec * 1000);
 
 	if (!this->timer->isActive()) {
