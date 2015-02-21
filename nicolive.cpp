@@ -136,7 +136,7 @@ extern "C" void nicolive_stop_streaming(void *data)
 	nicolive->stopStreaming();
 }
 
-extern "C" void nicolive_start_watching(void *data, int sec)
+extern "C" void nicolive_start_watching(void *data, long long sec)
 {
 	NicoLive *nicolive = static_cast<NicoLive *>(data);
 	nicolive->startWatching(sec);
@@ -148,10 +148,10 @@ extern "C" void nicolive_stop_watching(void *data)
 	nicolive->stopWatching();
 }
 
-extern "C" void nicolive_start_cmd_server(void *data)
+extern "C" void nicolive_start_cmd_server(void *data, long long port)
 {
 	NicoLive *nicolive = static_cast<NicoLive *>(data);
-	nicolive->startCmdServer();
+	nicolive->startCmdServer(port);
 }
 
 extern "C" void nicolive_stop_cmd_server(void *data)

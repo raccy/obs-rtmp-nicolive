@@ -20,15 +20,21 @@ NicoLiveWatcher::~NicoLiveWatcher()
 		stop();
 }
 
-void NicoLiveWatcher::start(int sec)
+void NicoLiveWatcher::start(long long sec)
 {
-	this->interval = sec * 1000;
+	if (sec < NicoLiveWatcher::MIN_INTERVAL / 1000)
+		sec = NicoLiveWatcher::MIN_INTERVAL / 1000;
+	else if (sec > NicoLiveWatcher::MAX_INTERVAL / 1000)
+		sec = NicoLiveWatcher::MAX_INTERVAL / 1000;
+
+	this->interval = static_cast<int>(sec * 1000);
 	if (this->interval < NicoLiveWatcher::MIN_INTERVAL)
 		this->interval = NicoLiveWatcher::MIN_INTERVAL;
 	if (!this->timer->isActive()) {
 		nicolive_log_debug("check session before timer start");
 		nicolive->checkSession();
-		nicolive_log_debug("start watch, interval: %d", this->interval);
+		nicolive_log_debug("start watch, interval: %lld",
+				this->interval);
 		// this->timer->start(this->interval);
 		this->timer->start(this->marginTime);
 	}

@@ -136,7 +136,7 @@ void NicoLive::stopStreaming()
 	this->flags.onair = false;
 }
 
-void NicoLive::startWatching(int sec)
+void NicoLive::startWatching(long long sec)
 {
 	this->watcher->start(sec);
 }
@@ -146,8 +146,12 @@ void NicoLive::stopWatching()
 	this->watcher->stop();
 }
 
-void NicoLive::startCmdServer()
+void NicoLive::startCmdServer(long long port)
 {
+	if (port < 1 || port > 65535)
+		port = NicoLiveCmdServer::DEFAULT_PORT;
+	if (port != this->cmd_server->getPort())
+		this->cmd_server->setPort(port);
 	this->cmd_server->start();
 }
 

@@ -74,7 +74,8 @@ static void rtmp_nicolive_update(void *data, obs_data_t *settings)
 	}
 
 	if (obs_data_get_bool(settings, "cmd_server")) {
-		nicolive_start_cmd_server(data);
+		// TODO: set custom port
+		nicolive_start_cmd_server(data, 0);
 	} else {
 		nicolive_stop_cmd_server(data);
 	}

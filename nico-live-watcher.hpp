@@ -7,7 +7,8 @@ class NicoLive;
 class NicoLiveWatcher : public QObject {
 	Q_OBJECT
 public:
-	static const int MIN_INTERVAL = 10 * 1000;
+	static const int MIN_INTERVAL = 10 * 1000; // 10s
+	static const int MAX_INTERVAL = 60 * 60 * 1000; // 1h
 private:
 	NicoLive *nicolive;
 	int marginTime;
@@ -17,7 +18,7 @@ private:
 public:
 	NicoLiveWatcher(NicoLive *nicolive, int margin_sec = 10);
 	~NicoLiveWatcher();
-	void start(int sec = 60);
+	void start(long long sec = 60);
 	void stop();
 	bool isActive();
 	int remainingTime();
