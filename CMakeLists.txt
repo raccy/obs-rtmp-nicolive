@@ -22,14 +22,21 @@ endif(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
 
 # find OBS
 if(NOT BUILD_IN_OBS)
-	set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-		"${CMAKE_CURRENT_SOURCE_DIR}/tools/cmake")
-	find_package(OBS REQUIRED)
-	set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${OBS_SRC}/cmake/Modules/")
-	#include(ObsHelpers)
-	#include(ObsCpack)
-	find_package(CXX11 REQUIRED)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX11_FLAGS}")
+	find_package(LibObs)
+	if(LibObs_FOUND)
+		if(NOT MSVC)
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+		endif(NOT MSVC)
+	else(LibObs_FOUND)
+		set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
+			"${CMAKE_CURRENT_SOURCE_DIR}/tools/cmake")
+		find_package(OBS REQUIRED)
+		set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${OBS_SRC}/cmake/Modules/")
+		#include(ObsHelpers)
+		#include(ObsCpack)
+		find_package(CXX11 REQUIRED)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX11_FLAGS}")
+	endif(LibObs_FOUND)
 endif(NOT BUILD_IN_OBS)
 
 # find Qt5
@@ -38,7 +45,7 @@ find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Network REQUIRED)
 
 # header and library
-if(NOT BUILD_IN_OBS)
+if(NOT BUILD_IN_OBS AND NOT LibObs_FOUND)
 	# include
 	include_directories(${OBS_INCLUDES_LIBOBS})
 
@@ -46,63 +53,23 @@ if(NOT BUILD_IN_OBS)
 	add_library(libobs SHARED IMPORTED)
 	set_property(TARGET libobs
 	PROPERTY IMPORTED_LOCATION ${OBS_LIB_LIBOBS})
-
-	# override Qt5 library
-	set_property(TARGET Qt5::Core
-		PROPERTY IMPORTED_LOCATION ${OBS_LIB_Qt5Core})
-	set_property(TARGET Qt5::Widgets
-		PROPERTY IMPORTED_LOCATION ${OBS_LIB_Qt5Widgets})
-	set_property(TARGET Qt5::Network
-		PROPERTY IMPORTED_LOCATION ${OBS_LIB_Qt5Network})
-	set_property(TARGET Qt5::Gui
-		PROPERTY IMPORTED_LOCATION ${OBS_LIB_Qt5Gui})
 	if(MSVC)
 		set_property(TARGET libobs
 			PROPERTY IMPORTED_IMPLIB ${OBS_LIB_LIBOBS_LIB})
-	# 	set_property(TARGET Qt5::Core
-	# 		PROPERTY IMPORTED_IMPLIB ${OBS_LIB_Qt5Core_LIB})
-	# 	set_property(TARGET Qt5::Widgets
-	# 		PROPERTY IMPORTED_IMPLIB ${OBS_LIB_Qt5Widgets_LIB})
-	# 	set_property(TARGET Qt5::Network
-	# 		PROPERTY IMPORTED_IMPLIB ${OBS_LIB_Qt5Network_LIB})
-	# 	set_property(TARGET Qt5::Gui
-	# 		PROPERTY IMPORTED_IMPLIB ${OBS_LIB_Qt5Gui_LIB})
-	# 	# RELEASE
-	# 	set_property(TARGET Qt5::Core
-	# 		PROPERTY IMPORTED_LOCATION_RELEASE ${OBS_LIB_Qt5Core})
-	# 	set_property(TARGET Qt5::Widgets
-	# 		PROPERTY IMPORTED_LOCATION_RELEASE ${OBS_LIB_Qt5Widgets})
-	# 	set_property(TARGET Qt5::Network
-	# 		PROPERTY IMPORTED_LOCATION_RELEASE ${OBS_LIB_Qt5Network})
-	# 	set_property(TARGET Qt5::Gui
-	# 		PROPERTY IMPORTED_LOCATION_RELEASE ${OBS_LIB_Qt5Gui})
-	# 	set_property(TARGET Qt5::Core
-	# 		PROPERTY IMPORTED_IMPLIB_RELEASE ${OBS_LIB_Qt5Core_LIB})
-	# 	set_property(TARGET Qt5::Widgets
-	# 		PROPERTY IMPORTED_IMPLIB_RELEASE ${OBS_LIB_Qt5Widgets_LIB})
-	# 	set_property(TARGET Qt5::Network
-	# 		PROPERTY IMPORTED_IMPLIB_RELEASE ${OBS_LIB_Qt5Network_LIB})
-	# 	set_property(TARGET Qt5::Gui
-	# 		PROPERTY IMPORTED_IMPLIB_RELEASE ${OBS_LIB_Qt5Gui_LIB})
-	# 	# DEBUG
-	# 	set_property(TARGET Qt5::Core
-	# 		PROPERTY IMPORTED_LOCATION_DEBUG ${OBS_LIB_Qt5Core})
-	# 	set_property(TARGET Qt5::Widgets
-	# 		PROPERTY IMPORTED_LOCATION_DEBUG ${OBS_LIB_Qt5Widgets})
-	# 	set_property(TARGET Qt5::Network
-	# 		PROPERTY IMPORTED_LOCATION_DEBUG ${OBS_LIB_Qt5Network})
-	# 	set_property(TARGET Qt5::Gui
-	# 		PROPERTY IMPORTED_LOCATION_DEBUG ${OBS_LIB_Qt5Gui})
-	# 	set_property(TARGET Qt5::Core
-	# 		PROPERTY IMPORTED_IMPLIB_DEBUG ${OBS_LIB_Qt5Core_LIB})
-	# 	set_property(TARGET Qt5::Widgets
-	# 		PROPERTY IMPORTED_IMPLIB_DEBUG ${OBS_LIB_Qt5Widgets_LIB})
-	# 	set_property(TARGET Qt5::Network
-	# 		PROPERTY IMPORTED_IMPLIB_DEBUG ${OBS_LIB_Qt5Network_LIB})
-	# 	set_property(TARGET Qt5::Gui
-	# 		PROPERTY IMPORTED_IMPLIB_DEBUG ${OBS_LIB_Qt5Gui_LIB})
 	endif(MSVC)
-endif(NOT BUILD_IN_OBS)
+
+	# override Qt5 library
+	if(APPLE)
+		set_property(TARGET Qt5::Core
+			PROPERTY IMPORTED_LOCATION ${OBS_LIB_Qt5Core})
+		set_property(TARGET Qt5::Widgets
+			PROPERTY IMPORTED_LOCATION ${OBS_LIB_Qt5Widgets})
+		set_property(TARGET Qt5::Network
+			PROPERTY IMPORTED_LOCATION ${OBS_LIB_Qt5Network})
+		set_property(TARGET Qt5::Gui
+			PROPERTY IMPORTED_LOCATION ${OBS_LIB_Qt5Gui})
+	endif(APPLE)
+endif(NOT BUILD_IN_OBS AND NOT LibObs_FOUND)
 
 set(rtmp-nicolive_SOURCES
 	nico-live.cpp
@@ -123,4 +90,11 @@ target_link_libraries(rtmp-nicolive
 
 if(BUILD_IN_OBS)
 	install_obs_plugin_with_data(rtmp-nicolive data)
+else(BUILD_IN_OBS)
+	set_property(TARGET rtmp-nicolive
+		PROPERTY PREFIX "")
+	install(TARGETS rtmp-nicolive
+		DESTINATION "${LIBOBS_PLUGIN_DESTINATION}")
+	install(DIRECTORY data/
+		DESTINATION "${LIBOBS_PLUGIN_DATA_DESTINATION}/rtmp-nicolive")
 endif(BUILD_IN_OBS)

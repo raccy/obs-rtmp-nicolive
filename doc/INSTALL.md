@@ -23,3 +23,19 @@ OBS_SRC=
 
 DCMAKE_BUILD_TYPE=Release
 cmake . -G" Visual Studio 12 2013 Win64"
+
+
+### Ubuntu
+
+cmake -DCMAKE_BUILD_TYPE=Release ..
+
+
+sudo checkinstall -D \
+--pkgname=rtmp-nicolive \
+--pkgversion=1.0 \
+--pkgrelease=0ubuntu \
+--pkglicense=MIT \
+--pkggroup=obs-studio \
+--maintainer=open@raccy.org \
+--requires=obs-studio \
+--nodoc
