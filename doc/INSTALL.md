@@ -31,7 +31,7 @@ cmake -DCMAKE_BUILD_TYPE=Release ..
 
 
 sudo checkinstall -D \
---pkgname=rtmp-nicolive \
+--pkgname=obs-rtmp-nicolive \
 --pkgversion=1.0 \
 --pkgrelease=0ubuntu \
 --pkglicense=MIT \
