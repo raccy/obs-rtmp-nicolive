@@ -28,6 +28,10 @@ cmake \
 
 ## Win
 
+cmake -G"Visual Studio 12 2013 Win64" -DCMAKE_PREFIX_PATH=C:/Qt/Qt5.4.1_64/5.4/msvc2013_64_opengl/lib/cmake -DCMAKE_BUILD_TYPE=Release -DOBS_SRC=Z:/project/rtmp-nicolive/obs-studio-0.8.2 -DOBS_APP=C:/Applications/OBS-MP-Win-0.8.2 ..
+
+cmake -DCMAKE_PREFIX_PATH=C:/Qt/Qt5.4.1/5.4/msvc2013_opengl/lib/cmake -DCMAKE_BUILD_TYPE=Release -DOBS_SRC=Z:/project/rtmp-nicolive/obs-studio-0.8.3 -DOBS_APP=C:/Applications/OBS-MP-Win-0.8.3 ..
+
 
 -GVisual Studio 12 2013 Win64
 
@@ -37,8 +41,7 @@ cmake -DCMAKE_PREFIX_PATH=C:/Qt/Qt5.4.1/5.4/msvc2013_opengl/lib/cmake -DCMAKE_BU
 
 上のでうまくいくはず。
 
-
-
+cmake -DCMAKE_PREFIX_PATH=C:/Qt/5.4/msvc2013_opengl/lib/cmake -DOBS_SRC=Z:/project/rtmp-nicolive/obs-studio-0.8.3 -DOBS_APP=C:/Applications/OBS-MP-Win-0.8.3 ..
 
 cmake -DCMAKE_PREFIX_PATH=C:/Qt/5.4/msvc2013_opengl/lib/cmake -DOBS_SRC=Z:/project/rtmp-nicolive/obs-studio-0.8.2 -DOBS_APP=C:/Applications/OBS-MP-Win-0.8.2 ..
 

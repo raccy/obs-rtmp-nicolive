@@ -233,7 +233,7 @@ static void rtmp_nicolive_defaults(obs_data_t *settings)
 	obs_data_set_default_bool  (settings, "auto_start",      false);
 	obs_data_set_default_int   (settings, "watch_interval",  60);
 	obs_data_set_default_bool  (settings, "cmd_server",      false);
-	obs_data_set_default_bool  (settings, "cmd_server_port", 25083);
+	obs_data_set_default_int   (settings, "cmd_server_port", 25083);
 }
 
 static const char *rtmp_nicolive_url(void *data)
