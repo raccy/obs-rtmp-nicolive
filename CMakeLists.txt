@@ -22,12 +22,13 @@ endif(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
 
 # find OBS
 if(NOT BUILD_IN_OBS)
-	find_package(LibObs)
+	find_package(LibObs QUIET)
 	if(LibObs_FOUND)
 		if(NOT MSVC)
 			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 		endif(NOT MSVC)
 	else(LibObs_FOUND)
+		MESSAGE( STATUS "Not Found LibObs cmake module")
 		set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
 			"${CMAKE_CURRENT_SOURCE_DIR}/tools/cmake")
 		find_package(OBS REQUIRED)

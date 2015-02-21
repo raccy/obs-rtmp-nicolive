@@ -4,11 +4,13 @@
 
 ```
 cmake \
+-DCMAKE_BUILD_TYPE=Release \
 -DCMAKE_PREFIX_PATH=~/QT/5.4/clang_64/lib/cmake/ \
 -DOBS_SRC=`pwd`/../../obs-studio-0.8.2 \
--DOBS_APP=/Applications/OBS.app \
 ..
 ```
+-DOBS_APP=/Applications/OBS.app \
+
 
 ## Win
 

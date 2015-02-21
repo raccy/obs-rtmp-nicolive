@@ -25,6 +25,11 @@ else()
 endif()
 
 if(MSVC)
+	set(LIBOBS_PLUGIN_DESTINATION
+		"${OBS_APP}/obs-plugins/${_lib_suffix}bit")
+	set(LIBOBS_PLUGIN_DATA_DESTINATION
+		"${OBS_APP}/data/obs-plugins")
+
 	set(OBS_APP_BIN "${OBS_APP}/bin/${_lib_suffix}bit")
 	set(OBS_LIB_LIBOBS "${OBS_APP_BIN}/obs.dll")
 	set(OBS_LIB_Qt5Core "${OBS_APP_BIN}/Qt5Core.dll")
@@ -39,6 +44,11 @@ if(MSVC)
 	set(OBS_LIB_Qt5Network_LIB "${OBS_APP_LIB}/Qt5Network.lib")
 	set(OBS_LIB_Qt5Gui_LIB "${OBS_APP_LIB}/Qt5Gui.lib")
 elseif(APPLE)
+	set(LIBOBS_PLUGIN_DESTINATION
+		"${OBS_APP}/Contents/Resources/obs-plugins/")
+	set(LIBOBS_PLUGIN_DATA_DESTINATION
+		"${OBS_APP}/Contents/Resources/data/obs-plugins")
+
 	set(OBS_APP_BIN "${OBS_APP}/Contents/Resources/bin")
 	set(OBS_LIB_LIBOBS "${OBS_APP_BIN}/libobs.0.dylib")
 	set(OBS_LIB_Qt5Core "${OBS_APP_BIN}/QtCore")
@@ -46,5 +56,9 @@ elseif(APPLE)
 	set(OBS_LIB_Qt5Network "${OBS_APP_BIN}/QtNetwork")
 	set(OBS_LIB_Qt5Gui "${OBS_APP_BIN}/QtGui")
 else()
-	# nothing
+	# linux?
+	set(LIBOBS_PLUGIN_DESTINATION
+		"${OBS_APP}/obs-plugins")
+	set(LIBOBS_PLUGIN_DATA_DESTINATION
+		"${OBS_APP}/data/obs-plugins")
 endif()
