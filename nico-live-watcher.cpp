@@ -31,7 +31,7 @@ void NicoLiveWatcher::start(long long sec)
 	if (!this->timer->isActive()) {
 		nicolive_log_debug("check session before timer start");
 		nicolive->checkSession();
-		nicolive_log_debug("start watch, interval: %lld",
+		nicolive_log_debug("start watch, interval: %d",
 				this->interval);
 		// this->timer->start(this->interval);
 		this->timer->start(this->marginTime);
