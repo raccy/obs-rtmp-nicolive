@@ -4,59 +4,21 @@
 
 ## 概要
 
-ニコニコ生放送の配信用URLとストリームキーを自動取得して、OBS MultiPlatform (obs-studio) で簡単に配信できるようにするプラグインです。
+ニコニコ生放送の配信用URLとストリームキーを自動取得して、[OBS MultiPlatform (obs-studio)](https://obsproject.com)で簡単に配信できるようにするプラグインです。
 
 ## インストール方法
 
-Mac のみバイナリを用意しました。配布物の README.txt を見て下さい。Windows と Ubuntuは準備中です。
-
-## 作り方
-
-今のところ、OBS 0.8.3 と一緒にコンパイルする方法が一番速いです。github から取得した場合は、必ず 0.8.3 タグを利用して下さい。バージョンが異なるとエラーになる場合があります。
-
-Mac OS Xであれば、下記でできると思います。(環境: Mac OS X 10.10 + Development Tools + homebrew)
-
-```
-$ brew install ffmpeg x264 qt5 fdk-aac
-$ git clone https://github.com/jp9000/obs-studio.git
-$ cd obs-studio
-$ git submodule init
-$ git submodule update
-$ git branch nicolive 0.7.3
-$ git checkout nicolive
-$ git submodule add https://github.com/raccy/obs-rtmp-nicolive.git plugins/rtmp-nicolive
-$ echo "add_subdirectory(rtmp-nicolive)" >> plugins/CMakeLists.txt
-$ mkdir build
-$ cd build
-$ cmake -D CMAKE_PREFIX_PATH=/usr/local/Cellar/qt5/5.4.0/lib/cmake ..
-$ make
-$ make package
-$ open .
-```
-
-buildディレクトリ配下に"obs-studio-x64-0.7.3-*.dmg"ができているので、その中のOBS.appをApplicationsに投げ込めばいいです。なお、ライブラリはOBS.appのなかに無いので、コンパイルした環境依存になります。
-
-デバッグする場合は下記でやってみてください。
-
-```
-$ cmake -D CMAKE_PREFIX_PATH=/usr/local/Cellar/qt5/5.4.0/lib/cmake -D CMAKE_BUILD_TYPE=Debug ..
-$ cd rundir/Debgu/bin
-$ ./obs
-```
-
-WindowsでもUbuntuでも OBS をコンパイルし、動作できるようであればうまくいくはずです。
-
-Mac 向けに独立してコンパイルできるようにしていますが、使い方は確立していません。詳しくは CamkeLists.txt を解析して下さい。
+[doc/INSTALL.md](doc/INSTALL.md)を見て下さい。
 
 ## 使い方
 
-配信先を「ニコニコ生放送」にして、ユーザ名とパスワードいれて、「配信開始」したら、枠を取っているとそのまま配信されます。RTMPのURLやキーを手動で取得する必要はありません。
+配信先を「ニコニコ生放送」にして、ユーザ名とパスワード、または、ユーザーセッション(ブラウザのクッキーに保存される「user_session_数字_16進数」のキー)をいれて、「配信開始」したら、枠を取っているとそのまま配信されます。RTMPのURLやキーを手動で取得する必要はありません。なお、ユーザ名とパスワードのみ入力した場合はセッションを一つ消費します。配信に成功した場合はログイン時のユーザーセッションは保存されます。
 
-このプラグイン自体には枠を自動で取ったり、延長したりすることはできませんので、他のコメビュとかとあわせて使って下さい。
+このプラグイン自体には枠を自動で取ったり、延長したりすることはできませんので、他のツール([Viqo](https://github.com/diginatu/Viqo)等)とあわせて使って下さい。
 
 ### 便利かもしれない機能その1 Viqo連携
 
-「Viqoの設定を読み込む」を有効にすると、Viqo https://github.com/diginatu/Viqo の設定からユーザーセッションを取得できます。Viqoを使用している人はセッションを消費しなくてすみます。
+「Viqoの設定を読み込む」を有効にすると、[Viqo](https://github.com/diginatu/Viqo) の設定からユーザーセッションを取得できます。Viqoを使用している人はセッションを消費しなくてすみます。
 
 ### 便利かもしれない機能その2 ビットレート調整
 

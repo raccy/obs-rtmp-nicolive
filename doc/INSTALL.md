@@ -109,6 +109,7 @@ OBS MultiPlatform は配付されているバイナリを使用して、プラ�
 
 ### Windows
 
+#### 準備をする
 必要な物を用意します。
 
 *   OBS MultiPlatform バイナリ:
@@ -117,7 +118,9 @@ OBS MultiPlatform は配付されているバイナリを使用して、プラ�
     https://github.com/jp9000/obs-studio/releases から `Source code (zip)` をダウンロードして、任意のフォルダに展開します。バイナリと同じバージョンを使用して下さい。
 *   Qt:
     http://www.qt.io/download/
-    にある Community またはスナップショット版の http://download.qt.io/snapshots/qt/ からインストーラをダウンロードしてインストールします。
+    にある Community またはスナップショット版の
+    http://download.qt.io/snapshots/qt/
+    からインストーラをダウンロードしてインストールします。
     OBS MultiPlatform バイナリ で使用しているバージョンをインストールして下さい。コンパイラの選択ですが、32bit でコンパイルする場合は msvc2013_opengl を、64bit でコンパイルする場合は msvc2013_64_opengl をインストールします(スナップショット版インストーラの場合はバラバラになっています)。
 *   Visual Studio 2013:
     http://www.visualstudio.com/downloads/
@@ -125,6 +128,12 @@ OBS MultiPlatform は配付されているバイナリを使用して、プラ�
 *   CMake:
     http://www.cmake.org/download/
     からインストーラをダウンロードしてインストールして下さい。
+*   mingw-pexport:
+    http://www.mingw.org/download/installer
+    で Mingw インストーラをダウンロード後に実行して、mingw32-pexport の bin を選択し、インストールして下さい。
+*   (オプション)7-Zip:
+    http://sevenzip.sourceforge.jp
+    からインストーラをダウンロードしてインストールして下さい。最後のアーカイブのみ必要です。
 
 Qt は OBS MultiPlatform バイナリ に含まれる Qt のライブラリと同じバージョンにする必要があります。`${バイナリのトップ}/bin/32bit/Qt5Core.dll` を右クリック、プロパティを表示し、「詳細」タブにある「製品バージョン」を確認して下さい。通常のインストーラーに含まれていない場合はスナップショットからダウンロードして下さい。
 
@@ -132,9 +141,13 @@ CMake はパスを通しておく必要があります。コマンドプロン�
 
 続いて、https://github.com/raccy/obs-rtmp-nicolive/releases から `Source code (zip)` をダウンロードして、任意のフォルダに展開します。コマンドプロンプトを起動して、展開したフォルダに移動します。
 
-<!-- TODO: -->
+#### ビルドする
 
-## Mac
+
+
+#### パッケージをまとめる
+
+### Mac
 
 cmake \
 -DCMAKE_BUILD_TYPE=Debug \
