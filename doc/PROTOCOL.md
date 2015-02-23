@@ -206,7 +206,7 @@ telnet を使用した手動コマンドテストを想定し、下記が許さ�
 `#` 以下はコメントを表す。
 
 ```
-# 通信切断
+# 通信開始
 C: HELO <CRLF>
 S: 100 <SP> HELO <SP> NCLVP_0.1 <CRLF>
 C: KEEP <CRLF>
