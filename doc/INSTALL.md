@@ -131,9 +131,12 @@ OBS MultiPlatform は配付されているバイナリを使用して、プラ�
 *   mingw-pexport:
     http://www.mingw.org/download/installer
     で Mingw インストーラをダウンロード後に実行して、mingw32-pexport の bin を選択し、インストールして下さい。
-*   (オプション)7-Zip:
+*   (オプション) 7-Zip:
     http://sevenzip.sourceforge.jp
     からインストーラをダウンロードしてインストールして下さい。最後のアーカイブのみ必要です。
+*   (オプション) Ruby:
+    http://rubyinstaller.org/downloads/
+    からインストーラをダウンロードしてインストールして下さい。Ruby へのパスは通しておく必要があります。最後のアーカイブ作成で、README.txt を生成する場合のみ必要です。
 
 Qt は OBS MultiPlatform バイナリ に含まれる Qt のライブラリと同じバージョンにする必要があります。`${バイナリのトップ}/bin/32bit/Qt5Core.dll` を右クリック、プロパティを表示し、「詳細」タブにある「製品バージョン」を確認して下さい。通常のインストーラーに含まれていない場合はスナップショットからダウンロードして下さい。
 
