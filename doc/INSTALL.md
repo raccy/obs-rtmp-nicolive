@@ -20,7 +20,7 @@ OBS MultiPlatform は配付されているバイナリを使用して、プラ�
 
 **Windows 8.1 64bit 以外ではテストしていません。Windows の他のバージョンで不具合が出る場合は [Issues](https://github.com/raccy/obs-rtmp-nicolive/issues) へ報告して下さい。**
 
-https://github.com/raccy/obs-rtmp-nicolive/releases から `obs-rtmp-nicolive_*-win.7z` をダウンロードし、任意のフォルダに展開して下さい。`*.7z` が展開できない人は 7-Zip http://sevenzip.sourceforge.jp をインストールして下さい。
+https://github.com/raccy/obs-rtmp-nicolive/releases から `obs-rtmp-nicolive_*-win.7z` をダウンロードし、任意のフォルダに展開して下さい。`*.7z` が展開できない人は 7-Zip を http://sevenzip.sourceforge.jp からダウンロードしてインストールして下さい。
 
 展開したフォルダ上の `README.txt` にインストール方法が記載されていますので、お読み下さい。
 
