@@ -17,9 +17,9 @@ set WIN_INSTALL_MD=..\tools\win\WIN_INSTALL.md
 set CONVERT_README_RB=..\tools\win\convert_readme.rb
 
 "%SEVEN_ZIP_EXE%"
-if errorlevel 1 call :die "Failed check 7-Zip. Please install 7-Zip or change SEVEN_ZIP_EXE"
+if errorlevel 1 echo "Failed check 7-Zip. Please install 7-Zip or change SEVEN_ZIP_EXE"
 "%RUBY_EXE%" -v
-if errorlevel 1 call :die "Failed check Ruyb. Please install Ruby and set PATH"
+if errorlevel 1 echo "Failed check Ruby. Please install Ruby and set PATH"
 
 echo creating package...
 

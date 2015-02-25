@@ -146,11 +146,46 @@ CMake はパスを通しておく必要があります。コマンドプロン�
 
 #### ビルドする
 
-<!-- TODO -->
+ビルド環境作成ツールでビルド環境を作ります。さきほどのコマンドプロンプトで、書きを実行します。
+
+```
+tools\win\make_build.cmd
+```
+
+build、build32、bulid64 の三つのフォルダが作成されます。それぞれでコンパイルします。
+
+始めに 32bit をコンパイルします。
+
+```
+cd build32
+run_cmake.cmd
+start rtmp-nicolive.sln
+```
+
+起動した Visual Studio 2013 にて、32bit Release を選び、ビルドします。ビルドしたら、Visual Studio 2013 を終了し「build32\Release\rtmp-niclove.dll」が作成されていることを確認します。
+
+次に、64bit をコンパイルします。
+
+```
+cd ..
+cd build64
+run_cmake.cmd
+start rtmp-nicolive.sln
+```
+
+起動した Visual Studio 2013 にて、64bit Release を選び、ビルドします。ビルドしたら、Visual Studio 2013 を終了し「build32\Release\rtmp-niclove.dll」が作成されていることを確認します。
 
 #### パッケージをまとめる
 
+作成された dll をいれるだけですが、便利なまとめるツールがあります。書きコマンドを実行します。
 
+```
+cd ..
+cd build
+make_package.cmd
+```
+
+作成された「build\obs-rtmp-nicolive_*_win\README.txt」にインストール方法が記載されてます。なお、Ruby が無い場合は REDAME.txt は作成されません。また、7-Zip がインストールされている場合は、7z アーカイブも作成されます。
 
 ### Mac
 
