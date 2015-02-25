@@ -142,50 +142,21 @@ Qt は OBS MultiPlatform バイナリ に含まれる Qt のライブラリと�
 
 CMake はパスを通しておく必要があります。コマンドプロンプトで、`cmake --version` と実行して、CMake のバージョンが表示されるか確認して下さい。
 
-続いて、https://github.com/raccy/obs-rtmp-nicolive/releases から `Source code (zip)` をダウンロードして、任意のフォルダに展開します。コマンドプロンプトを起動して、展開したフォルダに移動します。
+続いて、https://github.com/raccy/obs-rtmp-nicolive/releases から `Source code (zip)` をダウンロードして、任意のフォルダに展開します。展開したフォルダをエクスプローラーで開きます。
 
 #### ビルドする
 
-ビルド環境作成ツールでビルド環境を作ります。さきほどのコマンドプロンプトで、書きを実行します。
+ビルド環境作成ツールでビルド環境を作ります。展開したソースの「tools」フォルダの「win」フォルダを開き、`make_build.cmd` をダブルクリックで実行します。ツール類をインストール済みであれば環境が作られます。もし、エラーになった場合は、必要に応じてインストールまたは `make_build.cmd` の修正をして下さい。`make_build.cmd` が終了すると、「build」、「build32」、「build64」の三つのフォルダが開きます。
 
-```
-tools\win\make_build.cmd
-```
+「build32」フォルダで `run_cmake.cmd` を実行します。実行後、`rtmp-nicolive.sln` が作成されますので、開いて下さい。Visual Studio 2013 が起動しますので、上部の「Debug」を「Release」に変更して、ソリューションをビルドして下さい。このとき、上部が「Release」及び「Win32」であることを確認しておいて下さい。ビルド後は Visual Studio 2013 を終了して下さい。
 
-build、build32、bulid64 の三つのフォルダが作成されます。それぞれでコンパイルします。
-
-始めに 32bit をコンパイルします。
-
-```
-cd build32
-run_cmake.cmd
-start rtmp-nicolive.sln
-```
-
-起動した Visual Studio 2013 にて、32bit Release を選び、ビルドします。ビルドしたら、Visual Studio 2013 を終了し「build32\Release\rtmp-niclove.dll」が作成されていることを確認します。
-
-次に、64bit をコンパイルします。
-
-```
-cd ..
-cd build64
-run_cmake.cmd
-start rtmp-nicolive.sln
-```
-
-起動した Visual Studio 2013 にて、64bit Release を選び、ビルドします。ビルドしたら、Visual Studio 2013 を終了し「build32\Release\rtmp-niclove.dll」が作成されていることを確認します。
+「build64」フォルダでも「build32」フォルダとまったく同じ操作をし、ビルドして下さい。ビルド時に上部が「Release」および「x64」であることを確認しておいて下さい。ビルド後は Visual Studio 2013 を終了して下さい。
 
 #### パッケージをまとめる
 
-作成された dll をいれるだけですが、便利なまとめるツールがあります。書きコマンドを実行します。
+「Release」フォルダに作成された dll をいれるだけですが、便利なまとめるツールがあります。「build」フォルダで `make_package.cmd` を実行して下さい。
 
-```
-cd ..
-cd build
-make_package.cmd
-```
-
-作成された「build\obs-rtmp-nicolive_*_win\README.txt」にインストール方法が記載されてます。なお、Ruby が無い場合は REDAME.txt は作成されません。また、7-Zip がインストールされている場合は、7z アーカイブも作成されます。
+作成された「obs-rtmp-nicolive_*_win」フォルダの `README.txt` にインストール方法が記載されてます。なお、Ruby が無い場合は `REDAME.txt` は作成されませんのでご注意下さい。また、7-Zip がインストールされている場合は、7z アーカイブも同時に作成されます。
 
 ### Mac
 

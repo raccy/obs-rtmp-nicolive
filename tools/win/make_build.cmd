@@ -21,6 +21,7 @@ set QT64_CMAKE=%QT64_DIR%\%QT_VERSION%\msvc2013_64_opengl\lib\cmake
 
 rem ##### Checking #####
 rem check current directory
+cd ..\..
 if /i "%CD%\tools\win\make_build.cmd" neq "%~f0" call :die "You must run this batch on the top directory of sources" 255
 
 rem check file
@@ -31,12 +32,12 @@ call :check_exist "%QT64_CMAKE%" "Not found qt 64bit cmake. Please install Qt ms
 call :check_exist "%OBS_APP%" "Not found obs-studio application. Please install obs-stduio application or change OBS_APP"
 call :check_exist "%OBS_SRC%" "Not found obs-studio sourcs. Please install obs-stduio soruces or change OBS_SRC"
 
-cmake -v
+cmake > NUL 2>&1
 if errorlevel 1 call :die "Failed check CMake. Please install CMake ant set PATH"
 
 echo Check all ok, and will create build environments.
 echo Will remove all files in build, build32, and build64.
-set /p REPLY=Are you ok? [y|N]:
+set /p REPLY="Are you ok? [y|N]:"
 if /i "0%REPLY:~0,1%0" neq "0y0" call :die Canceled 0
 
 rem ##### Create build environments #####
@@ -57,30 +58,32 @@ mkdir build\libs\64bit
 
 "%PEXPORTS_EXE%" /EXPORTS "%OBS_APP%\bin\32bit\obs.dll" > "build\libs\32bit\obs.def"
 "%PEXPORTS_EXE%" /EXPORTS "%OBS_APP%\bin\64bit\obs.dll" > "build\libs\64bit\obs.def"
-"%LIB_EXE%" /def:"build\libs\32bit\obs.def" /out:"build\libs\32bit\obs.lib"
+"%LIB_EXE%" /MACHINE:x86 /def:"build\libs\32bit\obs.def" /out:"build\libs\32bit\obs.lib"
 "%LIB_EXE%" /MACHINE:x64 /def:"build\libs\64bit\obs.def" /out:"build\libs\64bit\obs.lib"
 
 rem TODO
 echo cmake -G"Visual Studio 12 2013" -DCMAKE_PREFIX_PATH="%QT32_CMAKE:\=/%" -DOBS_SRC="%OBS_SRC:\=/%" -DOBS_APP="%OBS_APP:\=/%" .. > build32\run_cmake.cmd
+echo @echo ##### CMake done. Please open rtmp-nicolive.sln ##### >> build32\run_cmake.cmd
+echo @echo You MUST change Debug to Release before build! >> build32\run_cmake.cmd
+echo pause >> build32\run_cmake.cmd
+
 echo cmake -G"Visual Studio 12 2013 Win64" -DCMAKE_PREFIX_PATH="%QT64_CMAKE:\=/%" -DOBS_SRC="%OBS_SRC:\=/%" -DOBS_APP="%OBS_APP:\=/%" .. > build64\run_cmake.cmd
-copy win\tools\_make_package.cmd build\make_package.cmd
+echo @echo ##### CMake done. Please open rtmp-nicolive.sln ##### >> build64\run_cmake.cmd
+echo @echo You MUST change Debug to Release before build! >> build64\run_cmake.cmd
+echo pause >> build64\run_cmake.cmd
+
+copy tools\win\_make_package.cmd build\make_package.cmd
 
 echo ##### Succeeded to create build environments. Please cmake and build. #####
-echo cd build32
-echo run_cmake.cmd
-echo start rtmp-nicolive.sln
-echo Visual Stuido set 32bit Release and build!
-echo cd ..
-echo cd build64
-echo run_cmake.cmd
-echo start rtmp-nicolive.sln
-echo Visual Stuido set 64bit Release and build!
-echo ##### Optional make package #####
-echo cd ..
-echo cd build
-echo make_package.cmd
-echo start obs-rtmp-nicolive_*-win
-echo Copy your obs-studio application directory!
+echo Next step
+echo cd ..\build32 and run run_cmake.cmd and build rtmp-nicolive.sln
+echo cd ..\build64 and run run_cmake.cmd and build rtmp-nicolive.sln
+echo cd ..\build and make_package.cmd
+echo and last, copy your obs-studio application directory!
+pause
+start build
+start build32
+start build64
 
 goto :eof
 
@@ -93,8 +96,12 @@ goto :eof
 
 :die
 set message=%~1
-if "a%~2a" == "aa" set code=1 else set /a code=%~2
+if "a%~2a" == "aa" (
+	set /a code=1
+) else (
+	set /a code=%~2
+)
 echo %message%
-if "%code" equ "255" pause
-exit /b %code%
+pause
+exit %code%
 goto :eof

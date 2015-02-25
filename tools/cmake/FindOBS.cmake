@@ -37,7 +37,7 @@ if(MSVC)
 	set(OBS_LIB_Qt5Network "${OBS_APP_BIN}/Qt5Network.dll")
 	set(OBS_LIB_Qt5Gui "${OBS_APP_BIN}/Qt5Gui.dll")
 	# win lib
-	set(OBS_APP_LIB "${CMAKE_CURRENT_SOURCE_DIR}/winlibs/${_lib_suffix}bit")
+	set(OBS_APP_LIB "${CMAKE_CURRENT_SOURCE_DIR}/build/libs/${_lib_suffix}bit")
 	set(OBS_LIB_LIBOBS_LIB "${OBS_APP_LIB}/obs.lib")
 	set(OBS_LIB_Qt5Core_LIB "${OBS_APP_LIB}/Qt5Core.lib")
 	set(OBS_LIB_Qt5Widgets_LIB "${OBS_APP_LIB}/Qt5Widgets.lib")

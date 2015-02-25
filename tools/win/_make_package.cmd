@@ -34,22 +34,27 @@ mkdir "%PACAKGE_NAME%\obs-plugins\64bit"
 mkdir "%PACAKGE_NAME%\data"
 mkdir "%PACAKGE_NAME%\data\obs-plugins"
 
-copy /b /y "%BUILD32_DIR%\Relese\%PLUGIN_NAME%.dll" "%PACAKGE_NAME%\obs-plugins\32bit\%PLUGIN_NAME%.dll"
-copy /b /y "%BUILD64_DIR%\Relese\%PLUGIN_NAME%.dll" "%PACAKGE_NAME%\obs-plugins\64bit\%PLUGIN_NAME%.dll"
-xcopy "%DATA_DIR%" "%PACAKGE_NAME%\data\obs-plugins\%PLUGIN_NAME%" /s
-"%RUBY_EXE%" "%CONVERT_README_RB%" "%README_MD%" "%WIN_INSTALL_MD%" README.txt
+copy /b /y "%BUILD32_DIR%\Release\%PLUGIN_NAME%.dll" "%PACAKGE_NAME%\obs-plugins\32bit\%PLUGIN_NAME%.dll"
+copy /b /y "%BUILD64_DIR%\Release\%PLUGIN_NAME%.dll" "%PACAKGE_NAME%\obs-plugins\64bit\%PLUGIN_NAME%.dll"
+xcopy "%DATA_DIR%\*" "%PACAKGE_NAME%\data\obs-plugins\%PLUGIN_NAME%" /s /i
+"%RUBY_EXE%" "%CONVERT_README_RB%" "%README_MD%" "%WIN_INSTALL_MD%" "%PACAKGE_NAME%\README.txt"
 "%SEVEN_ZIP_EXE%" a -r "%PACAKGE_NAME%.7z" "%PACAKGE_NAME%"
 
 echo ##### Succeeded to create package. #####
 echo You read %PACAKGE_NAME%\README.txt if you want to install this plugin.
 echo And you can deploy the %PACAKGE_NAME%.7z file!
+pause
 
 goto :eof
 
 :die
 set message=%~1
-if "a%~2a" == "aa" set code=1 else set /a code=%~2
+if "a%~2a" == "aa" (
+	set /a code=1
+) else (
+	set /a code=%~2
+)
 echo %message%
-if "%code" equ "255" pause
-exit /b %code%
+pause
+exit %code%
 goto :eof
