@@ -110,7 +110,7 @@ OBS MultiPlatform は配付されているバイナリを使用して、プラ�
 ### Windows
 
 #### 準備をする
-必要な物を用意します。
+必要な物を用意します。なお、32bit 版も 64bit 環境でコンパイルします。32bit 環境での 32bit 版のみのコンパイルはサポートしていません。(作者に環境がありません)
 
 *   OBS MultiPlatform バイナリ:
     https://github.com/jp9000/obs-studio/releases から `OBS-MP-Win-*.zip` をダウンロードして、任意のフォルダに展開します。
@@ -121,19 +121,19 @@ OBS MultiPlatform は配付されているバイナリを使用して、プラ�
     にある Community またはスナップショット版の
     http://download.qt.io/snapshots/qt/
     からインストーラをダウンロードしてインストールします。
-    OBS MultiPlatform バイナリ で使用しているバージョンをインストールして下さい。コンパイラの選択ですが、32bit でコンパイルする場合は msvc2013_opengl を、64bit でコンパイルする場合は msvc2013_64_opengl をインストールします(スナップショット版インストーラの場合はバラバラになっています)。
+    OBS MultiPlatform バイナリ で使用しているバージョンをインストールして下さい。コンパイラの選択ですが、32bit 用の msvc2013_opengl と 64bit 用の msvc2013_64_opengl をインストールします (スナップショット版インストーラの場合はバラバラになっていますので注意して下さい)。
 *   Visual Studio 2013:
     http://www.visualstudio.com/downloads/
     から Community Edition をダウンロードしてインストールして下さい。Express Edition でのコンパイルは未サポートです。
 *   CMake:
     http://www.cmake.org/download/
-    からインストーラをダウンロードしてインストールして下さい。
+    からインストーラをダウンロードしてインストールして下さい。CMake へのパスは通しておく必要があります。
 *   mingw-pexport:
     http://www.mingw.org/download/installer
     で Mingw インストーラをダウンロード後に実行して、mingw32-pexport の bin を選択し、インストールして下さい。
 *   (オプション) 7-Zip:
     http://sevenzip.sourceforge.jp
-    からインストーラをダウンロードしてインストールして下さい。最後のアーカイブのみ必要です。
+    からインストーラをダウンロードしてインストールして下さい。最後のアーカイブ作成でのみ必要です。
 *   (オプション) Ruby:
     http://rubyinstaller.org/downloads/
     からインストーラをダウンロードしてインストールして下さい。Ruby へのパスは通しておく必要があります。最後のアーカイブ作成で、README.txt を生成する場合のみ必要です。
@@ -150,7 +150,22 @@ CMake はパスを通しておく必要があります。コマンドプロン�
 
 #### パッケージをまとめる
 
+
+
 ### Mac
+
+#### 準備をする
+必要な物を用意します。
+
+*   OBS MultiPlatform バイナリ:
+    https://github.com/jp9000/obs-studio/releases から `OBS-MP-Win-*.zip` をダウンロードして、任意のフォルダに展開します。
+*   OBS MultiPlatform ソース:
+    https://github.com/jp9000/obs-studio/releases から `Source code (zip)` をダウンロードして、任意のフォルダに展開します。バイナリと同じバージョンを使用して下さい。
+*   Xcode / Development tools
+*   CMake
+*   Qt
+
+
 
 cmake \
 -DCMAKE_BUILD_TYPE=Debug \
