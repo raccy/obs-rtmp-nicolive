@@ -2,7 +2,6 @@
 /build/
 /build32/
 /build64/
-/winlibs/
 
 # Compiled Object files
 *.slo
