@@ -36,6 +36,7 @@ mkdir "%PACAKGE_NAME%\data\obs-plugins"
 
 copy /b /y "%BUILD32_DIR%\Release\%PLUGIN_NAME%.dll" "%PACAKGE_NAME%\obs-plugins\32bit\%PLUGIN_NAME%.dll"
 copy /b /y "%BUILD64_DIR%\Release\%PLUGIN_NAME%.dll" "%PACAKGE_NAME%\obs-plugins\64bit\%PLUGIN_NAME%.dll"
+copy /b /y ..\LICENSE "%PACAKGE_NAME%\LICENSE"
 xcopy "%DATA_DIR%\*" "%PACAKGE_NAME%\data\obs-plugins\%PLUGIN_NAME%" /s /i
 "%RUBY_EXE%" "%CONVERT_README_RB%" "%README_MD%" "%WIN_INSTALL_MD%" "%PACAKGE_NAME%\README.txt"
 "%SEVEN_ZIP_EXE%" a -r "%PACAKGE_NAME%.7z" "%PACAKGE_NAME%"
