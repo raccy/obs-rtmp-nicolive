@@ -4,6 +4,11 @@
 #include "nicolive.h"
 #include "nicolive-ui.h"
 
+// use in rtmp_nicolive_update_internal for reset default settigs
+#define reset_obs_data(type, settings, name) \
+		obs_data_set_##type((settings), (name), \
+			obs_data_get_##type((settings), (name)))
+
 static bool adjust_bitrate(obs_output_t *output, long long bitrate)
 {
 	obs_encoder_t *video_encoder = obs_output_get_video_encoder(output);
@@ -43,28 +48,40 @@ static const char *rtmp_nicolive_getname(void)
 	return obs_module_text("NiconicoLive");
 }
 
-static void rtmp_nicolive_update(void *data, obs_data_t *settings)
+static void rtmp_nicolive_update_internal(void *data, obs_data_t *settings,
+	bool msg_gui)
 {
-	// TODO load viqo every time the setting changes
 	if (obs_data_get_bool(settings, "load_viqo")) {
-		if (!nicolive_load_viqo_settings(data)) {
-			nicolive_mbox_warn(obs_module_text(
-					"MessageFailedLoadViqoSettings"));
+		if (nicolive_load_viqo_settings(data)) {
+			if (!nicolive_check_session(data)) {
+				nicolive_msg_warn(msg_gui,
+					obs_module_text("MessageFailedLogin"),
+					"failed login");
+			}
+		} else {
+			nicolive_msg_warn(msg_gui,
+				obs_module_text(
+					"MessageFailedLoadViqoSettings"),
+				"failed load viqo settings");
 			obs_data_set_bool(settings, "load_viqo", false);
-			nicolive_set_settings(data,
-				obs_data_get_string(settings, "mail"),
-				obs_data_get_string(settings, "password"),
-				obs_data_get_string(settings, "session"));
 		}
 	} else {
 		nicolive_set_settings(data,
 				obs_data_get_string(settings, "mail"),
 				obs_data_get_string(settings, "password"),
 				obs_data_get_string(settings, "session"));
+		if (nicolive_check_session(data)) {
+			obs_data_set_string(settings, "session",
+					nicolive_get_session(data));
+		} else {
+			nicolive_msg_warn(msg_gui,
+				obs_module_text("MessageFailedLogin"),
+				"failed login");
+		}
 	}
 
 	nicolive_set_enabled_adjust_bitrate(data,
-				obs_data_get_bool(settings, "adjust_bitrate"));
+			obs_data_get_bool(settings, "adjust_bitrate"));
 
 	if (obs_data_get_bool(settings, "auto_start")) {
 		nicolive_start_watching(data,
@@ -77,13 +94,37 @@ static void rtmp_nicolive_update(void *data, obs_data_t *settings)
 		if (!nicolive_start_cmd_server(data,
 				obs_data_get_int(settings,
 						"cmd_server_port"))) {
-			nicolive_mbox_warn(obs_module_text(
-					"MessageFailedStartCmdServer"));
+			nicolive_msg_warn(msg_gui,
+				obs_module_text("MessageFailedStartCmdServer"),
+				"failed start cmd server");
 			obs_data_set_bool(settings, "cmd_server", false);
 		}
 	} else {
 		nicolive_stop_cmd_server(data);
 	}
+
+	// OPTIMIZE: Default settisgs are not saved, so resetting data
+	// Maybe obs-studio 0.8.3 bug
+	// reset_obs_data(string, settings, "mail");
+	// reset_obs_data(string, settings, "password");
+	// reset_obs_data(string, settings, "session");
+	reset_obs_data(bool,   settings, "load_viqo");
+	reset_obs_data(bool,   settings, "adjust_bitrate");
+	reset_obs_data(bool,   settings, "auto_start");
+	reset_obs_data(int,    settings, "watch_interval");
+	reset_obs_data(bool,   settings, "cmd_server");
+	reset_obs_data(int,    settings, "cmd_server_port");
+}
+
+// FIXME: why do not call this func. obs-studio 0.8.3 bug?
+static void rtmp_nicolive_update(void *data, obs_data_t *settings)
+{
+	rtmp_nicolive_update_internal(data, settings, true);
+}
+
+static void rtmp_nicolive_update_silent(void *data, obs_data_t *settings)
+{
+	rtmp_nicolive_update_internal(data, settings, false);
 }
 
 static void rtmp_nicolive_destroy(void *data)
@@ -96,7 +137,7 @@ static void *rtmp_nicolive_create(obs_data_t *settings, obs_service_t *service)
 	void *data = nicolive_create();
 	UNUSED_PARAMETER(service);
 
-	rtmp_nicolive_update(data, settings);
+	rtmp_nicolive_update_silent(data, settings);
 
 	return data;
 }
@@ -137,10 +178,8 @@ static bool rtmp_nicolive_initialize(void *data, obs_output_t *output)
 
 static void rtmp_nicolive_activate(void *data, obs_data_t *settings)
 {
+	UNUSED_PARAMETER(settings);
 	nicolive_start_streaming(data);
-	if (!obs_data_get_bool(settings, "load_viqo"))
-		obs_data_set_string(settings, "session",
-				nicolive_get_session(data));
 }
 
 static void rtmp_nicolive_deactivate(void *data)
@@ -152,7 +191,6 @@ static bool load_viqo_modified(obs_properties_t *props,
 	obs_property_t *prop, obs_data_t *settings)
 {
 	UNUSED_PARAMETER(prop);
-	nicolive_log_debug("load viqo check modified");
 	if (obs_data_get_bool(settings, "load_viqo")) {
 		obs_property_set_enabled(
 				obs_properties_get(props, "mail"), false);
@@ -171,20 +209,33 @@ static bool load_viqo_modified(obs_properties_t *props,
 	return true;
 }
 
-// static bool auto_start_modified(obs_properties_t *props,
-// 	obs_property_t *prop, obs_data_t *settings)
-// {
-// 	UNUSED_PARAMETER(prop);
-// 	nicolive_log_debug("auto start check modified");
-// 	if (obs_data_get_bool(settings, "auto_start")) {
-// 		obs_property_set_enabled(obs_properties_get(props,
-// 			"watch_interval"), true);
-// 	} else {
-// 		obs_property_set_enabled(obs_properties_get(props,
-// 			"watch_interval"), false);
-// 	}
-// 	return true;
-// }
+static bool auto_start_modified(obs_properties_t *props,
+	obs_property_t *prop, obs_data_t *settings)
+{
+	UNUSED_PARAMETER(prop);
+	if (obs_data_get_bool(settings, "auto_start")) {
+		obs_property_set_enabled(obs_properties_get(props,
+			"watch_interval"), true);
+	} else {
+		obs_property_set_enabled(obs_properties_get(props,
+			"watch_interval"), false);
+	}
+	return true;
+}
+
+static bool cmd_server_modified(obs_properties_t *props,
+	obs_property_t *prop, obs_data_t *settings)
+{
+	UNUSED_PARAMETER(prop);
+	if (obs_data_get_bool(settings, "cmd_server")) {
+		obs_property_set_enabled(obs_properties_get(props,
+			"cmd_server_port"), true);
+	} else {
+		obs_property_set_enabled(obs_properties_get(props,
+			"cmd_server_port"), false);
+	}
+	return true;
+}
 
 static obs_properties_t *rtmp_nicolive_properties(void *data)
 {
@@ -208,13 +259,14 @@ static obs_properties_t *rtmp_nicolive_properties(void *data)
 
 	prop = obs_properties_add_bool(ppts, "auto_start",
 			obs_module_text("AutoStart"));
-	// obs_property_set_modified_callback(prop, auto_start_modified);
+	obs_property_set_modified_callback(prop, auto_start_modified);
 	obs_properties_add_int(ppts, "watch_interval",
 			obs_module_text("WatchInterval"),
 			10, 300, 1);
 
-	obs_properties_add_bool(ppts, "cmd_server",
+	prop = obs_properties_add_bool(ppts, "cmd_server",
 			obs_module_text("CmdServer"));
+	obs_property_set_modified_callback(prop, cmd_server_modified);
 	obs_properties_add_int(ppts, "cmd_server_port",
 			obs_module_text("CmdServerPort"),
 			1, 65535, 1);
@@ -224,7 +276,6 @@ static obs_properties_t *rtmp_nicolive_properties(void *data)
 
 static void rtmp_nicolive_defaults(obs_data_t *settings)
 {
-	nicolive_log_debug("default settings");
 	obs_data_set_default_string(settings, "mail",            "");
 	obs_data_set_default_string(settings, "password",        "");
 	obs_data_set_default_string(settings, "session",         "");

@@ -17,7 +17,7 @@
 #define nicolive_log_debug(format, ...) \
 		blog(LOG_DEBUG, "[nicolive] " format, ##__VA_ARGS__)
 #define nicolive_log_debug_call_func() \
-		debug("call func: %s", __func__)
+		nicolive_log_debug("call func: %s", __func__)
 #else
 #define nicolive_log_debug(format, ...)
 #define nicolive_log_debug_call_func()
