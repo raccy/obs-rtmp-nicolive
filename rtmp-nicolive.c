@@ -123,7 +123,10 @@ static void rtmp_nicolive_update(void *data, obs_data_t *settings)
 
 static void rtmp_nicolive_update_silent(void *data, obs_data_t *settings)
 {
-	rtmp_nicolive_update_internal(data, settings, false);
+	// FIXME: I want to silent with start obs-studio, but saving to setting
+	//        call to create service, so I can not silent here.
+	// rtmp_nicolive_update_internal(data, settings, false);
+	rtmp_nicolive_update_internal(data, settings, true);
 }
 
 static void rtmp_nicolive_destroy(void *data)
