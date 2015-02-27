@@ -146,6 +146,10 @@ CMake はパスを通しておく必要があります。コマンドプロン�
 
 #### ビルドする
 
+もし、OBS MultiPlatform をビルドしたことがある環境である場合は、CMake のキャッシュを削除しておく必要があります。レジストリエディタで下記レジストリを削除して下さい。
+
+    HKEY_CURRENT_USER\Software\Kitware\CMake\Packages\LibObs
+
 ビルド環境作成ツールでビルド環境を作ります。展開したソースの「tools」フォルダの「win」フォルダを開き、`make_build.cmd` をダブルクリックで実行します。ツール類をインストール済みであれば環境が作られます。もし、エラーになった場合は、必要に応じてインストールまたは `make_build.cmd` の修正をして下さい。`make_build.cmd` が終了すると、「build」、「build32」、「build64」の三つのフォルダが開きます。
 
 「build32」フォルダで `run_cmake.cmd` を実行します。実行後、`rtmp-nicolive.sln` が作成されますので、開いて下さい。Visual Studio 2013 が起動しますので、上部の「Debug」を「Release」に変更して、ソリューションをビルドして下さい。このとき、上部が「Release」及び「Win32」であることを確認しておいて下さい。ビルド後は Visual Studio 2013 を終了して下さい。
@@ -167,16 +171,52 @@ CMake はパスを通しておく必要があります。コマンドプロン�
     https://github.com/jp9000/obs-studio/releases から `OBS-MP-Win-*.zip` をダウンロードして、任意のフォルダに展開します。
 *   OBS MultiPlatform ソース:
     https://github.com/jp9000/obs-studio/releases から `Source code (zip)` をダウンロードして、任意のフォルダに展開します。バイナリと同じバージョンを使用して下さい。
-*   Xcode / Development tools
-*   CMake
-*   Qt
+*   Xcode / Command Line Tools
+    App Store から Xcode をインストールして下さい。インストール後、Xcode 上で Command Line Tools をインストールして下さい。
+*   CMake:
+    http://www.cmake.org/download/
+    からインストーラをダウンロードしてインストールして下さい。
+*   Qt:
+    http://www.qt.io/download/
+    にある Community またはスナップショット版の
+    http://download.qt.io/snapshots/qt/
+    からインストーラをダウンロードしてインストールします。
+    OBS MultiPlatform バイナリ で使用しているバージョンをインストールして下さい。
 
+Qt は OBS MultiPlatform バイナリ に含まれる Qt のライブラリと同じバージョンにする必要があります。`otool -L /Applications/OBS.app/Contents/Resources/bin/obs
+` で `QtCore` の `current version` を確認して下さい。通常のインストーラーに含まれていない場合はスナップショットからダウンロードして下さい。
 
+CMake は HomeBrew でインストールすることもできます。
 
+#### ビルドする
+
+もし、OBS MultiPlatform をビルドしたことがある環境である場合は、CMake のキャッシュを削除しておく必要があります。下記フォルダを削除して下さい。
+
+  ~/.cmake/packages/LibObs/
+
+ターミナルで、展開したソースのディレクトリに移動します。環境に合わせて下記コマンドを実行します。
+
+```
+mkdir build
+cd build
 cmake \
 -DCMAKE_BUILD_TYPE=Debug \
--DCMAKE_PREFIX_PATH=/usr/local/Cellar/qt5/5.4.0/lib/cmake \
+-DCMAKE_PREFIX_PATH=~/Qt/5.3/clang_64/lib/cmake \
+-DOBS_SRC=~/src/obs-studio-0.8.3 \
 ..
+make
+```
+
+`CMAKE_PREFIX` と `OBS_SRC` の値は Qt をインストールしたディレクトリ、OBS MultiPlatform のソースを展開したディレクトリにあわせて変更して下さい。もし、バイナリをデフォルト以外の場所にインストールした場合は `OBS_APP` も設定して下さい。`make` のビルドに成功すれば `rtmp-nicolive.so` が作成されます。
+
+#### パッケージをまとめる
+
+パッケージをまとめるためのツールを用意しています。下記コマンドを実行して下さい。
+
+```
+../tools/osx/make_package.sh
+```
+
 
 
 

@@ -49,7 +49,6 @@ find_package(Qt5Network REQUIRED)
 if(NOT BUILD_IN_OBS AND NOT LibObs_FOUND)
 	# include
 	include_directories(${OBS_INCLUDES_LIBOBS})
-
 	# libobs
 	add_library(libobs SHARED IMPORTED)
 	set_property(TARGET libobs
@@ -58,18 +57,6 @@ if(NOT BUILD_IN_OBS AND NOT LibObs_FOUND)
 		set_property(TARGET libobs
 			PROPERTY IMPORTED_IMPLIB ${OBS_LIB_LIBOBS_LIB})
 	endif(MSVC)
-
-	# override Qt5 library
-	if(APPLE)
-		set_property(TARGET Qt5::Core
-			PROPERTY IMPORTED_LOCATION ${OBS_LIB_Qt5Core})
-		set_property(TARGET Qt5::Widgets
-			PROPERTY IMPORTED_LOCATION ${OBS_LIB_Qt5Widgets})
-		set_property(TARGET Qt5::Network
-			PROPERTY IMPORTED_LOCATION ${OBS_LIB_Qt5Network})
-		set_property(TARGET Qt5::Gui
-			PROPERTY IMPORTED_LOCATION ${OBS_LIB_Qt5Gui})
-	endif(APPLE)
 endif(NOT BUILD_IN_OBS AND NOT LibObs_FOUND)
 
 set(rtmp-nicolive_SOURCES
