@@ -6,15 +6,16 @@
 
 // cannot use anonymouse struct because VS2013 bug
 // https://connect.microsoft.com/VisualStudio/feedback/details/808506/nsdmi-silently-ignored-on-nested-anonymous-classes-and-structs
-static struct nicolive_buff_s {
-	char *mail = nullptr;
-	char *password = nullptr;
-	char *session = nullptr;
-	char *live_id = nullptr;
-	char *live_url = nullptr;
-	char *live_key = nullptr;
-} nicolive_buff;
-
+namespace {
+	struct nicolive_buff_s {
+		char *mail = nullptr;
+		char *password = nullptr;
+		char *session = nullptr;
+		char *live_id = nullptr;
+		char *live_url = nullptr;
+		char *live_key = nullptr;
+	} nicolive_buff;
+}
 
 extern "C" void *nicolive_create(void)
 {
@@ -100,7 +101,7 @@ extern "C" long long nicolive_get_live_bitrate(const void *data)
 	return nicolive->getLiveBitrate();
 }
 
-bool nicolive_enabled_adjust_bitrate(const void *data)
+extern "C" bool nicolive_enabled_adjust_bitrate(const void *data)
 {
 	const NicoLive *nicolive = static_cast<const NicoLive *>(data);
 	return nicolive->enabledAdjustBitrate();

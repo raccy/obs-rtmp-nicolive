@@ -40,6 +40,7 @@ const char *nicolive_get_session(const void *data);
 const char *nicolive_get_live_url(const void *data);
 const char *nicolive_get_live_key(const void *data);
 long long nicolive_get_live_bitrate(const void *data);
+
 bool nicolive_enabled_adjust_bitrate(const void *data);
 
 bool nicolive_load_viqo_settings(void *data);
