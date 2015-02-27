@@ -121,7 +121,7 @@ OBS MultiPlatform は配付されているバイナリを使用して、プラ�
     にある Community またはスナップショット版の
     http://download.qt.io/snapshots/qt/
     からインストーラをダウンロードしてインストールします。
-    OBS MultiPlatform バイナリ で使用しているバージョンをインストールして下さい。コンパイラの選択ですが、32bit 用の msvc2013_opengl と 64bit 用の msvc2013_64_opengl をインストールします (スナップショット版インストーラの場合はバラバラになっていますので注意して下さい)。
+    OBS MultiPlatform バイナリ で使用しているバージョンをインストールして下さい。コンパイラの選択ですが、32bit 用の msvc2013 と 64bit 用の msvc2013_64 をインストールします (スナップショット版インストーラの場合はバラバラになっていますので注意して下さい)。
 *   Visual Studio 2013:
     http://www.visualstudio.com/downloads/
     から Community Edition をダウンロードしてインストールして下さい。Express Edition でのコンパイルは未サポートです。

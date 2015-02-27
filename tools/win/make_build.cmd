@@ -7,8 +7,9 @@ set OBS_APP=C:\Apps\OBS-MP-Win-0.8.3
 set OBS_SRC=%HOMEDRIVE%%HOMEPATH%\Documents\obs-studio-0.8.3
 
 set QT_VERSION=5.4
-set QT32_DIR=C:\Qt\Qt5.4.1_32
-set QT64_DIR=C:\Qt\Qt5.4.1_64
+set QT_DIR=C:\Qt
+set QT32_DIR=%QT_DIR%
+set QT64_DIR=%QT_DIR%
 
 set MINGW_DIR=C:\MinGW
 set VS2013_DIR=C:\Program Files (x86)\Microsoft Visual Studio 12.0
@@ -16,8 +17,8 @@ set VS2013_DIR=C:\Program Files (x86)\Microsoft Visual Studio 12.0
 rem ##### Create variables (should not modified) #####
 set PEXPORTS_EXE=%MINGW_DIR%\bin\pexports.exe
 set LIB_EXE=%VS2013_DIR%\VC\bin\lib.exe
-set QT32_CMAKE=%QT32_DIR%\%QT_VERSION%\msvc2013_opengl\lib\cmake
-set QT64_CMAKE=%QT64_DIR%\%QT_VERSION%\msvc2013_64_opengl\lib\cmake
+set QT32_CMAKE=%QT32_DIR%\%QT_VERSION%\msvc2013\lib\cmake
+set QT64_CMAKE=%QT64_DIR%\%QT_VERSION%\msvc2013_64\lib\cmake
 
 rem ##### Checking #####
 rem check current directory
