@@ -228,9 +228,54 @@ make
 #### 準備をする
 必要な物を用意します。
 
+始めに OBS MultiPlatform をインストールします。ffmpeg も含めて、通常のレポジトリにではなく、追加のレポジトリからインストールします。レポジトリ追加には software-properties-common パッケージになる `add-apt-repository` が必要です。
+
+```
+sudo apt-get install software-properties-common
+sudo add-apt-repository ppa:kirillshkrogalev/ffmpeg-next
+sudo add-apt-repository ppa:obsproject/obs-studio
+sudo apt-get update
+sudo apt-get install ffmpeg obs-studio
+```
+
+ビルドツールをインストールします。
+
+```
+sudo apt-get install build-essential cmake checkinstall
+```
+
+最後に Qt のライブラリを
+
+```
+sudo apt-get install qtbase5-dev
+```
+
+
 #### ビルドする
 
+```
+mkdir build
+cd build
+cmake \
+-DCMAKE_BUILD_TYPE=Release \
+..
+make
+```
+
 #### パッケージをまとめる
+
+sudo checkinstall -D \
+--pkgname=obs-rtmp-nicolive \
+--pkgversion=1.0 \
+--pkgrelease=0ubuntu \
+--pkglicense=MIT \
+--pkggroup=obs-studio \
+--maintainer=open@raccy.org \
+--requires=obs-studio \
+--nodoc
+
+
+
 
 
 ```
