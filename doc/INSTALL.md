@@ -264,6 +264,10 @@ make
 
 #### パッケージをまとめる
 
+sudo ../tools/ubuntu/make_package.sh
+
+
+
 sudo checkinstall -D \
 --pkgname=obs-rtmp-nicolive \
 --pkgversion=1.0 \
