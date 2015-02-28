@@ -3,7 +3,7 @@
 # make package tool for obs-rtmp-nicolive
 
 OBS_RTMP_NICOLIVE_VERSION=1.1
-PACAKGE_NAME=obs-rtmp-nicolive_${OBS_RTMP_NICOLIVE_VERSION}_osx
+PACAKGE_NAME=obs-rtmp-nicolive_${OBS_RTMP_NICOLIVE_VERSION}-osx
 
 DATA_DIR=../data
 PLUGIN_NAME=rtmp-nicolive
@@ -43,11 +43,9 @@ cp -R "../data" \
 # set rpath
 "${RUBY_EXE}" "${FIX_RPATH_RB}" "${PLUGIN_SO}"
 
-
-
 hdiutil create -ov -srcfolder "${PACAKGE_NAME}" -fs HFS+ -format UDBZ \
   -volname "obs-studio rtmp-nicolive" "${PACAKGE_NAME}.dmg"
 
-echo Succeeded to create package.
+echo "##### Succeeded to create package. #####"
 echo Read ${PACAKGE_NAME}/README.txt if you want to install this plugin.
 echo And you can deploy the ${PACAKGE_NAME}.dmg file!

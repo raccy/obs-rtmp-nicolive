@@ -160,7 +160,7 @@ CMake はパスを通しておく必要があります。コマンドプロン�
 
 「Release」フォルダに作成された dll をいれるだけですが、便利なまとめるツールがあります。「build」フォルダで `make_package.cmd` を実行して下さい。
 
-作成された「obs-rtmp-nicolive_*_win」フォルダの `README.txt` にインストール方法が記載されてます。なお、Ruby が無い場合は `REDAME.txt` は作成されませんのでご注意下さい。また、7-Zip がインストールされている場合は、7z アーカイブも同時に作成されます。
+作成された「obs-rtmp-nicolive_*-win」フォルダの `README.txt` にインストール方法が記載されてます。なお、Ruby が無い場合は `REDAME.txt` は作成されませんのでご注意下さい。また、7-Zip がインストールされている場合は、7z アーカイブも同時に作成されます。
 
 ### Mac
 
@@ -170,7 +170,7 @@ CMake はパスを通しておく必要があります。コマンドプロン�
 *   OBS MultiPlatform バイナリ:
     https://github.com/jp9000/obs-studio/releases から `OBS-MP-Win-*.zip` をダウンロードして、任意のフォルダに展開します。
 *   OBS MultiPlatform ソース:
-    https://github.com/jp9000/obs-studio/releases から `Source code (zip)` をダウンロードして、任意のフォルダに展開します。バイナリと同じバージョンを使用して下さい。
+    https://github.com/jp9000/obs-studio/releases から `Source code (tar.gz)` をダウンロードして、任意のフォルダに展開します。バイナリと同じバージョンを使用して下さい。
 *   Xcode / Command Line Tools
     App Store から Xcode をインストールして下さい。インストール後、Xcode 上で Command Line Tools をインストールして下さい。
 *   CMake:
@@ -200,7 +200,7 @@ CMake は HomeBrew でインストールすることもできます。
 mkdir build
 cd build
 cmake \
--DCMAKE_BUILD_TYPE=Debug \
+-DCMAKE_BUILD_TYPE=Release \
 -DCMAKE_PREFIX_PATH=~/Qt/5.3/clang_64/lib/cmake \
 -DOBS_SRC=~/src/obs-studio-0.8.3 \
 ..
@@ -211,13 +211,26 @@ make
 
 #### パッケージをまとめる
 
-パッケージをまとめるためのツールを用意しています。下記コマンドを実行して下さい。
+このまま `rtmp-niclovie.so` をインストールすることもできますが、依存パスが含まれているため、環境依存になります。パッケージをまとめるためのツールを用意しています。下記コマンドを実行して下さい。
 
 ```
 ../tools/osx/make_package.sh
 ```
 
+作成された「obs-rtmp-nicolive_*-osx」フォルダの `README.txt` にインストール方法が記載されてます。配付用の dmg アーカイブも同時に作成されます。
 
+### Ubuntu
+
+32bit/64bit 共通です。
+
+<!-- TODO: あとから -->
+
+#### 準備をする
+必要な物を用意します。
+
+#### ビルドする
+
+#### パッケージをまとめる
 
 
 ```

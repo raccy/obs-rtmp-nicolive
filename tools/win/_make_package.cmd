@@ -2,7 +2,7 @@
 rem make package tool for obs-rtmp-nicolive
 
 set OBS_RTMP_NICOLIVE_VERSION=1.1
-set PACAKGE_NAME=obs-rtmp-nicolive_1.1_win
+set PACAKGE_NAME=obs-rtmp-nicolive_%OBS_RTMP_NICOLIVE_VERSION%-win
 
 set BUILD32_DIR=..\build32
 set BUILD64_DIR=..\build64
@@ -42,7 +42,7 @@ xcopy "%DATA_DIR%\*" "%PACAKGE_NAME%\data\obs-plugins\%PLUGIN_NAME%" /s /i
 "%SEVEN_ZIP_EXE%" a -r "%PACAKGE_NAME%.7z" "%PACAKGE_NAME%"
 
 echo ##### Succeeded to create package. #####
-echo You read %PACAKGE_NAME%\README.txt if you want to install this plugin.
+echo Read %PACAKGE_NAME%\README.txt if you want to install this plugin.
 echo And you can deploy the %PACAKGE_NAME%.7z file!
 pause
 
