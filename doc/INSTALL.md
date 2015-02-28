@@ -48,7 +48,7 @@ sudo apt-get update && sudo apt-get install obs-studio
 https://github.com/raccy/obs-rtmp-nicolive/releases から 64bit を使用している場合は `obs-rtmp-nicolive_*-ubuntu_amd64.deb` を、32bit を使用している場合は `obs-rtmp-nicolive_*-ubuntu_i386.deb` をダウンロードします。下記コマンドでダウンロードした deb ファイルをインストールします。
 
 ```
-dpgk -i obs-rtmp-nicolive_*-ubuntu_*.deb
+sudo dpkg -i obs-rtmp-nicolive_*-ubuntu_*.deb
 ```
 
 OBS MultiPlatform と一緒にコンパイルする方法
@@ -188,6 +188,8 @@ Qt は OBS MultiPlatform バイナリ に含まれる Qt のライブラリと�
 
 CMake は HomeBrew でインストールすることもできます。
 
+続いて、https://github.com/raccy/obs-rtmp-nicolive/releases から `Source code (tar.gz)` をダウンロードして、任意のディレクトリに展開します。
+
 #### ビルドする
 
 もし、OBS MultiPlatform をビルドしたことがある環境である場合は、CMake のキャッシュを削除しておく必要があります。下記フォルダを削除して下さい。
@@ -223,8 +225,6 @@ make
 
 32bit/64bit 共通です。
 
-<!-- TODO: あとから -->
-
 #### 準備をする
 必要な物を用意します。
 
@@ -244,14 +244,17 @@ sudo apt-get install ffmpeg obs-studio
 sudo apt-get install build-essential cmake checkinstall
 ```
 
-最後に Qt のライブラリを
+Qt の開発環境をインストールします。
 
 ```
 sudo apt-get install qtbase5-dev
 ```
 
+続いて、https://github.com/raccy/obs-rtmp-nicolive/releases から `Source code (tar.gz)` をダウンロードして、任意のディレクトリに展開します。
 
 #### ビルドする
+
+ターミナルで、展開したソースのディレクトリに移動します。下記コマンドを実行します。
 
 ```
 mkdir build
@@ -264,85 +267,10 @@ make
 
 #### パッケージをまとめる
 
+checkinstall を使って、パッケージを作成します。パッケージ作成ツールを用意していますので、下記コマンドを実行します。
+
+```
 sudo ../tools/ubuntu/make_package.sh
-
-
-
-sudo checkinstall -D \
---pkgname=obs-rtmp-nicolive \
---pkgversion=1.0 \
---pkgrelease=0ubuntu \
---pkglicense=MIT \
---pkggroup=obs-studio \
---maintainer=open@raccy.org \
---requires=obs-studio \
---nodoc
-
-
-
-
-
-```
-cmake \
--DCMAKE_BUILD_TYPE=Release \
--DCMAKE_PREFIX_PATH=~/QT/5.4/clang_64/lib/cmake/ \
--DOBS_SRC=`pwd`/../../obs-studio-0.8.2 \
-..
-```
-cmake \
--DCMAKE_BUILD_TYPE=Release \
--DCMAKE_PREFIX_PATH=~/QT/5.4/clang_64/lib/cmake/ \
--DOBS_SRC=`pwd`/../.. \
-..
-
-
--DOBS_APP=/Applications/OBS.app \
-
-
-## Win
-
-cmake -G"Visual Studio 12 2013 Win64" -DCMAKE_PREFIX_PATH=C:/Qt/Qt5.4.1_64/5.4/msvc2013_64_opengl/lib/cmake -DCMAKE_BUILD_TYPE=Release -DOBS_SRC=Z:/project/rtmp-nicolive/obs-studio-0.8.2 -DOBS_APP=C:/Applications/OBS-MP-Win-0.8.2 ..
-
-cmake -DCMAKE_PREFIX_PATH=C:/Qt/Qt5.4.1/5.4/msvc2013_opengl/lib/cmake -DCMAKE_BUILD_TYPE=Release -DOBS_SRC=Z:/project/rtmp-nicolive/obs-studio-0.8.3 -DOBS_APP=C:/Applications/OBS-MP-Win-0.8.3 ..
-
-
--GVisual Studio 12 2013 Win64
-
-cmake -G"Visual Studio 12 2013 Win64" -DCMAKE_PREFIX_PATH=C:/Qt/Qt5.4.1_64/5.4/msvc2013_64_opengl/lib/cmake -DCMAKE_BUILD_TYPE=Release -DOBS_SRC=Z:/project/rtmp-nicolive/obs-studio-0.8.2 -DOBS_APP=C:/Applications/OBS-MP-Win-0.8.2 ..
-
-cmake -DCMAKE_PREFIX_PATH=C:/Qt/Qt5.4.1/5.4/msvc2013_opengl/lib/cmake -DCMAKE_BUILD_TYPE=Release -DOBS_SRC=Z:/project/rtmp-nicolive/obs-studio-0.8.2 -DOBS_APP=C:/Applications/OBS-MP-Win-0.8.2 ..
-
-上のでうまくいくはず。
-
-cmake -DCMAKE_PREFIX_PATH=C:/Qt/5.4/msvc2013_opengl/lib/cmake -DOBS_SRC=Z:/project/rtmp-nicolive/obs-studio-0.8.3 -DOBS_APP=C:/Applications/OBS-MP-Win-0.8.3 ..
-
-cmake -DCMAKE_PREFIX_PATH=C:/Qt/5.4/msvc2013_opengl/lib/cmake -DOBS_SRC=Z:/project/rtmp-nicolive/obs-studio-0.8.2 -DOBS_APP=C:/Applications/OBS-MP-Win-0.8.2 ..
-
-cmake -DCMAKE_PREFIX_PATH=C:/Qt/5.4/msvc2013_opengl/lib/cmake -DOBS_SRC=Z:/project/rtmp-nicolive/obs-studio-0.8.2 -DOBS_APP=C:/Applications/OBS-MP-Win-0.8.2 ..
-```
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=C:/Qt/5.4/msvc2013_64_opengl/lib/cmake -DOBS_SRC=Z:/project/rtmp-nicolive/obs-studio-0.8.2 -DOBS_APP=C:/Applications/OBS-MP-Win-0.8.2 ..
-
-cmake -G"Visual Studio 12 2013 Win64" -D CMAKE_PREFIX_PATH=C:/Qt/5.4/msvc2013_64_opengl/lib/cmake -D OBS_SRC=Z:/project/rtmp-nicolive/obs-studio-0.8.2 -D OBS_APP=C:/Applications/OBS-MP-Win-0.8.2 ..
-
-
-OBS_SRC=
 ```
 
-DCMAKE_BUILD_TYPE=Release
-cmake . -G" Visual Studio 12 2013 Win64"
-
-
-### Ubuntu
-
-cmake -DCMAKE_BUILD_TYPE=Release ..
-
-
-sudo checkinstall -D \
---pkgname=obs-rtmp-nicolive \
---pkgversion=1.0 \
---pkgrelease=0ubuntu \
---pkglicense=MIT \
---pkggroup=obs-studio \
---maintainer=open@raccy.org \
---requires=obs-studio \
---nodoc
+`obs-rtmp-nicolive_*-ubuntu_*.deb` が作成されます。deb パッケージとしてインストール可能です。なお、checkinstallでは、同時にバイナリがインストールされますので、ご注意下さい。

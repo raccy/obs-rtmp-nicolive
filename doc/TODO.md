@@ -14,11 +14,11 @@
 
 * [x] 0.8.3に対応する。
 * [x] OBSとは独立してコンパイルできるようにする。
-    * [x] Windows (β)
-    * [x] Mac OS X (β)
-    * [x] Ubuntu Linux (α)
+    * [x] Windows
+    * [x] Mac OS X
+    * [x] Ubuntu Linux
 * [x] 配付用バイナリを作る手順を確立する。
-    * [x] Windows (β)
-    * [x] Mac OS X (β)
-    * [x] Ubuntu Linux (α)
+    * [x] Windows
+    * [x] Mac OS X
+    * [x] Ubuntu Linux
 * [ ] プラグインインストーラ作る。
