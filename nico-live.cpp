@@ -436,10 +436,12 @@ bool NicoLive::loadViqoSettings()
 	}
 
 	QString viqo_data_dir = dir[0];
-	int index_obs = viqo_data_dir.lastIndexOf("obs");
-	if (index_obs >= 0) {
-		// obs -> Viqo
-		viqo_data_dir.replace(index_obs, 3, "Viqo");
+	int last_sep_index = viqo_data_dir.lastIndexOf(QDir::separator());
+	if (last_sep_index >= 0) {
+		// last name -> Viqo
+		viqo_data_dir.replace(last_sep_index + 1,
+				viqo_data_dir.length() - last_sep_index - 1,
+				"Viqo");
 	} else {
 		nicolive_log_error("found invalid save directory");
 		this->flags.load_viqo = false;
