@@ -299,6 +299,13 @@ static const char *rtmp_nicolive_key(void *data)
 	return nicolive_get_live_key(data);
 }
 
+static bool rtmp_nicolive_supports_multitrack(void *data)
+{
+	UNUSED_PARAMETER(data);
+	return false;
+}
+
+
 struct obs_service_info rtmp_nicolive_service = {
 	.id             = "rtmp_nicolive",
 	.get_name       = rtmp_nicolive_getname,
@@ -311,7 +318,8 @@ struct obs_service_info rtmp_nicolive_service = {
 	.get_defaults   = rtmp_nicolive_defaults,
 	.get_properties = rtmp_nicolive_properties,
 	.get_url        = rtmp_nicolive_url,
-	.get_key        = rtmp_nicolive_key
+	.get_key        = rtmp_nicolive_key,
+	.supports_multitrack = rtmp_nicolive_supports_multitrack
 };
 
 /* module initialize */
