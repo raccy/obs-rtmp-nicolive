@@ -305,7 +305,6 @@ static bool rtmp_nicolive_supports_multitrack(void *data)
 	return false;
 }
 
-
 struct obs_service_info rtmp_nicolive_service = {
 	.id             = "rtmp_nicolive",
 	.get_name       = rtmp_nicolive_getname,
