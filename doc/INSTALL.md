@@ -203,8 +203,8 @@ mkdir build
 cd build
 cmake \
 -DCMAKE_BUILD_TYPE=Release \
--DCMAKE_PREFIX_PATH=~/Qt/5.3/clang_64/lib/cmake \
--DOBS_SRC=~/src/obs-studio-0.8.3 \
+-DCMAKE_PREFIX_PATH=~/Qt/5.4/clang_64/lib/cmake \
+-DOBS_SRC=~/src/obs-studio-0.9.1 \
 ..
 make
 ```

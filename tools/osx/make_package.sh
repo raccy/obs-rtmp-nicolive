@@ -2,7 +2,7 @@
 
 # make package tool for obs-rtmp-nicolive
 
-OBS_RTMP_NICOLIVE_VERSION=1.1
+OBS_RTMP_NICOLIVE_VERSION=1.2
 PACAKGE_NAME=obs-rtmp-nicolive_${OBS_RTMP_NICOLIVE_VERSION}-osx
 
 DATA_DIR=../data
