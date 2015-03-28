@@ -436,7 +436,7 @@ bool NicoLive::loadViqoSettings()
 	}
 
 	QString viqo_data_dir = dir[0];
-	int last_sep_index = viqo_data_dir.lastIndexOf(QDir::separator());
+	int last_sep_index = viqo_data_dir.lastIndexOf('/');
 	if (last_sep_index >= 0) {
 		// last name -> Viqo
 		viqo_data_dir.replace(last_sep_index + 1,
