@@ -44,6 +44,7 @@ endif(NOT BUILD_IN_OBS)
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Network REQUIRED)
+find_package(Libcurl REQUIRED)
 
 # header and library
 if(NOT BUILD_IN_OBS AND NOT LibObs_FOUND)
@@ -74,6 +75,7 @@ target_link_libraries(rtmp-nicolive
 	Qt5::Core
 	Qt5::Widgets
 	Qt5::Network
+	${LIBCURL_LIBRARIES}
 	libobs)
 
 if(BUILD_IN_OBS)

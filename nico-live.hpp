@@ -11,6 +11,7 @@ class NicoLive : public QObject {
 	friend class NicoLiveWatcher;
 public:
 	static const QUrl LOGIN_URL;
+	static const QUrl NLE_LOGIN_URL;
 	static const QUrl PUBSTAT_URL;
 	static const QString FMEPROF_URL_PRE;
 private:
@@ -85,6 +86,8 @@ private:
 	QByteArray getWeb(const QUrl);
 	// Access Niconico Site
 	bool siteLogin();
+	const QString siteLoginNLE(const QString &mail,
+			const QString &password) const;
 	bool sitePubStat();
 	bool siteLiveProf();
 	bool parseXml(QXmlStreamReader &reader, QHash<QString, QString> &hash);

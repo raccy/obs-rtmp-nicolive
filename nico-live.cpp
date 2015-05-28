@@ -7,6 +7,8 @@
 
 const QUrl NicoLive::LOGIN_URL =
 		QUrl("https://secure.nicovideo.jp/secure/login?site=nicolive");
+const QUrl NicoLive::NLE_LOGIN_URL =
+		QUrl("https://account.nicovideo.jp/api/v1/login");
 const QUrl NicoLive::PUBSTAT_URL =
 		QUrl("http://live.nicovideo.jp/api/getpublishstatus");
 const QString NicoLive::FMEPROF_URL_PRE =
@@ -280,6 +282,39 @@ bool NicoLive::siteLogin()
 	}
 
 	return success;
+}
+
+const QString NicoLive::siteLoginNLE(const QString &mail,
+		const QString &password) const
+{
+	QString ticket;
+	if (mail.isEmpty() || password.isEmpty()) {
+		return ticket;
+	}
+
+	// libcurl 実装に書き直す
+
+	// QNetworkRequest rq(NicoLive::NLE_LOGIN_URL);
+	// rq.setHeader(QNetworkRequest::ContentTypeHeader,
+	// 		"application/x-www-form-urlencoded");
+	//
+	// QUrlQuery params;
+	// site: nicolive_encoder
+	// params.addQueryItem("site", "nicolive_encoder");
+	// params.addQueryItem("time", QDateTime::currentDateTime().);
+	// params.addQueryItem("mail", QUrl::toPercentEncoding(mail));
+	// params.addQueryItem("password",
+	// 		QUrl::toPercentEncoding(password));
+	//
+	// QNetworkReply *netReply = this->qnam->post(rq,
+	// 		params.toString(QUrl::FullyEncoded).toUtf8());
+	//
+	// nicolive_log_info("login start");
+
+
+
+
+	return ticket;
 }
 
 /*
