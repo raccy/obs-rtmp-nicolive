@@ -1,5 +1,7 @@
+#include <string>
 #include <QtCore>
 #include <QtNetwork>
+#include <curl/curl.h>
 #include "nicolive.h"
 #include "nico-live.hpp"
 #include "nico-live-watcher.hpp"
@@ -292,27 +294,50 @@ const QString NicoLive::siteLoginNLE(const QString &mail,
 		return ticket;
 	}
 
-	// libcurl 実装に書き直す
+	std::string write_data;
+	const char *post_data = "setxxx";
+	const char *url = NicoLive::NLE_LOGIN_URL.toString().toStdString().c_str();
 
-	// QNetworkRequest rq(NicoLive::NLE_LOGIN_URL);
-	// rq.setHeader(QNetworkRequest::ContentTypeHeader,
-	// 		"application/x-www-form-urlencoded");
-	//
-	// QUrlQuery params;
-	// site: nicolive_encoder
-	// params.addQueryItem("site", "nicolive_encoder");
-	// params.addQueryItem("time", QDateTime::currentDateTime().);
-	// params.addQueryItem("mail", QUrl::toPercentEncoding(mail));
-	// params.addQueryItem("password",
-	// 		QUrl::toPercentEncoding(password));
-	//
-	// QNetworkReply *netReply = this->qnam->post(rq,
-	// 		params.toString(QUrl::FullyEncoded).toUtf8());
-	//
-	// nicolive_log_info("login start");
+	CURL *curl;
+	CURLcode res;
 
+	curl_global_init(CURL_GLOBAL_DEFAULT);
 
+	curl = curl_easy_init();
+	if (curl) {
+		curl_easy_setopt(curl, CURLOPT_URL, url);
 
+		// TODO: read system...
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &write_data);
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
+				[](char *ptr, size_t size, size_t nmemb,
+				void *userdata) -> size_t {
+			size_t length = size * nmemb;
+			std::string *str = (std::string *)userdata;
+			str->append(ptr, length);
+			return length;
+		});
+
+		// TODO: no verify ssl
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE,
+				(long)strlen(post_data));
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_data);
+
+		res = curl_easy_perform(curl);
+		if (res != CURLE_OK) {
+			nicolive_log_error("curl failed: %s\n",
+					curl_easy_strerror(res));
+		}
+		curl_easy_cleanup(curl);
+	}
+	curl_global_cleanup();
+
+	if (! write_data.empty()) {
+		ticket = QString::fromStdString(write_data);
+	}
 
 	return ticket;
 }
