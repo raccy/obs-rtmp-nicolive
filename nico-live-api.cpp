@@ -1,5 +1,6 @@
 #include <string>
 #include <map>
+#include <sstream>
 #include <iomanip>
 #include <ios>
 #include "nico-live-api.hpp"
@@ -39,7 +40,7 @@ bool NicoLiveApi::parseXml(
 {}
 std::string urlEncode(const std::string str)
 {
-	std::string encStr;
+	std::stringstream stream;
 	for (const char &ch: str) {
 		if (0x20 <= ch && ch <= 0x7F) {
 			switch (ch) {
@@ -47,23 +48,30 @@ std::string urlEncode(const std::string str)
 			case '=':
 			case '+':
 			case '%':
-				encStr += '%';
-				encStr << std::setw(2)
-					<< std::setfill(0)
+				stream << '%';
+				stream << std::setfill ('0')
+					<< std::setw(2)
 					<< std::hex
 					<< std::uppercase
 					<< (int)ch;
 				break;
 			case ' ':
-				encStr += '+';
+				stream << '+';
 				break;
 			default:
-				;
+				stream << ch;
 			}
 		} else {
-
+			stream << '%';
+			stream << std::setfill ('0')
+				<< std::setw(2)
+				<< std::hex
+				<< std::uppercase
+				<< (int)ch;
+			break;
 		}
 	}
+	return stream.str();
 }
 
 // instance
