@@ -1,7 +1,8 @@
 #pragma once
 
 #include <string>
-#include <map>
+#include <unordered_map>
+#include <vector>
 
 class NicoLiveApi {
 public:
@@ -9,16 +10,17 @@ public:
 	static const std::string LOGIN_API_URL;
 	static const std::string PUBSTAT_URL;
 	static std::string createWwwFormUrlencoded(
-		const std::multimap<std::string, std::string> &formData);
+		const std::unordered_map<std::string, std::string> &formData);
 	static std::string createCookieString(
-		const std::map<std::string, std::string> &cookie);
+		const std::unordered_map<std::string, std::string> &cookie);
 	static bool parseXml(
 		const std::string &xml,
-		std::multimap<std::string, std::string> *data);
+		std::unordered_map<std::string, std::vector<std::string>>
+			*data);
 	static std::string urlEncode(const std::string str);
 
 private:
-	std::map<std::string, std::string> cookie;
+	std::unordered_map<std::string, std::string> cookie;
 
 public:
 	NicoLiveApi();
@@ -37,7 +39,7 @@ public:
 		std::string *response);
 	bool postWeb(
 		const std::string &url,
-		const std::multimap<std::string, std::string> &formData,
+		const std::unordered_map<std::string, std::string> &formData,
 		int *code,
 		std::string *response);
 
@@ -61,8 +63,8 @@ public:
 		const std::string mail,
 		const std::string password);
 	bool getPublishStatus(
-		std::multimap<std::string, std::string>);
+		std::unordered_map<std::string, std::string>);
 	bool getPublishStatusTicket(
 		const std::string &ticket,
-		std::multimap<std::string, std::string> *data);
+		std::unordered_map<std::string, std::string> *data);
 };

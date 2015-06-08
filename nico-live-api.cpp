@@ -1,5 +1,5 @@
 #include <string>
-#include <map>
+#include <unordered_map>
 #include <sstream>
 #include <iomanip>
 #include <ios>
@@ -15,7 +15,7 @@ const std::string NicoLiveApi::PUBSTAT_URL =
 	"http://live.nicovideo.jp/api/getpublishstatus";
 
 std::string NicoLiveApi::createWwwFormUrlencoded(
-	const std::multimap<std::string, std::string> &formData)
+	const std::unordered_map<std::string, std::string> &formData)
 {
 	std::string encodedData;
 	for (auto &data: formData) {
@@ -30,14 +30,45 @@ std::string NicoLiveApi::createWwwFormUrlencoded(
 }
 
 std::string NicoLiveApi::createCookieString(
-	const std::map<std::string, std::string> &cookie)
+	const std::unordered_map<std::string, std::string> &cookie)
 {
+	std::string cookieStr;
+	for (auto &data: cookie) {
+		if (!cookieStr.empty()) {
+			cookieStr += "; ";
+		}
+		cookieStr += data.first;
+		cookieStr += "=";
+		cookieStr += data.second;
+	}
+	return cookieStr;
 }
 
 bool NicoLiveApi::parseXml(
 	const std::string &xml,
-	std::multimap<std::string, std::string> *data)
-{}
+	std::unordered_map<std::string, std::vector<std::string>> *data)
+{
+	pugi::xml_document doc;
+	pugi::xml_parse_result result = doc.load_string(xml.c_str());
+	if (result.status != pugi::status_ok) {
+		return false;
+	}
+	for (auto &entry: *data) {
+		pugi::xpath_node_set nodes =
+			doc.select_nodes(entry.first.c_str());
+		for (auto &node: nodes) {
+			if (node.node() != nullptr) {
+				entry.second.push_back(std::string(
+					node.node().text().get()));
+			} else {
+				entry.second.push_back(std::string(
+					node.attribute().value()));
+			}
+		}
+	}
+	return true;
+}
+
 std::string urlEncode(const std::string str)
 {
 	std::stringstream stream;
@@ -94,7 +125,7 @@ bool NicoLiveApi::getWeb(
 {}
 bool NicoLiveApi::postWeb(
 	const std::string &url,
-	const std::multimap<std::string, std::string> &formData,
+	const std::unordered_map<std::string, std::string> &formData,
 	int *code,
 	std::string *response)
 {}
@@ -122,9 +153,9 @@ std::string NicoLiveApi::loginNicoliveEncoder(
 	const std::string password)
 {}
 bool NicoLiveApi::getPublishStatus(
-	std::multimap<std::string, std::string>)
+	std::unordered_map<std::string, std::string>)
 {}
 bool NicoLiveApi::getPublishStatusTicket(
 	const std::string &ticket,
-	std::multimap<std::string, std::string> *data)
+	std::unordered_map<std::string, std::string> *data)
 {}
