@@ -106,18 +106,30 @@ std::string urlEncode(const std::string str)
 }
 
 // instance
-NicoLiveApi::NicoLiveApi()
-{}
-NicoLiveApi::~NicoLiveApi()
-{}
+NicoLiveApi::NicoLiveApi() {}
+
+NicoLiveApi::~NicoLiveApi() {}
+
 void NicoLiveApi::setCookie(const std::string &name, const std::string &value)
-{}
+{
+	this->cookie[name] = value;
+}
+
 void NicoLiveApi::deleteCookie(const std::string &name)
-{}
+{
+	this->cookie.erase(name);
+}
+
 void NicoLiveApi::clearCookie()
-{}
+{
+	this->cookie.clear();
+}
+
 const std::string NicoLiveApi::getCookie(const std::string &name) const
-{}
+{
+	return this->cookie.at(name);
+}
+
 bool NicoLiveApi::getWeb(
 	const std::string &url,
 	int *code,
