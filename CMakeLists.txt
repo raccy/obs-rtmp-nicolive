@@ -61,6 +61,8 @@ if(NOT BUILD_IN_OBS AND NOT LibObs_FOUND)
 endif(NOT BUILD_IN_OBS AND NOT LibObs_FOUND)
 
 set(rtmp-nicolive_SOURCES
+	pugixml/src/pugixml.cpp
+	ncio-live-api.cpp
 	nico-live.cpp
 	nico-live-watcher.cpp
 	nico-live-cmd-server.cpp
