@@ -5,6 +5,10 @@
 #include <vector>
 
 class NicoLiveApi {
+	enum class Method {
+		GET,
+		POST,
+	};
 public:
 	static const std::string LOGIN_SITE_URL;
 	static const std::string LOGIN_API_URL;
@@ -18,6 +22,8 @@ public:
 		std::unordered_map<std::string, std::vector<std::string>>
 			*data);
 	static std::string urlEncode(const std::string str);
+	static size_t writeString(char *ptr, size_t size, size_t nmemb,
+		void *userdata);
 
 private:
 	std::unordered_map<std::string, std::string> cookie;
@@ -33,6 +39,12 @@ public:
 	const std::string getCookie(const std::string &name) const;
 
 	// Generic
+	bool accessWeb(
+		const std::string &url,
+		const Method &method,
+		const std::unordered_map<std::string, std::string> &formData,
+		int *code,
+		std::string *response);
 	bool getWeb(
 		const std::string &url,
 		int *code,
