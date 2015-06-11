@@ -266,39 +266,81 @@ bool NicoLiveApi::getWeb(
 	const std::string &url,
 	int *code,
 	std::string *response)
-{}
+{
+	unordered_map<std::string, std::stirng> formData;
+	return this->accessWeb(url, NicoLiveApi::Method::GET,
+		formData, code, response);
+}
 
 bool NicoLiveApi::postWeb(
 	const std::string &url,
 	const std::unordered_map<std::string, std::string> &formData,
 	int *code,
 	std::string *response)
-{}
+{
+	return this->accessWeb(url, NicoLiveApi::Method::POST,
+		formData, code, response);
+}
+
 bool NicoLiveApi::loginSite(
-	const std::string site,
-	const std::string mail,
-	const std::string password)
-{}
+	const std::string &site,
+	const std::string &mail,
+	const std::string &password)
+{
+	std::string url;
+	url += NicoLiveApi::LOGIN_SITE_URL;
+	url += "?site="
+	url += NicoLiveApi::urlEnocde(site);
+	unordered_map<std::string, std::stirng> formData;
+	formData["mail"] = mail;
+	formData["password"] = password;
+
+	int code = 0;
+	std::string response;
+
+	this->clearCookie();
+
+	bool result = this->postWeb(url, formData, &code, &response);
+	if (result) {
+		if (code = 302) {
+			if (this->getCookie("user_session")
+					.find("user_session_") == 0) {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	} else {
+		return false;
+	}
+}
+
 std::string NicoLiveApi::loginSiteTicket(
-	const std::string site,
-	const std::string mail,
-	const std::string password)
+	const std::string &site,
+	const std::string &mail,
+	const std::string &password)
 {}
+
 bool NicoLiveApi::loginSiteNicolive(
-	const std::string mail,
-	const std::string password)
-{}
+	const std::string &mail,
+	const std::string &password)
+{
+	return this->loginSite("nicolive", mail, password);
+}
+
 std::string NicoLiveApi::loginApiTicket(
-	const std::string site,
-	const std::string mail,
-	const std::string password)
+	const std::string &site,
+	const std::string &mail,
+	const std::string &password)
 {}
 std::string NicoLiveApi::loginNicoliveEncoder(
-	const std::string mail,
-	const std::string password)
+	const std::string &mail,
+	const std::string &password)
 {}
 bool NicoLiveApi::getPublishStatus(
-	std::unordered_map<std::string, std::string>)
+	std::unordered_map<std::string, std::string> *data)
 {}
 bool NicoLiveApi::getPublishStatusTicket(
 	const std::string &ticket,
