@@ -5,6 +5,7 @@
 
 class NicoLiveWatcher;
 class NicoLiveCmdServer;
+class NicoLiveApi;
 
 class NicoLive : public QObject {
 	Q_OBJECT
@@ -45,6 +46,7 @@ private:
 	QNetworkAccessManager* qnam;
 	NicoLiveWatcher *watcher;
 	NicoLiveCmdServer *cmd_server;
+	NicoLiveApi *webApi;
 public:
 	NicoLive(QObject *parent = 0);
 	~NicoLive();
@@ -86,8 +88,8 @@ private:
 	QByteArray getWeb(const QUrl);
 	// Access Niconico Site
 	bool siteLogin();
-	const QString siteLoginNLE(const QString &mail,
-			const QString &password) const;
+	// const QString siteLoginNLE(const QString &mail,
+	// 		const QString &password) const;
 	bool sitePubStat();
 	bool siteLiveProf();
 	bool parseXml(QXmlStreamReader &reader, QHash<QString, QString> &hash);

@@ -21,7 +21,7 @@ public:
 		const std::string &xml,
 		std::unordered_map<std::string, std::vector<std::string>>
 			*data);
-	static std::string urlEncode(const std::string str);
+	static std::string urlEncode(const std::string &str);
 	static size_t writeString(char *ptr, size_t size, size_t nmemb,
 		void *userdata);
 
@@ -75,7 +75,8 @@ public:
 	// 	const std::string &mail,
 	// 	const std::string &password);
 	bool getPublishStatus(
-		std::unordered_map<std::string, std::string> *data);
+		std::unordered_map<std::string,
+		std::vector<std::string>> *data);
 	// bool getPublishStatusTicket(
 	// 	const std::string &ticket,
 	// 	std::unordered_map<std::string, std::string> *data);

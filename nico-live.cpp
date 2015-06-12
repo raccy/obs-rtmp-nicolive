@@ -6,6 +6,7 @@
 #include "nico-live.hpp"
 #include "nico-live-watcher.hpp"
 #include "nico-live-cmd-server.hpp"
+#include "nico-live-api.hpp"
 
 const QUrl NicoLive::LOGIN_URL =
 		QUrl("https://secure.nicovideo.jp/secure/login?site=nicolive");
@@ -22,10 +23,12 @@ NicoLive::NicoLive(QObject *parent)
 	qnam = new QNetworkAccessManager(this);
 	watcher = new NicoLiveWatcher(this);
 	cmd_server = new NicoLiveCmdServer(this);
+	webApi = new NicoLiveApi();
 }
 
 NicoLive::~NicoLive()
 {
+	delete webApi;
 }
 
 void NicoLive::setSession(const QString &session)
@@ -286,61 +289,61 @@ bool NicoLive::siteLogin()
 	return success;
 }
 
-const QString NicoLive::siteLoginNLE(const QString &mail,
-		const QString &password) const
-{
-	QString ticket;
-	if (mail.isEmpty() || password.isEmpty()) {
-		return ticket;
-	}
-
-	std::string write_data;
-	const char *post_data = "setxxx";
-	const char *url = NicoLive::NLE_LOGIN_URL.toString().toStdString().c_str();
-
-	CURL *curl;
-	CURLcode res;
-
-	curl_global_init(CURL_GLOBAL_DEFAULT);
-
-	curl = curl_easy_init();
-	if (curl) {
-		curl_easy_setopt(curl, CURLOPT_URL, url);
-
-		// TODO: read system...
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &write_data);
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
-				[](char *ptr, size_t size, size_t nmemb,
-				void *userdata) -> size_t {
-			size_t length = size * nmemb;
-			std::string *str = (std::string *)userdata;
-			str->append(ptr, length);
-			return length;
-		});
-
-		// TODO: no verify ssl
-		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE,
-				(long)strlen(post_data));
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_data);
-
-		res = curl_easy_perform(curl);
-		if (res != CURLE_OK) {
-			nicolive_log_error("curl failed: %s\n",
-					curl_easy_strerror(res));
-		}
-		curl_easy_cleanup(curl);
-	}
-	curl_global_cleanup();
-
-	if (! write_data.empty()) {
-		ticket = QString::fromStdString(write_data);
-	}
-
-	return ticket;
-}
+// const QString NicoLive::siteLoginNLE(const QString &mail,
+// 		const QString &password) const
+// {
+// 	QString ticket;
+// 	if (mail.isEmpty() || password.isEmpty()) {
+// 		return ticket;
+// 	}
+//
+// 	std::string write_data;
+// 	const char *post_data = "setxxx";
+// 	const char *url = NicoLive::NLE_LOGIN_URL.toString().toStdString().c_str();
+//
+// 	CURL *curl;
+// 	CURLcode res;
+//
+// 	curl_global_init(CURL_GLOBAL_DEFAULT);
+//
+// 	curl = curl_easy_init();
+// 	if (curl) {
+// 		curl_easy_setopt(curl, CURLOPT_URL, url);
+//
+// 		// TODO: read system...
+// 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &write_data);
+// 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
+// 				[](char *ptr, size_t size, size_t nmemb,
+// 				void *userdata) -> size_t {
+// 			size_t length = size * nmemb;
+// 			std::string *str = (std::string *)userdata;
+// 			str->append(ptr, length);
+// 			return length;
+// 		});
+//
+// 		// TODO: no verify ssl
+// 		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+// 		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+//
+// 		curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE,
+// 				(long)strlen(post_data));
+// 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_data);
+//
+// 		res = curl_easy_perform(curl);
+// 		if (res != CURLE_OK) {
+// 			nicolive_log_error("curl failed: %s\n",
+// 					curl_easy_strerror(res));
+// 		}
+// 		curl_easy_cleanup(curl);
+// 	}
+// 	curl_global_cleanup();
+//
+// 	if (! write_data.empty()) {
+// 		ticket = QString::fromStdString(write_data);
+// 	}
+//
+// 	return ticket;
+// }
 
 /*
 original code by https://github.com/diginatu/Viqo

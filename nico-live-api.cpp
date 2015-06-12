@@ -72,7 +72,7 @@ bool NicoLiveApi::parseXml(
 	return true;
 }
 
-std::string urlEncode(const std::string str)
+std::string NicoLiveApi::urlEncode(const std::string &str)
 {
 	std::stringstream stream;
 	for (const char &ch: str) {
@@ -112,7 +112,6 @@ size_t NicoLiveApi::writeString(char *ptr, size_t size, size_t nmemb,
 	void *userdata)
 {
 	size_t length = size * nmemb;
-	std::cerr << length << std::endl;
 	std::string *str = static_cast<std::string *>(userdata);
 	str->append(ptr, length);
 	return length;
@@ -220,7 +219,7 @@ bool NicoLiveApi::accessWeb(
 	// Cookie
 	if (! this->cookie.empty()) {
 		curl_easy_setopt(curl, CURLOPT_COOKIE,
-			NicoLiveApi::createCookieString(this->cookie).c_str())
+			NicoLiveApi::createCookieString(this->cookie).c_str());
 	}
 
 	// POST data
@@ -245,11 +244,11 @@ bool NicoLiveApi::accessWeb(
 
 	// Get code and set cookie
 	std::istringstream isHeader(headerData);
-	std::regex httpRe("HTTP/\d+\.\d+\s+(\d+)\s.*",
+	std::regex httpRe("HTTP/\\d+\\.\\d+\\s+(\\d+)\\s.*",
 		std::regex_constants::icase);
-	std::regex setCookieRe("Set-Cookie:\s+([^=]+)=([^;]+);.*",
+	std::regex setCookieRe("Set-Cookie:\\s+([^=]+)=([^;]+);.*",
 		std::regex_constants::icase);
-	std::match_results results;
+	std::smatch results;
 	for (std::string line; std::getline(isHeader, line); ) {
 		if (std::regex_match(line, results, httpRe)) {
 			*code = std::stoi(results[1]);
@@ -258,7 +257,7 @@ bool NicoLiveApi::accessWeb(
 		}
 	}
 
-	*response = writeData;
+	*response = bodyData;
 
 	return true;
 }
@@ -267,7 +266,7 @@ bool NicoLiveApi::getWeb(
 	int *code,
 	std::string *response)
 {
-	unordered_map<std::string, std::stirng> formData;
+	std::unordered_map<std::string, std::string> formData;
 	return this->accessWeb(url, NicoLiveApi::Method::GET,
 		formData, code, response);
 }
@@ -289,9 +288,9 @@ bool NicoLiveApi::loginSite(
 {
 	std::string url;
 	url += NicoLiveApi::LOGIN_SITE_URL;
-	url += "?site="
-	url += NicoLiveApi::urlEnocde(site);
-	unordered_map<std::string, std::stirng> formData;
+	url += "?site=";
+	url += NicoLiveApi::urlEncode(site);
+	std::unordered_map<std::string, std::string> formData;
 	// FIXME: mail_tel?
 	formData["mail"] = mail;
 	formData["password"] = password;
@@ -301,10 +300,10 @@ bool NicoLiveApi::loginSite(
 
 	this->clearCookie();
 
-	nicolive_log_info("login site: %s", site);
+	nicolive_log_info("login site: %s", site.c_str());
 	bool result = this->postWeb(url, formData, &code, &response);
 	if (result) {
-		if (code = 302) {
+		if (code == 302) {
 			// TODO: check redirect location?
 			if (this->getCookie("user_session")
 					.find("user_session_") == 0) {
@@ -348,7 +347,7 @@ bool NicoLiveApi::loginSiteNicolive(
 // 	const std::string &password)
 // {}
 bool NicoLiveApi::getPublishStatus(
-	std::unordered_map<std::string, std::string> *data)
+	std::unordered_map<std::string, std::vector<std::string>> *data)
 {
 	int code;
 	std::string response;
