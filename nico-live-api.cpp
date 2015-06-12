@@ -250,9 +250,13 @@ bool NicoLiveApi::accessWeb(
 		std::regex_constants::icase);
 	std::smatch results;
 	for (std::string line; std::getline(isHeader, line); ) {
+		nicolive_log_debug("header: %s", line.c_str());
 		if (std::regex_match(line, results, httpRe)) {
+			nicolive_log_debug("header httpRe: %s", line.c_str());
 			*code = std::stoi(results[1]);
 		} else if (std::regex_match(line, results, setCookieRe)) {
+			nicolive_log_debug("header setCookieRe: %s",
+				line.c_str());
 			this->cookie[results[1]] = results[2];
 		}
 	}
