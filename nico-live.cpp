@@ -230,63 +230,70 @@ bool NicoLive::siteLogin()
 		return false;
 	}
 
-	QNetworkRequest rq(NicoLive::LOGIN_URL);
-	rq.setHeader(QNetworkRequest::ContentTypeHeader,
-			"application/x-www-form-urlencoded");
-
-	QUrlQuery params;
-	params.addQueryItem("next_url", "");
-	params.addQueryItem("show_button_facebook", "0");
-	params.addQueryItem("show_button_twitter", "0");
-	params.addQueryItem("nolinks", "0");
-	params.addQueryItem("_use_valid_error_code", "0");
-	params.addQueryItem("mail", QUrl::toPercentEncoding(this->mail));
-	params.addQueryItem("password",
-			QUrl::toPercentEncoding(this->password));
-
-	QNetworkReply *netReply = qnam->post(rq,
-			params.toString(QUrl::FullyEncoded).toUtf8());
-
-	nicolive_log_info("login start");
-
-	// wait reply
-	QEventLoop loop;
-	connect(netReply, SIGNAL(finished()), &loop, SLOT(quit()));
-	loop.exec();
-
-	nicolive_log_info("login finished");
-
-	// finished reply
-	auto headers = netReply->rawHeaderPairs();
-
-	bool success = false;
-	foreach (auto header, headers) {
-		if (header.first == "Set-Cookie") {
-			auto cookies = QNetworkCookie::parseCookies(
-					header.second);
-			foreach (auto cookie, cookies) {
-				if (cookie.name() == "user_session" &&
-						cookie.value() != "deleted" &&
-						cookie.value() != "") {
-					this->session = cookie.value();
-					success = true;
-					break;
-				}
-			}
-			break;
-		}
+	bool result = this->webApi->loginSiteNicolive(this->mail.toStdString(),
+		this->password.toStdString());
+	if (result) {
+		this->session = this->webApi->getCookie("user_session").c_str();
 	}
-	netReply->deleteLater();
+	return result;
 
-	if (success) {
-		this->flags.session_valid = true;
-		nicolive_log_info("login succeeded");
-	} else {
-		this->flags.session_valid = false;
-		nicolive_log_warn("login failed");
-	}
-
-	return success;
+	// QNetworkRequest rq(NicoLive::LOGIN_URL);
+	// rq.setHeader(QNetworkRequest::ContentTypeHeader,
+	// 		"application/x-www-form-urlencoded");
+	//
+	// QUrlQuery params;
+	// params.addQueryItem("next_url", "");
+	// params.addQueryItem("show_button_facebook", "0");
+	// params.addQueryItem("show_button_twitter", "0");
+	// params.addQueryItem("nolinks", "0");
+	// params.addQueryItem("_use_valid_error_code", "0");
+	// params.addQueryItem("mail", QUrl::toPercentEncoding(this->mail));
+	// params.addQueryItem("password",
+	// 		QUrl::toPercentEncoding(this->password));
+	//
+	// QNetworkReply *netReply = qnam->post(rq,
+	// 		params.toString(QUrl::FullyEncoded).toUtf8());
+	//
+	// nicolive_log_info("login start");
+	//
+	// // wait reply
+	// QEventLoop loop;
+	// connect(netReply, SIGNAL(finished()), &loop, SLOT(quit()));
+	// loop.exec();
+	//
+	// nicolive_log_info("login finished");
+	//
+	// // finished reply
+	// auto headers = netReply->rawHeaderPairs();
+	//
+	// bool success = false;
+	// foreach (auto header, headers) {
+	// 	if (header.first == "Set-Cookie") {
+	// 		auto cookies = QNetworkCookie::parseCookies(
+	// 				header.second);
+	// 		foreach (auto cookie, cookies) {
+	// 			if (cookie.name() == "user_session" &&
+	// 					cookie.value() != "deleted" &&
+	// 					cookie.value() != "") {
+	// 				this->session = cookie.value();
+	// 				success = true;
+	// 				break;
+	// 			}
+	// 		}
+	// 		break;
+	// 	}
+	// }
+	// netReply->deleteLater();
+	//
+	// if (success) {
+	// 	this->flags.session_valid = true;
+	// 	nicolive_log_info("login succeeded");
+	// } else {
+	// 	this->flags.session_valid = false;
+	// 	nicolive_log_warn("login failed");
+	// }
+	//
+	// return success;
 }
 
 // const QString NicoLive::siteLoginNLE(const QString &mail,

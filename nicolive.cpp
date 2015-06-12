@@ -29,9 +29,10 @@ extern "C" void nicolive_destroy(void *data)
 }
 
 extern "C" void nicolive_set_settings(void *data, const char *mail,
-	const char *password,const char *session)
+	const char *password, const char *session)
 {
 	NicoLive *nicolive = static_cast<NicoLive *>(data);
+	nicolive_log_debug("password: %s", password);
 	nicolive->setAccount(mail, password);
 	nicolive->setSession(session);
 }
