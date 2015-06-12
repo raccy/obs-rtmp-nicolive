@@ -60,23 +60,23 @@ public:
 		const std::string &site,
 		const std::string &mail,
 		const std::string &password);
-	std::string loginSiteTicket(
-		const std::string &site,
-		const std::string &mail,
-		const std::string &password);
+	// std::string loginSiteTicket(
+	// 	const std::string &site,
+	// 	const std::string &mail,
+	// 	const std::string &password);
 	bool loginSiteNicolive(
 		const std::string &mail,
 		const std::string &password);
-	std::string loginApiTicket(
-		const std::string &site,
-		const std::string &mail,
-		const std::string &password);
-	std::string loginNicoliveEncoder(
-		const std::string &mail,
-		const std::string &password);
+	// std::string loginApiTicket(
+	// 	const std::string &site,
+	// 	const std::string &mail,
+	// 	const std::string &password);
+	// std::string loginNicoliveEncoder(
+	// 	const std::string &mail,
+	// 	const std::string &password);
 	bool getPublishStatus(
 		std::unordered_map<std::string, std::string> *data);
-	bool getPublishStatusTicket(
-		const std::string &ticket,
-		std::unordered_map<std::string, std::string> *data);
+	// bool getPublishStatusTicket(
+	// 	const std::string &ticket,
+	// 	std::unordered_map<std::string, std::string> *data);
 };

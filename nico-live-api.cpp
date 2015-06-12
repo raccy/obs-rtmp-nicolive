@@ -292,6 +292,7 @@ bool NicoLiveApi::loginSite(
 	url += "?site="
 	url += NicoLiveApi::urlEnocde(site);
 	unordered_map<std::string, std::stirng> formData;
+	// FIXME: mail_tel?
 	formData["mail"] = mail;
 	formData["password"] = password;
 
@@ -300,28 +301,35 @@ bool NicoLiveApi::loginSite(
 
 	this->clearCookie();
 
+	nicolive_log_info("login site: %s", site);
 	bool result = this->postWeb(url, formData, &code, &response);
 	if (result) {
 		if (code = 302) {
+			// TODO: check redirect location?
 			if (this->getCookie("user_session")
 					.find("user_session_") == 0) {
+				nicolive_log_info("login success");
 				return true;
 			} else {
+				nicolive_log_info("login fail");
 				return false;
 			}
 		} else {
+			nicolive_log_error("login invalid return code: %d",
+				code);
 			return false;
 		}
 	} else {
+		nicolive_log_error("access login errror");
 		return false;
 	}
 }
 
-std::string NicoLiveApi::loginSiteTicket(
-	const std::string &site,
-	const std::string &mail,
-	const std::string &password)
-{}
+// std::string NicoLiveApi::loginSiteTicket(
+// 	const std::string &site,
+// 	const std::string &mail,
+// 	const std::string &password)
+// {}
 
 bool NicoLiveApi::loginSiteNicolive(
 	const std::string &mail,
@@ -330,19 +338,35 @@ bool NicoLiveApi::loginSiteNicolive(
 	return this->loginSite("nicolive", mail, password);
 }
 
-std::string NicoLiveApi::loginApiTicket(
-	const std::string &site,
-	const std::string &mail,
-	const std::string &password)
-{}
-std::string NicoLiveApi::loginNicoliveEncoder(
-	const std::string &mail,
-	const std::string &password)
-{}
+// std::string NicoLiveApi::loginApiTicket(
+// 	const std::string &site,
+// 	const std::string &mail,
+// 	const std::string &password)
+// {}
+// std::string NicoLiveApi::loginNicoliveEncoder(
+// 	const std::string &mail,
+// 	const std::string &password)
+// {}
 bool NicoLiveApi::getPublishStatus(
 	std::unordered_map<std::string, std::string> *data)
-{}
-bool NicoLiveApi::getPublishStatusTicket(
-	const std::string &ticket,
-	std::unordered_map<std::string, std::string> *data)
-{}
+{
+	int code;
+	std::string response;
+	if (!this->getWeb(NicoLiveApi::PUBSTAT_URL, &code, &response)) {
+		nicolive_log_error("failed to get publish status");
+		return false;
+	}
+
+	if (code != 200) {
+		nicolive_log_error(
+			"failed to get publish status, return code = %d", code);
+		return false;
+	}
+
+	return NicoLiveApi::parseXml(response, data);
+}
+
+// bool NicoLiveApi::getPublishStatusTicket(
+// 	const std::string &ticket,
+// 	std::unordered_map<std::string, std::string> *data)
+// {}
