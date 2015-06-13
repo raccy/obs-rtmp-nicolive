@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QtCore>
-#include <QtNetwork>
+// #include <QtNetwork>
 
 class NicoLiveWatcher;
 class NicoLiveCmdServer;
@@ -43,7 +43,7 @@ private:
 		bool cmd_server_started = false;
 		bool silent_once = false;
 	} flags;
-	QNetworkAccessManager* qnam;
+	// QNetworkAccessManager* qnam;
 	NicoLiveWatcher *watcher;
 	NicoLiveCmdServer *cmd_server;
 	NicoLiveApi *webApi;
@@ -84,14 +84,14 @@ public:
 	void nextSilentOnce();
 	bool silentOnce();
 private:
-	QVariant makeCookieData(const QString &session_id);
-	QByteArray getWeb(const QUrl);
+	// QVariant makeCookieData(const QString &session_id);
+	// QByteArray getWeb(const QUrl);
 	// Access Niconico Site
 	bool siteLogin();
 	// const QString siteLoginNLE(const QString &mail,
 	// 		const QString &password) const;
 	bool sitePubStat();
 	bool siteLiveProf();
-	bool parseXml(QXmlStreamReader &reader, QHash<QString, QString> &hash);
+	// bool parseXml(QXmlStreamReader &reader, QHash<QString, QString> &hash);
 	void clearLiveInfo();
 };

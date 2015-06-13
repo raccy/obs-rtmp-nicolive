@@ -2,7 +2,7 @@
 #include <vector>
 #include <unordered_map>
 #include <QtCore>
-#include <QtNetwork>
+// #include <QtNetwork>
 #include <curl/curl.h>
 #include "nicolive.h"
 #include "nico-live.hpp"
@@ -22,7 +22,7 @@ const QString NicoLive::FMEPROF_URL_PRE =
 NicoLive::NicoLive(QObject *parent)
 {
 	(void)parent;
-	qnam = new QNetworkAccessManager(this);
+	// qnam = new QNetworkAccessManager(this);
 	watcher = new NicoLiveWatcher(this);
 	cmd_server = new NicoLiveCmdServer(this);
 	webApi = new NicoLiveApi();
@@ -199,25 +199,25 @@ file: src/NicoLiveManager/nicolivemanager.cpp
 Licensed under the MIT License Copyright (c) 2014 diginatu
 see https://github.com/diginatu/Viqo/raw/master/LICENSE
 */
-QVariant NicoLive::makeCookieData(const QString &session_id)
-{
-	QVariant cookieData;
-
-	// make cookies
-	QList <QNetworkCookie> cookies;
-	QNetworkCookie ck;
-	ck.toRawForm(QNetworkCookie::NameAndValueOnly);
-	ck.setName("user_session");
-
-	QByteArray user_id_ba;
-	user_id_ba.append(session_id);
-
-	ck.setValue(user_id_ba);
-	cookies.append(ck);
-
-	cookieData.setValue(cookies);
-	return cookieData;
-}
+// QVariant NicoLive::makeCookieData(const QString &session_id)
+// {
+// 	QVariant cookieData;
+//
+// 	// make cookies
+// 	QList <QNetworkCookie> cookies;
+// 	QNetworkCookie ck;
+// 	ck.toRawForm(QNetworkCookie::NameAndValueOnly);
+// 	ck.setName("user_session");
+//
+// 	QByteArray user_id_ba;
+// 	user_id_ba.append(session_id);
+//
+// 	ck.setValue(user_id_ba);
+// 	cookies.append(ck);
+//
+// 	cookieData.setValue(cookies);
+// 	return cookieData;
+// }
 
 /*
 original code by https://github.com/diginatu/Viqo
@@ -360,34 +360,34 @@ file: src/NicoLiveManager/rawmylivewaku.cpp
 Licensed under the MIT License Copyright (c) 2014 diginatu
 see https://github.com/diginatu/Viqo/raw/master/LICENSE
 */
-QByteArray NicoLive::getWeb(const QUrl url)
-{
-
-	if (this->session.isEmpty())
-		return "";
-
-	// make request
-	QNetworkRequest rq;
-	QVariant cookieData = this->makeCookieData(this->session);
-	rq.setHeader(QNetworkRequest::CookieHeader, cookieData);
-	rq.setUrl(url);
-
-	QNetworkReply * netReply = qnam->get(rq);
-
-	nicolive_log_info("web get start");
-
-	// wait reply
-	QEventLoop loop;
-	connect(netReply, SIGNAL(finished()), &loop, SLOT(quit()));
-	loop.exec();
-
-	nicolive_log_info("web get finished");
-
-	// finished reply
-	QByteArray repdata = netReply->readAll();
-	netReply->deleteLater();
-	return repdata;
-}
+// QByteArray NicoLive::getWeb(const QUrl url)
+// {
+//
+// 	if (this->session.isEmpty())
+// 		return "";
+//
+// 	// make request
+// 	QNetworkRequest rq;
+// 	QVariant cookieData = this->makeCookieData(this->session);
+// 	rq.setHeader(QNetworkRequest::CookieHeader, cookieData);
+// 	rq.setUrl(url);
+//
+// 	QNetworkReply * netReply = qnam->get(rq);
+//
+// 	nicolive_log_info("web get start");
+//
+// 	// wait reply
+// 	QEventLoop loop;
+// 	connect(netReply, SIGNAL(finished()), &loop, SLOT(quit()));
+// 	loop.exec();
+//
+// 	nicolive_log_info("web get finished");
+//
+// 	// finished reply
+// 	QByteArray repdata = netReply->readAll();
+// 	netReply->deleteLater();
+// 	return repdata;
+// }
 
 bool NicoLive::sitePubStat()
 {
@@ -651,84 +651,84 @@ bool NicoLive::loadViqoSettings()
 
 // This method parse XML and create hash map.
 // The keys are XPath strings for all text and attribute values in elements
-bool NicoLive::parseXml(QXmlStreamReader &reader, QHash<QString, QString> &hash)
-{
-	QStringList element_stack;
-	QString content;
-
-	auto xpath = [](const QStringList &element_list)->QString{
-		QString str;
-		for (auto element: element_list)
-			(str += "/") += element;
-		return str;
-	};
-
-	auto xpath_attr = [](const QStringList &element_list,
-			const QStringRef &attr_name)->QString{
-		QString str;
-		for (auto element: element_list)
-			(str += "/") += element;
-		(str += "/@") += attr_name;
-		return str;
-	};
-
-	while (!reader.atEnd()) {
-		switch (reader.tokenType()) {
-		case QXmlStreamReader::StartElement:
-			if (!content.isEmpty()) {
-				hash[xpath(element_stack)] += content;
-				content = QString();
-			}
-			element_stack.append(reader.name().toString());
-			for (auto attr: reader.attributes()) {
-				hash[xpath_attr(element_stack, attr.name())] +=
-						attr.value().toString();
-			}
-			break;
-		case QXmlStreamReader::EndElement:
-			if (!content.isEmpty()) {
-				hash[xpath(element_stack)] += content;
-				content = QString();
-			}
-			if (!element_stack.isEmpty())
-				element_stack.removeLast();
-			else
-				nicolive_log_error("found invaild xml: more end element");
-			break;
-		case QXmlStreamReader::Characters:
-			if (!reader.isWhitespace())
-				content += reader.text();
-			break;
-		case QXmlStreamReader::NoToken:
-		case QXmlStreamReader::Invalid:
-		case QXmlStreamReader::StartDocument:
-		case QXmlStreamReader::EndDocument:
-		case QXmlStreamReader::Comment:
-		case QXmlStreamReader::DTD:
-		case QXmlStreamReader::EntityReference:
-		case QXmlStreamReader::ProcessingInstruction:
-		default:
-			break;
-		}
-		reader.readNext();
-	}
-
-#ifdef _DEBUG
-	for (auto key: hash.keys()) {
-		nicolive_log_debug("xml [%s] =  %s",
-				key.toStdString().c_str(),
-				hash[key].toStdString().c_str());
-	}
-#endif
-
-	if (reader.hasError()) {
-		nicolive_log_error("faield to parse xml: %s",
-				reader.errorString().toStdString().c_str());
-		return false;
-	} else {
-		return true;
-	}
-}
+// bool NicoLive::parseXml(QXmlStreamReader &reader, QHash<QString, QString> &hash)
+// {
+// 	QStringList element_stack;
+// 	QString content;
+//
+// 	auto xpath = [](const QStringList &element_list)->QString{
+// 		QString str;
+// 		for (auto element: element_list)
+// 			(str += "/") += element;
+// 		return str;
+// 	};
+//
+// 	auto xpath_attr = [](const QStringList &element_list,
+// 			const QStringRef &attr_name)->QString{
+// 		QString str;
+// 		for (auto element: element_list)
+// 			(str += "/") += element;
+// 		(str += "/@") += attr_name;
+// 		return str;
+// 	};
+//
+// 	while (!reader.atEnd()) {
+// 		switch (reader.tokenType()) {
+// 		case QXmlStreamReader::StartElement:
+// 			if (!content.isEmpty()) {
+// 				hash[xpath(element_stack)] += content;
+// 				content = QString();
+// 			}
+// 			element_stack.append(reader.name().toString());
+// 			for (auto attr: reader.attributes()) {
+// 				hash[xpath_attr(element_stack, attr.name())] +=
+// 						attr.value().toString();
+// 			}
+// 			break;
+// 		case QXmlStreamReader::EndElement:
+// 			if (!content.isEmpty()) {
+// 				hash[xpath(element_stack)] += content;
+// 				content = QString();
+// 			}
+// 			if (!element_stack.isEmpty())
+// 				element_stack.removeLast();
+// 			else
+// 				nicolive_log_error("found invaild xml: more end element");
+// 			break;
+// 		case QXmlStreamReader::Characters:
+// 			if (!reader.isWhitespace())
+// 				content += reader.text();
+// 			break;
+// 		case QXmlStreamReader::NoToken:
+// 		case QXmlStreamReader::Invalid:
+// 		case QXmlStreamReader::StartDocument:
+// 		case QXmlStreamReader::EndDocument:
+// 		case QXmlStreamReader::Comment:
+// 		case QXmlStreamReader::DTD:
+// 		case QXmlStreamReader::EntityReference:
+// 		case QXmlStreamReader::ProcessingInstruction:
+// 		default:
+// 			break;
+// 		}
+// 		reader.readNext();
+// 	}
+//
+// #ifdef _DEBUG
+// 	for (auto key: hash.keys()) {
+// 		nicolive_log_debug("xml [%s] =  %s",
+// 				key.toStdString().c_str(),
+// 				hash[key].toStdString().c_str());
+// 	}
+// #endif
+//
+// 	if (reader.hasError()) {
+// 		nicolive_log_error("faield to parse xml: %s",
+// 				reader.errorString().toStdString().c_str());
+// 		return false;
+// 	} else {
+// 		return true;
+// 	}
+// }
 
 void NicoLive::clearLiveInfo()
 {
