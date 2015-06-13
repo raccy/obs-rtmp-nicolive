@@ -76,7 +76,7 @@ public:
 	// 	const std::string &password);
 	bool getPublishStatus(
 		std::unordered_map<std::string,
-		std::vector<std::string>> *data);
+			std::vector<std::string>> *data);
 	// bool getPublishStatusTicket(
 	// 	const std::string &ticket,
 	// 	std::unordered_map<std::string, std::string> *data);

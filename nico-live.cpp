@@ -1,4 +1,6 @@
 #include <string>
+#include <vector>
+#include <unordered_map>
 #include <QtCore>
 #include <QtNetwork>
 #include <curl/curl.h>
@@ -399,54 +401,93 @@ bool NicoLive::sitePubStat()
 		return false;
 	}
 
-	QXmlStreamReader reader(this->getWeb(NicoLive::PUBSTAT_URL));
-	QHash<QString, QString> xml_data;
-	if (!parseXml(reader, xml_data)) {
+	const std::string statusXpath = "/getpublishstatus/@status";
+	const std::string errorCodeXpath =
+		"/getpublishstatus/error/code/text()";
+	const std::unordered_map<std::string, std::string> xpathMap = {
+		{"id", "/getpublishstatus//stream/id/text()"},
+		{"exclude", "/getpublishstatus//stream/exclude/text()"},
+		{"base_time", "/getpublishstatus//stream/base_time/text()"},
+		{"open_time", "/getpublishstatus//stream/open_time/text()"},
+		{"start_time", "/getpublishstatus//stream/start_time/text()"},
+		{"end_time", "/getpublishstatus//stream/end_time/text()"},
+		{"url", "/getpublishstatus//rtmp/url/text()"},
+		{"stream", "/getpublishstatus//rtmp/stream/text()"},
+		{"ticket", "/getpublishstatus//rtmp/ticket/text()"},
+		{"bitrate", "/getpublishstatus//rtmp/bitrate/text()"},
+	};
+
+	std::unordered_map<std::string, std::vector<std::string>> data;
+	data[statusXpath] = std::vector<std::string>();
+	for (auto &xpathPair: xpathMap) {
+		data[xpathPair.second] = std::vector<std::string>();
+	}
+
+	bool result = this->webApi->getPublishStatus(&data);
+
+	if (!result) {
+		nicolive_log_error("failed get publish status web page");
+		return false;
+	}
+
+	if (data[statusXpath].empty()) {
+		nicolive_log_error("faield get publish status");
 		return false;
 	}
 
 	bool success = false;
-	QString status = xml_data["/getpublishstatus/@status"];
-	QString error_code;
+	std::string status = data[statusXpath][0];
 
 	if (status == "ok") {
 		this->flags.onair = true;
-		this->live_info.id = xml_data["/getpublishstatus/stream/id"];
-		this->live_info.exclude =
-			(xml_data["/getpublishstatus/stream/exclude"] == "1");
-		this->live_info.base_time.setTime_t(xml_data[
-			"/getpublishstatus/stream/base_time"].toUInt());
-		this->live_info.open_time.setTime_t(xml_data[
-			"/getpublishstatus/stream/open_time"].toUInt());
-		this->live_info.start_time.setTime_t(xml_data[
-			"/getpublishstatus/stream/start_time"].toUInt());
-		this->live_info.end_time.setTime_t(xml_data[
-			"/getpublishstatus/stream/end_time"].toUInt());
-		this->live_info.url =
-			xml_data["/getpublishstatus/rtmp/url"];
-		this->live_info.stream =
-			xml_data["/getpublishstatus/rtmp/stream"];
-		this->live_info.ticket =
-			xml_data["/getpublishstatus/rtmp/ticket"];
-		this->live_info.bitrate =
-			xml_data["/getpublishstatus/rtmp/bitrate"].toInt();
-		nicolive_log_info("live waku: %s", this->live_info.id.toStdString().c_str());
-		success = true;
+		try {
+			this->live_info.id =
+				data[xpathMap.at("id")].at(0).c_str();
+			this->live_info.exclude =
+				(data[xpathMap.at("exclude")].at(0) == "1");
+			this->live_info.base_time.setTime_t(std::stoi(
+				data[xpathMap.at("base_time")].at(0)));
+			this->live_info.open_time.setTime_t(std::stoi(
+				data[xpathMap.at("open_time")].at(0)));
+			this->live_info.start_time.setTime_t(std::stoi(
+				data[xpathMap.at("start_time")].at(0)));
+			this->live_info.end_time.setTime_t(std::stoi(
+				data[xpathMap.at("end_time")].at(0)));
+			this->live_info.url =
+				data[xpathMap.at("url")].at(0).c_str();
+			this->live_info.stream =
+				data[xpathMap.at("stream")].at(0).c_str();
+			this->live_info.ticket =
+				data[xpathMap.at("ticket")].at(0).c_str();
+			this->live_info.bitrate = std::stoi(
+				data[xpathMap.at("bitrate")].at(0));
+			nicolive_log_info("live waku: %s",
+				this->live_info.id.toStdString().c_str());
+			success = true;
+		} catch (std::out_of_range &err) {
+			nicolive_log_error("parse faild?");
+			clearLiveInfo();
+			success = false;
+		}
 	} else if (status == "fail") {
 		clearLiveInfo();
-		error_code = xml_data["/getpublishstatus/error/code"];
-		if (error_code == "notfound") {
+		std::string errorCode = "null";
+		if (!data[errorCodeXpath].empty()) {
+			std::string errorCode = data[errorCodeXpath][0];
+		}
+		if (errorCode == "notfound") {
 			nicolive_log_info("no live waku");
 			success = true;
-		} else if (error_code == "unknown") {
+		} else if (errorCode == "unknown") {
 			nicolive_log_warn("login session failed");
 		} else {
 			nicolive_log_error("unknow error code: %s",
-					error_code.toStdString().c_str());
+				errorCode.c_str());
 		}
 	} else {
 		clearLiveInfo();
-		nicolive_log_error("unknow status: %s", status.toStdString().c_str());
+		nicolive_log_error("unknow status: %s",
+			status.c_str());
 	}
 
 	if (success) {
@@ -456,6 +497,64 @@ bool NicoLive::sitePubStat()
 	}
 
 	return success;
+
+	// QXmlStreamReader reader(this->getWeb(NicoLive::PUBSTAT_URL));
+	// QHash<QString, QString> xml_data;
+	// if (!parseXml(reader, xml_data)) {
+	// 	return false;
+	// }
+	//
+	// bool success = false;
+	// QString status = xml_data["/getpublishstatus/@status"];
+	// QString error_code;
+	//
+	// if (status == "ok") {
+	// 	this->flags.onair = true;
+	// 	this->live_info.id = xml_data["/getpublishstatus/stream/id"];
+	// 	this->live_info.exclude =
+	// 		(xml_data["/getpublishstatus/stream/exclude"] == "1");
+	// 	this->live_info.base_time.setTime_t(xml_data[
+	// 		"/getpublishstatus/stream/base_time"].toUInt());
+	// 	this->live_info.open_time.setTime_t(xml_data[
+	// 		"/getpublishstatus/stream/open_time"].toUInt());
+	// 	this->live_info.start_time.setTime_t(xml_data[
+	// 		"/getpublishstatus/stream/start_time"].toUInt());
+	// 	this->live_info.end_time.setTime_t(xml_data[
+	// 		"/getpublishstatus/stream/end_time"].toUInt());
+	// 	this->live_info.url =
+	// 		xml_data["/getpublishstatus/rtmp/url"];
+	// 	this->live_info.stream =
+	// 		xml_data["/getpublishstatus/rtmp/stream"];
+	// 	this->live_info.ticket =
+	// 		xml_data["/getpublishstatus/rtmp/ticket"];
+	// 	this->live_info.bitrate =
+	// 		xml_data["/getpublishstatus/rtmp/bitrate"].toInt();
+	// 	nicolive_log_info("live waku: %s", this->live_info.id.toStdString().c_str());
+	// 	success = true;
+	// } else if (status == "fail") {
+	// 	clearLiveInfo();
+	// 	error_code = xml_data["/getpublishstatus/error/code"];
+	// 	if (error_code == "notfound") {
+	// 		nicolive_log_info("no live waku");
+	// 		success = true;
+	// 	} else if (error_code == "unknown") {
+	// 		nicolive_log_warn("login session failed");
+	// 	} else {
+	// 		nicolive_log_error("unknow error code: %s",
+	// 				error_code.toStdString().c_str());
+	// 	}
+	// } else {
+	// 	clearLiveInfo();
+	// 	nicolive_log_error("unknow status: %s", status.toStdString().c_str());
+	// }
+	//
+	// if (success) {
+	// 	this->flags.session_valid = true;
+	// } else {
+	// 	this->flags.session_valid = false;
+	// }
+	//
+	// return success;
 }
 
 bool NicoLive::siteLiveProf() {
