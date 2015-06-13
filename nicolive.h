@@ -53,9 +53,6 @@ void nicolive_stop_streaming(void *data);
 void nicolive_start_watching(void *data, long long sec);
 void nicolive_stop_watching(void *data);
 
-// bool nicolive_start_cmd_server(void *data, long long port);
-// void nicolive_stop_cmd_server(void *data);
-
 bool nicolive_silent_once(void *data);
 
 #ifdef __cplusplus

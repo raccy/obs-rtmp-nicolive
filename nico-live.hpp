@@ -11,10 +11,6 @@ class NicoLive : public QObject {
 	Q_OBJECT
 	friend class NicoLiveWatcher;
 public:
-	static const QUrl LOGIN_URL;
-	static const QUrl NLE_LOGIN_URL;
-	static const QUrl PUBSTAT_URL;
-	static const QString FMEPROF_URL_PRE;
 private:
 	QString mail;
 	QString password;
@@ -31,7 +27,6 @@ private:
 		long long bitrate = 0;
 		bool exclude = false;
 	} live_info;
-	// QString live_id;
 	QString live_url;
 	QString live_key;
 	QString onair_live_id;
@@ -40,12 +35,9 @@ private:
 		bool onair = false;
 		bool load_viqo = false;
 		bool adjust_bitrate = false;
-		// bool cmd_server_started = false;
 		bool silent_once = false;
 	} flags;
-	// QNetworkAccessManager* qnam;
 	NicoLiveWatcher *watcher;
-	// NicoLiveCmdServer *cmd_server;
 	NicoLiveApi *webApi;
 public:
 	NicoLive(QObject *parent = 0);
@@ -74,8 +66,6 @@ public:
 	void stopStreaming();
 	void startWatching(long long sec = 60);
 	void stopWatching();
-	// bool startCmdServer(long long port = 0);
-	// void stopCmdServer();
 
 	bool checkSession();
 	bool checkLive();
@@ -84,14 +74,12 @@ public:
 	void nextSilentOnce();
 	bool silentOnce();
 private:
-	// QVariant makeCookieData(const QString &session_id);
-	// QByteArray getWeb(const QUrl);
 	// Access Niconico Site
 	bool siteLogin();
 	// const QString siteLoginNLE(const QString &mail,
 	// 		const QString &password) const;
 	bool sitePubStat();
 	bool siteLiveProf();
-	// bool parseXml(QXmlStreamReader &reader, QHash<QString, QString> &hash);
+
 	void clearLiveInfo();
 };
