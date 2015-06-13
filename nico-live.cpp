@@ -10,21 +10,21 @@
 #include "nico-live-cmd-server.hpp"
 #include "nico-live-api.hpp"
 
-const QUrl NicoLive::LOGIN_URL =
-		QUrl("https://secure.nicovideo.jp/secure/login?site=nicolive");
-const QUrl NicoLive::NLE_LOGIN_URL =
-		QUrl("https://account.nicovideo.jp/api/v1/login");
-const QUrl NicoLive::PUBSTAT_URL =
-		QUrl("http://live.nicovideo.jp/api/getpublishstatus");
-const QString NicoLive::FMEPROF_URL_PRE =
-		"http://live.nicovideo.jp/api/getfmeprofile?v=";
+// const QUrl NicoLive::LOGIN_URL =
+// 		QUrl("https://secure.nicovideo.jp/secure/login?site=nicolive");
+// const QUrl NicoLive::NLE_LOGIN_URL =
+// 		QUrl("https://account.nicovideo.jp/api/v1/login");
+// const QUrl NicoLive::PUBSTAT_URL =
+// 		QUrl("http://live.nicovideo.jp/api/getpublishstatus");
+// const QString NicoLive::FMEPROF_URL_PRE =
+// 		"http://live.nicovideo.jp/api/getfmeprofile?v=";
 
 NicoLive::NicoLive(QObject *parent)
 {
 	(void)parent;
 	// qnam = new QNetworkAccessManager(this);
 	watcher = new NicoLiveWatcher(this);
-	cmd_server = new NicoLiveCmdServer(this);
+	// cmd_server = new NicoLiveCmdServer(this);
 	webApi = new NicoLiveApi();
 }
 
@@ -155,21 +155,21 @@ void NicoLive::stopWatching()
 	this->watcher->stop();
 }
 
-bool NicoLive::startCmdServer(long long port)
-{
-	if (port < 1 || port > 65535)
-		port = NicoLiveCmdServer::DEFAULT_PORT;
-	if (port != this->cmd_server->getPort()) {
-		this->cmd_server->stop();
-		this->cmd_server->setPort(static_cast<int>(port));
-	}
-	return this->cmd_server->start();
-}
+// bool NicoLive::startCmdServer(long long port)
+// {
+// 	if (port < 1 || port > 65535)
+// 		port = NicoLiveCmdServer::DEFAULT_PORT;
+// 	if (port != this->cmd_server->getPort()) {
+// 		this->cmd_server->stop();
+// 		this->cmd_server->setPort(static_cast<int>(port));
+// 	}
+// 	return this->cmd_server->start();
+// }
 
-void NicoLive::stopCmdServer()
-{
-	this->cmd_server->stop();
-}
+// void NicoLive::stopCmdServer()
+// {
+// 	this->cmd_server->stop();
+// }
 
 void NicoLive::nextSilentOnce()
 {

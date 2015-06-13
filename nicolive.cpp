@@ -1,5 +1,5 @@
 #include <QtCore>
-#include <QtNetwork>
+// #include <QtNetwork>
 #include <obs-module.h>
 #include "nicolive.h"
 #include "nico-live.hpp"
@@ -150,17 +150,17 @@ extern "C" void nicolive_stop_watching(void *data)
 	nicolive->stopWatching();
 }
 
-extern "C" bool nicolive_start_cmd_server(void *data, long long port)
-{
-	NicoLive *nicolive = static_cast<NicoLive *>(data);
-	return nicolive->startCmdServer(port);
-}
+// extern "C" bool nicolive_start_cmd_server(void *data, long long port)
+// {
+// 	NicoLive *nicolive = static_cast<NicoLive *>(data);
+// 	return nicolive->startCmdServer(port);
+// }
 
-extern "C" void nicolive_stop_cmd_server(void *data)
-{
-	NicoLive *nicolive = static_cast<NicoLive *>(data);
-	nicolive->stopCmdServer();
-}
+// extern "C" void nicolive_stop_cmd_server(void *data)
+// {
+// 	NicoLive *nicolive = static_cast<NicoLive *>(data);
+// 	nicolive->stopCmdServer();
+// }
 
 extern "C" bool nicolive_silent_once(void *data)
 {

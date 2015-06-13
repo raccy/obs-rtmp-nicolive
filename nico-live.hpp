@@ -40,12 +40,12 @@ private:
 		bool onair = false;
 		bool load_viqo = false;
 		bool adjust_bitrate = false;
-		bool cmd_server_started = false;
+		// bool cmd_server_started = false;
 		bool silent_once = false;
 	} flags;
 	// QNetworkAccessManager* qnam;
 	NicoLiveWatcher *watcher;
-	NicoLiveCmdServer *cmd_server;
+	// NicoLiveCmdServer *cmd_server;
 	NicoLiveApi *webApi;
 public:
 	NicoLive(QObject *parent = 0);
@@ -74,8 +74,8 @@ public:
 	void stopStreaming();
 	void startWatching(long long sec = 60);
 	void stopWatching();
-	bool startCmdServer(long long port = 0);
-	void stopCmdServer();
+	// bool startCmdServer(long long port = 0);
+	// void stopCmdServer();
 
 	bool checkSession();
 	bool checkLive();

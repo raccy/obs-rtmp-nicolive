@@ -89,18 +89,18 @@ static void rtmp_nicolive_update_internal(void *data, obs_data_t *settings,
 		nicolive_stop_watching(data);
 	}
 
-	if (obs_data_get_bool(settings, "cmd_server")) {
-		if (!nicolive_start_cmd_server(data,
-				obs_data_get_int(settings,
-						"cmd_server_port"))) {
-			nicolive_msg_warn(msg_gui,
-				obs_module_text("MessageFailedStartCmdServer"),
-				"failed start cmd server");
-			obs_data_set_bool(settings, "cmd_server", false);
-		}
-	} else {
-		nicolive_stop_cmd_server(data);
-	}
+	// if (obs_data_get_bool(settings, "cmd_server")) {
+	// 	if (!nicolive_start_cmd_server(data,
+	// 			obs_data_get_int(settings,
+	// 					"cmd_server_port"))) {
+	// 		nicolive_msg_warn(msg_gui,
+	// 			obs_module_text("MessageFailedStartCmdServer"),
+	// 			"failed start cmd server");
+	// 		obs_data_set_bool(settings, "cmd_server", false);
+	// 	}
+	// } else {
+	// 	nicolive_stop_cmd_server(data);
+	// }
 
 	// OPTIMIZE: Default settisgs are not saved, so resetting data
 	// Maybe obs-studio 0.8.3 bug
@@ -111,8 +111,8 @@ static void rtmp_nicolive_update_internal(void *data, obs_data_t *settings,
 	reset_obs_data(bool,   settings, "adjust_bitrate");
 	reset_obs_data(bool,   settings, "auto_start");
 	reset_obs_data(int,    settings, "watch_interval");
-	reset_obs_data(bool,   settings, "cmd_server");
-	reset_obs_data(int,    settings, "cmd_server_port");
+	// reset_obs_data(bool,   settings, "cmd_server");
+	// reset_obs_data(int,    settings, "cmd_server_port");
 }
 
 // FIXME: why do not call this func. obs-studio 0.8.3 bug?
@@ -225,19 +225,19 @@ static bool auto_start_modified(obs_properties_t *props,
 	return true;
 }
 
-static bool cmd_server_modified(obs_properties_t *props,
-	obs_property_t *prop, obs_data_t *settings)
-{
-	UNUSED_PARAMETER(prop);
-	if (obs_data_get_bool(settings, "cmd_server")) {
-		obs_property_set_enabled(obs_properties_get(props,
-			"cmd_server_port"), true);
-	} else {
-		obs_property_set_enabled(obs_properties_get(props,
-			"cmd_server_port"), false);
-	}
-	return true;
-}
+// static bool cmd_server_modified(obs_properties_t *props,
+// 	obs_property_t *prop, obs_data_t *settings)
+// {
+// 	UNUSED_PARAMETER(prop);
+// 	if (obs_data_get_bool(settings, "cmd_server")) {
+// 		obs_property_set_enabled(obs_properties_get(props,
+// 			"cmd_server_port"), true);
+// 	} else {
+// 		obs_property_set_enabled(obs_properties_get(props,
+// 			"cmd_server_port"), false);
+// 	}
+// 	return true;
+// }
 
 static obs_properties_t *rtmp_nicolive_properties(void *data)
 {
@@ -266,12 +266,12 @@ static obs_properties_t *rtmp_nicolive_properties(void *data)
 			obs_module_text("WatchInterval"),
 			10, 300, 1);
 
-	prop = obs_properties_add_bool(ppts, "cmd_server",
-			obs_module_text("CmdServer"));
-	obs_property_set_modified_callback(prop, cmd_server_modified);
-	obs_properties_add_int(ppts, "cmd_server_port",
-			obs_module_text("CmdServerPort"),
-			1, 65535, 1);
+	// prop = obs_properties_add_bool(ppts, "cmd_server",
+	// 		obs_module_text("CmdServer"));
+	// obs_property_set_modified_callback(prop, cmd_server_modified);
+	// obs_properties_add_int(ppts, "cmd_server_port",
+	// 		obs_module_text("CmdServerPort"),
+	// 		1, 65535, 1);
 
 	return ppts;
 }
@@ -285,8 +285,8 @@ static void rtmp_nicolive_defaults(obs_data_t *settings)
 	obs_data_set_default_bool  (settings, "adjust_bitrate",  true);
 	obs_data_set_default_bool  (settings, "auto_start",      false);
 	obs_data_set_default_int   (settings, "watch_interval",  60);
-	obs_data_set_default_bool  (settings, "cmd_server",      false);
-	obs_data_set_default_int   (settings, "cmd_server_port", 25083);
+	// obs_data_set_default_bool  (settings, "cmd_server",      false);
+	// obs_data_set_default_int   (settings, "cmd_server_port", 25083);
 }
 
 static const char *rtmp_nicolive_url(void *data)
