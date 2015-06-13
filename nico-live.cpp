@@ -7,7 +7,7 @@
 #include "nicolive.h"
 #include "nico-live.hpp"
 #include "nico-live-watcher.hpp"
-#include "nico-live-cmd-server.hpp"
+// #include "nico-live-cmd-server.hpp"
 #include "nico-live-api.hpp"
 
 // const QUrl NicoLive::LOGIN_URL =
