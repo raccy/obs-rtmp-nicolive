@@ -43,7 +43,6 @@ endif(NOT BUILD_IN_OBS)
 # find Qt5
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)
-# find_package(Qt5Network REQUIRED)
 find_package(Libcurl REQUIRED)
 
 # header and library
@@ -61,11 +60,10 @@ if(NOT BUILD_IN_OBS AND NOT LibObs_FOUND)
 endif(NOT BUILD_IN_OBS AND NOT LibObs_FOUND)
 
 set(rtmp-nicolive_SOURCES
-	pugixml/src/pugixml.cpp
+	pugixml.cpp
 	nico-live-api.cpp
 	nico-live.cpp
 	nico-live-watcher.cpp
-	# nico-live-cmd-server.cpp
 	nicolive.cpp
 	nicolive-ui.cpp
 	rtmp-nicolive.c)
@@ -76,7 +74,6 @@ add_library(rtmp-nicolive MODULE
 target_link_libraries(rtmp-nicolive
 	Qt5::Core
 	Qt5::Widgets
-	# Qt5::Network
 	${LIBCURL_LIBRARIES}
 	libobs)
 

@@ -6,7 +6,7 @@
 #include <regex>
 #include "nico-live-api.hpp"
 #include "curl/curl.h"
-#include "pugixml/src/pugixml.hpp"
+#include "pugixml.hpp"
 #include "nicolive.h"
 
 // static
