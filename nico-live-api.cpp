@@ -244,20 +244,21 @@ bool NicoLiveApi::accessWeb(
 
 	// Get code and set cookie
 	std::istringstream isHeader(headerData);
-	std::regex httpRe("HTTP/\\d+\\.\\d+\\s+(\\d+)\\s.*",
+	std::regex httpRe("HTTP/\\d+\\.\\d+\\s+(\\d+)\\s.*\\r?",
 		std::regex_constants::icase);
-	std::regex setCookieRe("Set-Cookie:\\s+([^=]+)=([^;]+);.*",
+	std::regex setCookieRe("Set-Cookie:\\s+([^=]+)=([^;]+);.*\\r?",
 		std::regex_constants::icase);
 	std::smatch results;
 	for (std::string line; std::getline(isHeader, line); ) {
 		nicolive_log_debug("header: %s", line.c_str());
 		if (std::regex_match(line, results, httpRe)) {
-			nicolive_log_debug("header httpRe: %s", line.c_str());
-			*code = std::stoi(results[1]);
+			nicolive_log_debug("header httpRe: %s",
+				results.str(1).c_str());
+			*code = std::stoi(results.str(1));
 		} else if (std::regex_match(line, results, setCookieRe)) {
-			nicolive_log_debug("header setCookieRe: %s",
-				line.c_str());
-			this->cookie[results[1]] = results[2];
+			nicolive_log_debug("header setCookieRe: %s, %s",
+				results.str(1).c_str(), results.str(2).c_str());
+			this->cookie[results.str(1)] = results.str(2);
 		}
 	}
 
