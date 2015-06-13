@@ -564,29 +564,37 @@ bool NicoLive::siteLiveProf() {
 		this->live_url = QString();
 		this->live_key = QString();
 		return false;
-	}
-
-	QString live_prof_url;
-	live_prof_url += NicoLive::FMEPROF_URL_PRE;
-	live_prof_url += this->live_info.id;
-
-	QXmlStreamReader reader(this->getWeb(QUrl(live_prof_url)));
-	QHash<QString, QString> xml_data;
-	if (!parseXml(reader, xml_data)) {
-		return false;
-	}
-
-	this->live_url =
-		xml_data["/flashmedialiveencoder_profile/output/rtmp/url"];
-	this->live_key =
-		xml_data["/flashmedialiveencoder_profile/output/rtmp/stream"];
-	if (this->live_url.isEmpty() || this->live_key.isEmpty()) {
-		nicolive_log_warn("not found live url or key");
-		return false;
 	} else {
 		nicolive_log_info("found live url and key");
+		this->live_url = QString();
+		this->live_url += this->live_info.url;
+		this->live_url += "?";
+		this->live_url += this->live_info.ticket;
+		this->live_key = this->live_info.stream;
 		return true;
 	}
+
+	// QString live_prof_url;
+	// live_prof_url += NicoLive::FMEPROF_URL_PRE;
+	// live_prof_url += this->live_info.id;
+	//
+	// QXmlStreamReader reader(this->getWeb(QUrl(live_prof_url)));
+	// QHash<QString, QString> xml_data;
+	// if (!parseXml(reader, xml_data)) {
+	// 	return false;
+	// }
+	//
+	// this->live_url =
+	// 	xml_data["/flashmedialiveencoder_profile/output/rtmp/url"];
+	// this->live_key =
+	// 	xml_data["/flashmedialiveencoder_profile/output/rtmp/stream"];
+	// if (this->live_url.isEmpty() || this->live_key.isEmpty()) {
+	// 	nicolive_log_warn("not found live url or key");
+	// 	return false;
+	// } else {
+	// 	nicolive_log_info("found live url and key");
+	// 	return true;
+	// }
 }
 
 /*
