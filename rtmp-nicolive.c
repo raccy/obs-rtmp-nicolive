@@ -8,6 +8,13 @@
 		obs_data_set_##type((settings), (name), \
 			obs_data_get_##type((settings), (name)))
 
+enum rtmp_nicolive_login_type {
+	RTMP_NICOLIVE_LOGIN_MAIL,
+	RTMP_NICOLIVE_LOGIN_SESSION,
+	RTMP_NICOLIVE_LOGIN_VIQO,
+};
+
+
 static bool adjust_bitrate(obs_output_t *output, long long bitrate)
 {
 	obs_encoder_t *video_encoder = obs_output_get_video_encoder(output);
@@ -50,7 +57,30 @@ static const char *rtmp_nicolive_getname(void)
 static void rtmp_nicolive_update_internal(void *data, obs_data_t *settings,
 	bool msg_gui)
 {
-	if (obs_data_get_bool(settings, "load_viqo")) {
+	switch (obs_data_get_int(settings, "login_type")) {
+	case RTMP_NICOLIVE_LOGIN_MAIL:
+		nicolive_set_settings(data,
+				obs_data_get_string(settings, "mail"),
+				obs_data_get_string(settings, "password"),
+				"");
+		if (!nicolive_check_session(data)) {
+			nicolive_msg_warn(msg_gui,
+				obs_module_text("MessageFailedLogin"),
+				"failed login");
+		}
+		break;
+	case RTMP_NICOLIVE_LOGIN_SESSION:
+		nicolive_set_settings(data,
+				"",
+				"",
+				obs_data_get_string(settings, "session"));
+		if (!nicolive_check_session(data)) {
+			nicolive_msg_warn(msg_gui,
+				obs_module_text("MessageFailedLogin"),
+				"failed login");
+		}
+		break;
+	case RTMP_NICOLIVE_LOGIN_VIQO:
 		if (nicolive_load_viqo_settings(data)) {
 			if (!nicolive_check_session(data)) {
 				nicolive_msg_warn(msg_gui,
@@ -62,22 +92,43 @@ static void rtmp_nicolive_update_internal(void *data, obs_data_t *settings,
 				obs_module_text(
 					"MessageFailedLoadViqoSettings"),
 				"failed load viqo settings");
-			obs_data_set_bool(settings, "load_viqo", false);
 		}
-	} else {
-		nicolive_set_settings(data,
-				obs_data_get_string(settings, "mail"),
-				obs_data_get_string(settings, "password"),
-				obs_data_get_string(settings, "session"));
-		if (nicolive_check_session(data)) {
-			obs_data_set_string(settings, "session",
-					nicolive_get_session(data));
-		} else {
-			nicolive_msg_warn(msg_gui,
-				obs_module_text("MessageFailedLogin"),
-				"failed login");
-		}
+		break;
+	default:
+		nicolive_msg_error(msg_gui,
+			obs_module_text(
+				"MessageFailedLogin"),
+			"unknown login type");
 	}
+
+	// if (obs_data_get_bool(settings, "load_viqo")) {
+	// 	if (nicolive_load_viqo_settings(data)) {
+	// 		if (!nicolive_check_session(data)) {
+	// 			nicolive_msg_warn(msg_gui,
+	// 				obs_module_text("MessageFailedLogin"),
+	// 				"failed login");
+	// 		}
+	// 	} else {
+	// 		nicolive_msg_warn(msg_gui,
+	// 			obs_module_text(
+	// 				"MessageFailedLoadViqoSettings"),
+	// 			"failed load viqo settings");
+	// 		obs_data_set_bool(settings, "load_viqo", false);
+	// 	}
+	// } else {
+	// 	nicolive_set_settings(data,
+	// 			obs_data_get_string(settings, "mail"),
+	// 			obs_data_get_string(settings, "password"),
+	// 			obs_data_get_string(settings, "session"));
+	// 	if (nicolive_check_session(data)) {
+	// 		obs_data_set_string(settings, "session",
+	// 				nicolive_get_session(data));
+	// 	} else {
+	// 		nicolive_msg_warn(msg_gui,
+	// 			obs_module_text("MessageFailedLogin"),
+	// 			"failed login");
+	// 	}
+	// }
 
 	nicolive_set_enabled_adjust_bitrate(data,
 			obs_data_get_bool(settings, "adjust_bitrate"));
@@ -94,7 +145,7 @@ static void rtmp_nicolive_update_internal(void *data, obs_data_t *settings,
 	// reset_obs_data(string, settings, "mail");
 	// reset_obs_data(string, settings, "password");
 	// reset_obs_data(string, settings, "session");
-	reset_obs_data(bool,   settings, "load_viqo");
+	// reset_obs_data(bool,   settings, "load_viqo");
 	reset_obs_data(bool,   settings, "adjust_bitrate");
 	reset_obs_data(bool,   settings, "auto_start");
 	reset_obs_data(int,    settings, "watch_interval");
@@ -174,24 +225,60 @@ static void rtmp_nicolive_deactivate(void *data)
 	nicolive_stop_streaming(data);
 }
 
-static bool load_viqo_modified(obs_properties_t *props,
+// static bool load_viqo_modified(obs_properties_t *props,
+// 	obs_property_t *prop, obs_data_t *settings)
+// {
+// 	UNUSED_PARAMETER(prop);
+// 	if (obs_data_get_bool(settings, "load_viqo")) {
+// 		obs_property_set_enabled(
+// 				obs_properties_get(props, "mail"), false);
+// 		obs_property_set_enabled(
+// 				obs_properties_get(props, "password"), false);
+// 		obs_property_set_enabled(
+// 				obs_properties_get(props, "session"), false);
+// 	} else {
+// 		obs_property_set_enabled(
+// 				obs_properties_get(props, "mail"), true);
+// 		obs_property_set_enabled(
+// 				obs_properties_get(props, "password"), true);
+// 		obs_property_set_enabled(
+// 				obs_properties_get(props, "session"), true);
+// 	}
+// 	return true;
+// }
+
+static bool change_login_type(obs_properties_t *props,
 	obs_property_t *prop, obs_data_t *settings)
 {
 	UNUSED_PARAMETER(prop);
-	if (obs_data_get_bool(settings, "load_viqo")) {
-		obs_property_set_enabled(
-				obs_properties_get(props, "mail"), false);
-		obs_property_set_enabled(
-				obs_properties_get(props, "password"), false);
-		obs_property_set_enabled(
-				obs_properties_get(props, "session"), false);
-	} else {
-		obs_property_set_enabled(
+	switch (obs_data_get_int(settings, "login_type")) {
+	case RTMP_NICOLIVE_LOGIN_MAIL:
+		obs_property_set_visible(
 				obs_properties_get(props, "mail"), true);
-		obs_property_set_enabled(
+		obs_property_set_visible(
 				obs_properties_get(props, "password"), true);
-		obs_property_set_enabled(
+		obs_property_set_visible(
+				obs_properties_get(props, "session"), false);
+		break;
+	case RTMP_NICOLIVE_LOGIN_SESSION:
+		obs_property_set_visible(
+				obs_properties_get(props, "mail"), false);
+		obs_property_set_visible(
+				obs_properties_get(props, "password"), false);
+		obs_property_set_visible(
 				obs_properties_get(props, "session"), true);
+		break;
+	case RTMP_NICOLIVE_LOGIN_VIQO:
+		obs_property_set_visible(
+				obs_properties_get(props, "mail"), false);
+		obs_property_set_visible(
+				obs_properties_get(props, "password"), false);
+		obs_property_set_visible(
+				obs_properties_get(props, "session"), false);
+		break;
+	default:
+		nicolive_log_error("unknown login type");
+		return false;
 	}
 	return true;
 }
@@ -213,8 +300,20 @@ static bool auto_start_modified(obs_properties_t *props,
 static obs_properties_t *rtmp_nicolive_properties(void *data)
 {
 	UNUSED_PARAMETER(data);
+	obs_property_t   *list;
 	obs_property_t *prop;
 	obs_properties_t *ppts = obs_properties_create();
+
+	list = obs_properties_add_list(ppts, "login_type",
+			obs_module_text("LoginType"),
+			OBS_COMBO_TYPE_LIST, OBS_COMBO_FORMAT_INT);
+	obs_property_list_add_int(list, obs_module_text("LoginMailPassowrd"),
+			RTMP_NICOLIVE_LOGIN_MAIL);
+	obs_property_list_add_int(list, obs_module_text("UseCookieUserSession"),
+			RTMP_NICOLIVE_LOGIN_SESSION);
+	obs_property_list_add_int(list, obs_module_text("LoadViqoSettings"),
+			RTMP_NICOLIVE_LOGIN_VIQO);
+	obs_property_set_modified_callback(list, change_login_type);
 
 	obs_properties_add_text(ppts, "mail", obs_module_text("MailAddress"),
 			OBS_TEXT_DEFAULT);
@@ -223,9 +322,9 @@ static obs_properties_t *rtmp_nicolive_properties(void *data)
 	obs_properties_add_text(ppts, "session", obs_module_text("Session"),
 			OBS_TEXT_PASSWORD);
 
-	prop = obs_properties_add_bool(ppts, "load_viqo",
-			obs_module_text("LoadViqoSettings"));
-	obs_property_set_modified_callback(prop, load_viqo_modified);
+	// prop = obs_properties_add_bool(ppts, "load_viqo",
+	// 		obs_module_text("LoadViqoSettings"));
+	// obs_property_set_modified_callback(prop, load_viqo_modified);
 
 	obs_properties_add_bool(ppts, "adjust_bitrate",
 			obs_module_text("AdjustBitrate"));
@@ -242,10 +341,12 @@ static obs_properties_t *rtmp_nicolive_properties(void *data)
 
 static void rtmp_nicolive_defaults(obs_data_t *settings)
 {
+	obs_data_set_default_int   (settings, "login_type",
+			RTMP_NICOLIVE_LOGIN_MAIL);
 	obs_data_set_default_string(settings, "mail",            "");
 	obs_data_set_default_string(settings, "password",        "");
 	obs_data_set_default_string(settings, "session",         "");
-	obs_data_set_default_bool  (settings, "load_viqo",       false);
+	// obs_data_set_default_bool  (settings, "load_viqo",       false);
 	obs_data_set_default_bool  (settings, "adjust_bitrate",  true);
 	obs_data_set_default_bool  (settings, "auto_start",      false);
 	obs_data_set_default_int   (settings, "watch_interval",  60);

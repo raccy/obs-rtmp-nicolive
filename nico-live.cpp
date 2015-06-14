@@ -25,14 +25,12 @@ void NicoLive::setSession(const QString &session)
 	this->session = session;
 	this->flags.session_valid = false;
 	this->flags.load_viqo = false;
-
+	this->webApi->setCookie("user_session", this->session.toStdString());
 }
 
 void NicoLive::setSession(const char *session)
 {
-	this->session = session;
-	this->flags.session_valid = false;
-	this->flags.load_viqo = false;
+	this->setSession(QString(session));
 }
 
 void NicoLive::setAccount(const QString &mail, const QString &password)
@@ -214,6 +212,7 @@ bool NicoLive::sitePubStat()
 
 	std::unordered_map<std::string, std::vector<std::string>> data;
 	data[statusXpath] = std::vector<std::string>();
+	data[errorCodeXpath] = std::vector<std::string>();
 	for (auto &xpathPair: xpathMap) {
 		data[xpathPair.second] = std::vector<std::string>();
 	}
@@ -268,7 +267,7 @@ bool NicoLive::sitePubStat()
 		clearLiveInfo();
 		std::string errorCode = "null";
 		if (!data[errorCodeXpath].empty()) {
-			std::string errorCode = data[errorCodeXpath][0];
+			errorCode = data[errorCodeXpath][0];
 		}
 		if (errorCode == "notfound") {
 			nicolive_log_info("no live waku");
@@ -353,11 +352,13 @@ bool NicoLive::loadViqoSettings()
 	QJsonDocument jsd = QJsonDocument::fromJson(file.readAll());
 
 	QJsonObject login_way = jsd.object()["login_way"].toObject();
-	this->session = login_way["user_session"].toString();
+	// this->session = login_way["user_session"].toString();
+	this->setSession(login_way["user_session"].toString());
 
 	QJsonObject user_data = jsd.object()["user_data"].toObject();
-	this->mail = user_data["mail"].toString();
-	this->password = user_data["pass"].toString();
+	// FIXME: no mail and password
+	// this->mail = user_data["mail"].toString();
+	// this->password = user_data["pass"].toString();
 
 	file.close();
 	this->flags.load_viqo = true;

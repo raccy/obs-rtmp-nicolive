@@ -217,6 +217,8 @@ bool NicoLiveApi::accessWeb(
 	}
 
 	// Cookie
+	nicolive_log_debug("create cookie: %s",
+			NicoLiveApi::createCookieString(this->cookie).c_str());
 	if (! this->cookie.empty()) {
 		curl_easy_setopt(curl, CURLOPT_COOKIE,
 			NicoLiveApi::createCookieString(this->cookie).c_str());
@@ -261,6 +263,7 @@ bool NicoLiveApi::accessWeb(
 			this->cookie[results.str(1)] = results.str(2);
 		}
 	}
+	nicolive_log_debug("body: %s", bodyData.c_str());
 
 	*response = bodyData;
 
