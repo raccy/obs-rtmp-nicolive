@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <ios>
 #include <regex>
+#include <ctime>
 #include "nico-live-api.hpp"
 #include "curl/curl.h"
 #include "pugixml.hpp"
@@ -345,15 +346,75 @@ bool NicoLiveApi::loginSiteNicolive(
 	return this->loginSite("nicolive", mail, password);
 }
 
-// std::string NicoLiveApi::loginApiTicket(
-// 	const std::string &site,
-// 	const std::string &mail,
-// 	const std::string &password)
-// {}
-// std::string NicoLiveApi::loginNicoliveEncoder(
-// 	const std::string &mail,
-// 	const std::string &password)
-// {}
+std::string NicoLiveApi::loginApiTicket(
+	const std::string &site,
+	const std::string &mail,
+	const std::string &password)
+{
+	std::stringstream unixTimeStream;
+	unixTimeStream << std::time(nullptr);
+	std::unordered_map<std::string, std::string> formData;
+	formData["site"] = site;
+	formData["time"] = unixTimeStream.str();
+	formData["mail"] = mail;
+	formData["password"] = password;
+
+	int code = 0;
+	std::string response;
+
+	this->clearCookie();
+
+	nicolive_log_info("login api site: %s", site.c_str());
+	bool result = this->postWeb(NicoLiveApi::LOGIN_API_URL, formData,
+		&code, &response);
+
+	if (!result) {
+		nicolive_log_error("access login api errror");
+		return std::string();
+	}
+
+	if (code != 200) {
+		nicolive_log_error("login api invalid return code: %d",
+			code);
+		return std::string();
+	}
+
+	std::unordered_map<std::string, std::vector<std::string>> data;
+	data["/nicovideo_user_response/@status"] = std::vector<std::string>();
+	data["/nicovideo_user_response/ticket/text()"] =
+		std::vector<std::string>();
+
+	if (!NicoLiveApi::parseXml(response, &data)) {
+		nicolive_log_info("login api fail parse xml");
+		return std::string();
+	}
+
+	if (data["/nicovideo_user_response/@status"].empty()) {
+		nicolive_log_info("login api unknown status");
+		return std::string();
+	}
+
+	if (data["/nicovideo_user_response/@status"].at(0) != "ok") {
+		nicolive_log_info("login api fail status: %s",
+			data["/nicovideo_user_response/@status"].at(0).c_str());
+		return std::string();
+	}
+
+	if (data["/nicovideo_user_response/ticket/text()"].empty()) {
+		nicolive_log_info("login api no ticket");
+		return std::string();
+	}
+
+	return data["/nicovideo_user_response/ticket/text()"].at(0);
+}
+
+std::string NicoLiveApi::loginNicoliveEncoder(
+	const std::string &mail,
+	const std::string &password)
+{
+	return this->loginApiTicket("nicolive_encoder", mail, password);
+}
+
 bool NicoLiveApi::getPublishStatus(
 	std::unordered_map<std::string, std::vector<std::string>> *data)
 {
@@ -373,7 +434,28 @@ bool NicoLiveApi::getPublishStatus(
 	return NicoLiveApi::parseXml(response, data);
 }
 
-// bool NicoLiveApi::getPublishStatusTicket(
-// 	const std::string &ticket,
-// 	std::unordered_map<std::string, std::string> *data)
-// {}
+bool NicoLiveApi::getPublishStatusTicket(
+	const std::string &ticket,
+	std::unordered_map<std::string, std::vector<std::string>> *data)
+{
+	std::unordered_map<std::string, std::string> formData;
+	formData["ticket"] = ticket;
+	formData["accept-multi"] = "0";
+
+	int code;
+	std::string response;
+	if (!this->postWeb(NicoLiveApi::PUBSTAT_URL, formData,
+			&code, &response)) {
+		nicolive_log_error("failed to get publish status ticket");
+		return false;
+	}
+
+	if (code != 200) {
+		nicolive_log_error(
+			"failed to get publish ticketstatus, return code = %d",
+			code);
+		return false;
+	}
+
+	return NicoLiveApi::parseXml(response, data);
+}
