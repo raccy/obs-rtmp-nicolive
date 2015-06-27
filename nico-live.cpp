@@ -153,7 +153,7 @@ bool NicoLive::silentOnce()
 
 bool NicoLive::checkSession()
 {
-	return (sitePubStat() || (siteLogin() && sitePubStat()));
+	return (sitePubStat() || (siteLoginNLE() && sitePubStat()));
 }
 
 bool NicoLive::checkLive()
@@ -176,22 +176,39 @@ bool NicoLive::siteLogin()
 	return result;
 }
 
-// const QString NicoLive::siteLoginNLE(const QString &mail,
-// 		const QString &password) const
-// {
-// 	// TODO: need to create
-// }
+bool NicoLive::siteLoginNLE()
+{
+	if (this->mail.isEmpty() || this->password.isEmpty()) {
+		nicolive_log_warn("no mail or password");
+		return false;
+	}
+
+	std::string result = this->webApi->loginNicoliveEncoder(
+		this->mail.toStdString(),
+		this->password.toStdString());
+	if (!result.empty()) {
+		this->ticket = result.c_str();
+		return true;
+	} else {
+		return false;
+	}
+}
 
 bool NicoLive::sitePubStat()
 {
 	nicolive_log_debug("session: %s",
 			this->session.toStdString().c_str());
 
+	bool useTicket = false;
 	if (this->session.isEmpty()) {
-		nicolive_log_debug("this->session is empty.");
-		this->flags.onair = false;
-		clearLiveInfo();
-		return false;
+		if (this-ticket.isEmpty()) {
+			nicolive_log_debug("this->session is empty.");
+			this->flags.onair = false;
+			clearLiveInfo();
+			return false;
+		} else {
+			useTicket = true;
+		}
 	}
 
 	const std::string statusXpath = "/getpublishstatus/@status";
@@ -217,7 +234,14 @@ bool NicoLive::sitePubStat()
 		data[xpathPair.second] = std::vector<std::string>();
 	}
 
-	bool result = this->webApi->getPublishStatus(&data);
+	bool result = false;
+	if (useTicket) {
+		result = this->webApi->getPublishStatusTicket(
+			this->ticket.toStdString(),
+			&data);
+	} else {
+		result = this->webApi->getPublishStatus(&data);
+	}
 
 	if (!result) {
 		nicolive_log_error("failed get publish status web page");

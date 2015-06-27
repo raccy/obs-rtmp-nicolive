@@ -15,6 +15,7 @@ private:
 	QString mail;
 	QString password;
 	QString session;
+	QString ticket;
 	struct {
 		QString id;
 		QString url;
@@ -76,8 +77,7 @@ public:
 private:
 	// Access Niconico Site
 	bool siteLogin();
-	// const QString siteLoginNLE(const QString &mail,
-	// 		const QString &password) const;
+	bool siteLoginNLE();
 	bool sitePubStat();
 	bool siteLiveProf();
 
