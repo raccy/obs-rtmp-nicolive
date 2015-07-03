@@ -43,7 +43,10 @@ endif(NOT BUILD_IN_OBS)
 # find Qt5
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)
+
 find_package(Libcurl REQUIRED)
+include_directories(${LIBCURL_INCLUDE_DIRS})
+add_definitions(${LIBCURL_DEFINITIONS})
 
 # header and library
 if(NOT BUILD_IN_OBS AND NOT LibObs_FOUND)
