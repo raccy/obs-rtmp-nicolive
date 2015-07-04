@@ -44,6 +44,7 @@ endif(NOT BUILD_IN_OBS)
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 
+# find libcurl
 find_package(Libcurl REQUIRED)
 include_directories(${LIBCURL_INCLUDE_DIRS})
 add_definitions(${LIBCURL_DEFINITIONS})
