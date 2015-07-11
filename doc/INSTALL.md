@@ -113,7 +113,7 @@ OBS MultiPlatform は配付されているバイナリを使用して、プラ�
 必要な物を用意します。なお、32bit 版も 64bit 環境でコンパイルします。32bit 環境での 32bit 版のみのコンパイルはサポートしていません。(作者に環境がありません)
 
 *   OBS MultiPlatform バイナリ:
-    https://github.com/jp9000/obs-studio/releases から `OBS-MP-Win-*.zip` をダウンロードして、任意のフォルダに展開します。
+    https://github.com/jp9000/obs-studio/releases から `OBS-MP-*-installer.exe` をダウンロードして、インストールします。
 *   OBS MultiPlatform ソース:
     https://github.com/jp9000/obs-studio/releases から `Source code (zip)` をダウンロードして、任意のフォルダに展開します。バイナリと同じバージョンを使用して下さい。
 *   Qt:
@@ -168,7 +168,7 @@ CMake はパスを通しておく必要があります。コマンドプロン�
 必要な物を用意します。
 
 *   OBS MultiPlatform バイナリ:
-    https://github.com/jp9000/obs-studio/releases から `OBS-MP-Win-*.zip` をダウンロードして、任意のフォルダに展開します。
+    https://github.com/jp9000/obs-studio/releases から `obs-*-installer.dmg` をダウンロードして、インストールします。
 *   OBS MultiPlatform ソース:
     https://github.com/jp9000/obs-studio/releases から `Source code (tar.gz)` をダウンロードして、任意のフォルダに展開します。バイナリと同じバージョンを使用して下さい。
 *   Xcode / Command Line Tools
@@ -204,7 +204,7 @@ cd build
 cmake \
 -DCMAKE_BUILD_TYPE=Release \
 -DCMAKE_PREFIX_PATH=~/Qt/5.4/clang_64/lib/cmake \
--DOBS_SRC=~/src/obs-studio-0.9.1 \
+-DOBS_SRC=~/src/obs-studio-0.11.1 \
 ..
 make
 ```

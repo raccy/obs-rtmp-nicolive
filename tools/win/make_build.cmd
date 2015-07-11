@@ -3,8 +3,8 @@ rem make build tool for obs-rtmp-nicolive
 
 rem ##### Settings #####
 rem You must change follow lines to suite your environment.
-set OBS_APP=C:\Apps\OBS-MP-Win-0.9.1
-set OBS_SRC=%HOMEDRIVE%%HOMEPATH%\Documents\obs-studio-0.9.1
+set OBS_APP=C:\Program Files (x86)\obs-studio
+set OBS_SRC=%HOMEDRIVE%%HOMEPATH%\Documents\obs-studio-0.11.1
 
 set QT_VERSION=5.4
 set QT_DIR=C:\Qt

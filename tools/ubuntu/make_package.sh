@@ -2,7 +2,7 @@
 
 # make package tool for obs-rtmp-nicolive
 
-OBS_RTMP_NICOLIVE_VERSION=1.2
+OBS_RTMP_NICOLIVE_VERSION=2.0
 PACAKGE_NAME=obs-rtmp-nicolive
 
 DOC_DIR=doc-pak

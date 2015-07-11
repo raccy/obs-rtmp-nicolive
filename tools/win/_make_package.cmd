@@ -1,7 +1,7 @@
 @echo off
 rem make package tool for obs-rtmp-nicolive
 
-set OBS_RTMP_NICOLIVE_VERSION=1.2
+set OBS_RTMP_NICOLIVE_VERSION=2.0
 set PACAKGE_NAME=obs-rtmp-nicolive_%OBS_RTMP_NICOLIVE_VERSION%-win
 
 set BUILD32_DIR=..\build32
