@@ -131,6 +131,9 @@ OBS MultiPlatform は配付されているバイナリを使用して、プラ�
 *   mingw-pexport:
     http://www.mingw.org/download/installer
     で Mingw インストーラをダウンロード後に実行して、mingw32-pexport の bin を選択し、インストールして下さい。
+*   Curl:
+    http://curl.haxx.se/download.html
+    にある curl-*.zip をダウンロードして任意のファイルに展開します。
 *   (オプション) 7-Zip:
     http://sevenzip.sourceforge.jp
     からインストーラをダウンロードしてインストールして下さい。最後のアーカイブ作成でのみ必要です。
@@ -236,6 +239,7 @@ sudo add-apt-repository ppa:kirillshkrogalev/ffmpeg-next
 sudo add-apt-repository ppa:obsproject/obs-studio
 sudo apt-get update
 sudo apt-get install ffmpeg obs-studio
+sudo apt-get install libcurl3-dev
 ```
 
 ビルドツールをインストールします。
