@@ -5,6 +5,7 @@ rem ##### Settings #####
 rem You must change follow lines to suite your environment.
 set OBS_APP=C:\Program Files (x86)\obs-studio
 set OBS_SRC=%HOMEDRIVE%%HOMEPATH%\Documents\obs-studio-0.11.1
+set CURL_SRC=%HOMEDRIVE%%HOMEPATH%\Documents\curl-7.43.0
 
 set QT_VERSION=5.4
 set QT_DIR=C:\Qt
@@ -32,6 +33,7 @@ call :check_exist "%QT32_CMAKE%" "Not found qt 32bit cmake. Please install Qt ms
 call :check_exist "%QT64_CMAKE%" "Not found qt 64bit cmake. Please install Qt msvc2013_64_opengl or change QT64_DIR"
 call :check_exist "%OBS_APP%" "Not found obs-studio application. Please install obs-stduio application or change OBS_APP"
 call :check_exist "%OBS_SRC%" "Not found obs-studio sourcs. Please install obs-stduio soruces or change OBS_SRC"
+call :check_exist "%CURL_SRC%" "Not found curl sourcs. Please install curl soruces or change CURL_SRC"
 
 cmake > NUL 2>&1
 if errorlevel 1 call :die "Failed check CMake. Please install CMake ant set PATH"
@@ -53,22 +55,27 @@ if errorlevel 1 call :die "Failed mkdir build32"
 mkdir build64
 if errorlevel 1 call :die "Failed mkdir build64"
 
-mkdir build\libs
-mkdir build\libs\32bit
-mkdir build\libs\64bit
+mkdir build\libs32
+mkdir build\libs64
 
-"%PEXPORTS_EXE%" /EXPORTS "%OBS_APP%\bin\32bit\obs.dll" > "build\libs\32bit\obs.def"
-"%PEXPORTS_EXE%" /EXPORTS "%OBS_APP%\bin\64bit\obs.dll" > "build\libs\64bit\obs.def"
-"%LIB_EXE%" /MACHINE:x86 /def:"build\libs\32bit\obs.def" /out:"build\libs\32bit\obs.lib"
-"%LIB_EXE%" /MACHINE:x64 /def:"build\libs\64bit\obs.def" /out:"build\libs\64bit\obs.lib"
+rem obs.dll
+"%PEXPORTS_EXE%" /EXPORTS "%OBS_APP%\bin\32bit\obs.dll" > "build\lib32\obs.def"
+"%PEXPORTS_EXE%" /EXPORTS "%OBS_APP%\bin\64bit\obs.dll" > "build\lib64\obs.def"
+"%LIB_EXE%" /MACHINE:x86 /def:"build\libs\32bit\obs.def" /out:"build\lib32\obs.lib"
+"%LIB_EXE%" /MACHINE:x64 /def:"build\libs\64bit\obs.def" /out:"build\lib64\obs.lib"
+rem libcurl.dll
+"%PEXPORTS_EXE%" /EXPORTS "%OBS_APP%\bin\32bit\libcurl.dll" > "build\lib32\libcurl.def"
+"%PEXPORTS_EXE%" /EXPORTS "%OBS_APP%\bin\64bit\libcurl.dll" > "build\lib64\libcurl.def"
+"%LIB_EXE%" /MACHINE:x86 /def:"build\libs\32bit\libcurl.def" /out:"build\lib32\libcurl.lib"
+"%LIB_EXE%" /MACHINE:x64 /def:"build\libs\64bit\libcurl.def" /out:"build\lib64\libcurl.lib"
 
 rem TODO
-echo cmake -G"Visual Studio 12 2013" -DCMAKE_PREFIX_PATH="%QT32_CMAKE:\=/%" -DOBS_SRC="%OBS_SRC:\=/%" -DOBS_APP="%OBS_APP:\=/%" .. > build32\run_cmake.cmd
+echo cmake -G"Visual Studio 12 2013" -DCMAKE_PREFIX_PATH="%QT32_CMAKE:\=/%" -DOBS_SRC="%OBS_SRC:\=/%" -DOBS_APP="%OBS_APP:\=/%" -DcurlPath="%CURL_SRC:\=/%" .. > build32\run_cmake.cmd
 echo @echo ##### CMake done. Please open rtmp-nicolive.sln ##### >> build32\run_cmake.cmd
 echo @echo You MUST change Debug to Release before build! >> build32\run_cmake.cmd
 echo pause >> build32\run_cmake.cmd
 
-echo cmake -G"Visual Studio 12 2013 Win64" -DCMAKE_PREFIX_PATH="%QT64_CMAKE:\=/%" -DOBS_SRC="%OBS_SRC:\=/%" -DOBS_APP="%OBS_APP:\=/%" .. > build64\run_cmake.cmd
+echo cmake -G"Visual Studio 12 2013 Win64" -DCMAKE_PREFIX_PATH="%QT64_CMAKE:\=/%" -DOBS_SRC="%OBS_SRC:\=/%" -DOBS_APP="%OBS_APP:\=/%" -DcurlPath="%CURL_SRC:\=/%" .. > build64\run_cmake.cmd
 echo @echo ##### CMake done. Please open rtmp-nicolive.sln ##### >> build64\run_cmake.cmd
 echo @echo You MUST change Debug to Release before build! >> build64\run_cmake.cmd
 echo pause >> build64\run_cmake.cmd

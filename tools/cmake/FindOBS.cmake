@@ -33,7 +33,7 @@ if(MSVC)
 	set(OBS_APP_BIN "${OBS_APP}/bin/${_lib_suffix}bit")
 	set(OBS_LIB_LIBOBS "${OBS_APP_BIN}/obs.dll")
 	# win lib
-	set(OBS_APP_LIB "${CMAKE_CURRENT_SOURCE_DIR}/build/libs/${_lib_suffix}bit")
+	set(OBS_APP_LIB "${CMAKE_CURRENT_SOURCE_DIR}/build/lib${_lib_suffix}")
 	set(OBS_LIB_LIBOBS_LIB "${OBS_APP_LIB}/obs.lib")
 elseif(APPLE)
 	set(LIBOBS_PLUGIN_DESTINATION
