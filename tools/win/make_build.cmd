@@ -61,13 +61,13 @@ mkdir build\libs64
 rem obs.dll
 "%PEXPORTS_EXE%" /EXPORTS "%OBS_APP%\bin\32bit\obs.dll" > "build\lib32\obs.def"
 "%PEXPORTS_EXE%" /EXPORTS "%OBS_APP%\bin\64bit\obs.dll" > "build\lib64\obs.def"
-"%LIB_EXE%" /MACHINE:x86 /def:"build\libs\32bit\obs.def" /out:"build\lib32\obs.lib"
-"%LIB_EXE%" /MACHINE:x64 /def:"build\libs\64bit\obs.def" /out:"build\lib64\obs.lib"
+"%LIB_EXE%" /MACHINE:x86 /def:"build\lib32\obs.def" /out:"build\lib32\obs.lib"
+"%LIB_EXE%" /MACHINE:x64 /def:"build\lib64\obs.def" /out:"build\lib64\obs.lib"
 rem libcurl.dll
 "%PEXPORTS_EXE%" /EXPORTS "%OBS_APP%\bin\32bit\libcurl.dll" > "build\lib32\libcurl.def"
 "%PEXPORTS_EXE%" /EXPORTS "%OBS_APP%\bin\64bit\libcurl.dll" > "build\lib64\libcurl.def"
-"%LIB_EXE%" /MACHINE:x86 /def:"build\libs\32bit\libcurl.def" /out:"build\lib32\libcurl.lib"
-"%LIB_EXE%" /MACHINE:x64 /def:"build\libs\64bit\libcurl.def" /out:"build\lib64\libcurl.lib"
+"%LIB_EXE%" /MACHINE:x86 /def:"build\lib32\libcurl.def" /out:"build\lib32\libcurl.lib"
+"%LIB_EXE%" /MACHINE:x64 /def:"build\lib64\libcurl.def" /out:"build\lib64\libcurl.lib"
 
 rem TODO
 echo cmake -G"Visual Studio 12 2013" -DCMAKE_PREFIX_PATH="%QT32_CMAKE:\=/%" -DOBS_SRC="%OBS_SRC:\=/%" -DOBS_APP="%OBS_APP:\=/%" -DcurlPath="%CURL_SRC:\=/%" .. > build32\run_cmake.cmd
