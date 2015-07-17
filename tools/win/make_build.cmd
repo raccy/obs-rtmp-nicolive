@@ -55,8 +55,8 @@ if errorlevel 1 call :die "Failed mkdir build32"
 mkdir build64
 if errorlevel 1 call :die "Failed mkdir build64"
 
-mkdir build\libs32
-mkdir build\libs64
+mkdir build\lib32
+mkdir build\lib64
 
 rem obs.dll
 "%PEXPORTS_EXE%" /EXPORTS "%OBS_APP%\bin\32bit\obs.dll" > "build\lib32\obs.def"
