@@ -51,6 +51,15 @@ https://github.com/raccy/obs-rtmp-nicolive/releases から 64bit を使用して
 sudo dpkg -i obs-rtmp-nicolive_*-ubuntu_*.deb
 ```
 
+### Arch Linux
+AUR上に [obs-studio](https://aur.archlinux.org/packages/obs-studio/) と [obs-rtmp-nicolive-git](https://aur.archlinux.org/packages/obs-rtmp-nicolive-git/) があるので、それをインストールするのが簡単です。
+
+```
+$ yaourt -S obs-studio obs-rtmp-nicolive-git
+```
+
+なお、このパッケージに関して問題が発生した場合には、まずAUR上で問題を報告してください。 obs-rtmp-nicolive の問題ではなくパッケージ特有の問題である可能性があります。
+
 OBS MultiPlatform と一緒にコンパイルする方法
 --------------------------------------------
 
