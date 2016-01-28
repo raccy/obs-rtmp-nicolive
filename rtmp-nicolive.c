@@ -49,8 +49,9 @@ static bool adjust_bitrate(obs_output_t *output, long long bitrate)
 	return true;
 }
 
-static const char *rtmp_nicolive_getname(void)
+static const char *rtmp_nicolive_getname(void *type_data)
 {
+	UNUSED_PARAMETER(type_data);
 	return obs_module_text("NiconicoLive");
 }
 
