@@ -1,0 +1,42 @@
+root = true
+
+[*]
+end_of_line = lf
+trim_trailing_whitespace = true
+insert_final_newline = true
+charset = utf-8
+tab_width = 8
+max_line_length = 80
+curly_bracket_next_line = false
+spaces_around_operators = true
+spaces_around_brackets = both
+
+[*.{c,cpp,h,hpp}]
+indent_style = tab
+c_include_path = ../../libobs
+indent_brace_style = K&R
+
+[*.md]
+indent_style = space
+indent_size = 4
+
+[CMakeLists.txt]
+indent_style = tab
+
+[*.{rb}]
+indent_style = space
+indent_size = 2
+continuation_indent_size = 4
+
+[*.{py}]
+indent_style = space
+indent_size = 4
+continuation_indent_size = 8
+
+[*.{sh}]
+indent_style = space
+indent_size = 2
+
+[*.{cmd,bat}]
+end_of_line = crlf
+indent_style = tab
