@@ -67,35 +67,6 @@ static void rtmp_nicolive_update_internal(void *data, obs_data_t *settings,
 			"unknown login type");
 	}
 
-	// if (obs_data_get_bool(settings, "load_viqo")) {
-	// 	if (nicolive_load_viqo_settings(data)) {
-	// 		if (!nicolive_check_session(data)) {
-	// 			nicolive_msg_warn(msg_gui,
-	// 				obs_module_text("MessageFailedLogin"),
-	// 				"failed login");
-	// 		}
-	// 	} else {
-	// 		nicolive_msg_warn(msg_gui,
-	// 			obs_module_text(
-	// 				"MessageFailedLoadViqoSettings"),
-	// 			"failed load viqo settings");
-	// 		obs_data_set_bool(settings, "load_viqo", false);
-	// 	}
-	// } else {
-	// 	nicolive_set_settings(data,
-	// 			obs_data_get_string(settings, "mail"),
-	// 			obs_data_get_string(settings, "password"),
-	// 			obs_data_get_string(settings, "session"));
-	// 	if (nicolive_check_session(data)) {
-	// 		obs_data_set_string(settings, "session",
-	// 				nicolive_get_session(data));
-	// 	} else {
-	// 		nicolive_msg_warn(msg_gui,
-	// 			obs_module_text("MessageFailedLogin"),
-	// 			"failed login");
-	// 	}
-	// }
-
 	nicolive_set_enabled_adjust_bitrate(data,
 			obs_data_get_bool(settings, "adjust_bitrate"));
 
@@ -108,10 +79,6 @@ static void rtmp_nicolive_update_internal(void *data, obs_data_t *settings,
 
 	// OPTIMIZE: Default settisgs are not saved, so resetting data
 	// Maybe obs-studio 0.8.3 bug
-	// reset_obs_data(string, settings, "mail");
-	// reset_obs_data(string, settings, "password");
-	// reset_obs_data(string, settings, "session");
-	// reset_obs_data(bool,   settings, "load_viqo");
 	reset_obs_data(bool,   settings, "adjust_bitrate");
 	reset_obs_data(bool,   settings, "auto_start");
 	reset_obs_data(int,    settings, "watch_interval");
@@ -181,28 +148,6 @@ static void rtmp_nicolive_deactivate(void *data)
 {
 	nicolive_stop_streaming(data);
 }
-
-// static bool load_viqo_modified(obs_properties_t *props,
-// 	obs_property_t *prop, obs_data_t *settings)
-// {
-// 	UNUSED_PARAMETER(prop);
-// 	if (obs_data_get_bool(settings, "load_viqo")) {
-// 		obs_property_set_enabled(
-// 				obs_properties_get(props, "mail"), false);
-// 		obs_property_set_enabled(
-// 				obs_properties_get(props, "password"), false);
-// 		obs_property_set_enabled(
-// 				obs_properties_get(props, "session"), false);
-// 	} else {
-// 		obs_property_set_enabled(
-// 				obs_properties_get(props, "mail"), true);
-// 		obs_property_set_enabled(
-// 				obs_properties_get(props, "password"), true);
-// 		obs_property_set_enabled(
-// 				obs_properties_get(props, "session"), true);
-// 	}
-// 	return true;
-// }
 
 static bool change_login_type(obs_properties_t *props,
 	obs_property_t *prop, obs_data_t *settings)
@@ -279,10 +224,6 @@ static obs_properties_t *rtmp_nicolive_properties(void *data)
 	obs_properties_add_text(ppts, "session", obs_module_text("Session"),
 			OBS_TEXT_PASSWORD);
 
-	// prop = obs_properties_add_bool(ppts, "load_viqo",
-	// 		obs_module_text("LoadViqoSettings"));
-	// obs_property_set_modified_callback(prop, load_viqo_modified);
-
 	obs_properties_add_bool(ppts, "adjust_bitrate",
 			obs_module_text("AdjustBitrate"));
 
@@ -303,7 +244,6 @@ static void rtmp_nicolive_defaults(obs_data_t *settings)
 	obs_data_set_default_string(settings, "mail",            "");
 	obs_data_set_default_string(settings, "password",        "");
 	obs_data_set_default_string(settings, "session",         "");
-	// obs_data_set_default_bool  (settings, "load_viqo",       false);
 	obs_data_set_default_bool  (settings, "adjust_bitrate",  true);
 	obs_data_set_default_bool  (settings, "auto_start",      false);
 	obs_data_set_default_int   (settings, "watch_interval",  60);
