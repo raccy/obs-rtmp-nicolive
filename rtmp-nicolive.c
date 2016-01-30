@@ -270,7 +270,6 @@ static void rtmp_nicolive_apply_encoder_settings(void *data,
 		obs_data_t *video_encoder_settings,
 		obs_data_t *audio_encoder_settings)
 {
-	nicolive_log_debug_call_func();
 	if (!(nicolive_check_session(data) && nicolive_check_live(data))) {
 		return;
 	}
