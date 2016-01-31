@@ -70,6 +70,7 @@ set(rtmp-nicolive_SOURCES
 	nico-live-watcher.cpp
 	nicolive.cpp
 	nicolive-ui.cpp
+	nicolive-operation.c
 	rtmp-nicolive.c)
 
 add_library(rtmp-nicolive MODULE

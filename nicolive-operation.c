@@ -1,0 +1,36 @@
+#include <stdbool.h>
+#include <string.h>
+#include <obs-internal.h>
+#include <obs-hotkey.h>
+#include "nicolive.h"
+#include "nicolive-operation.h"
+
+#define START_STREAMING_HOTKEY_NAME "OBSBasic.StartStreaming"
+#define STOP_STREAMING_HOTKEY_NAME "OBSBasic.StopStreaming"
+
+inline static bool nicolive_operation_click_enum_func(void *data,
+		obs_hotkey_id id, obs_hotkey_t *key)
+{
+	nicolive_log_debug_call_func();
+	const char *target = data;
+	const char *name = obs_hotkey_get_name(key);
+	nicolive_log_debug("check hotkey(start): %s", name);
+	if (strcmp(name, target) == 0) {
+		obs_hotkey_trigger_routed_callback(id, true);
+	}
+	return true;
+}
+
+void nicolive_streaming_start(void)
+{
+	nicolive_log_debug_call_func();
+	obs_enum_hotkeys(nicolive_operation_click_enum_func,
+		START_STREAMING_HOTKEY_NAME);
+}
+
+void nicolive_streaming_stop(void)
+{
+	nicolive_log_debug_call_func();
+	obs_enum_hotkeys(nicolive_operation_click_enum_func,
+		STOP_STREAMING_HOTKEY_NAME);
+}
