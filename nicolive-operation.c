@@ -14,9 +14,10 @@ inline static bool nicolive_operation_click_enum_func(void *data,
 	nicolive_log_debug_call_func();
 	const char *target = data;
 	const char *name = obs_hotkey_get_name(key);
-	nicolive_log_debug("check hotkey(start): %s", name);
 	if (strcmp(name, target) == 0) {
+		nicolive_log_debug("click hotkey: %s", name);
 		obs_hotkey_trigger_routed_callback(id, true);
+		return false;
 	}
 	return true;
 }
