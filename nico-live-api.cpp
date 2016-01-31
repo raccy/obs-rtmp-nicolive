@@ -218,7 +218,7 @@ bool NicoLiveApi::accessWeb(
 	}
 
 	// Cookie
-	nicolive_log_debug("create cookie: %s",
+	nicolive_log_debug("create cookie: %40s",
 			NicoLiveApi::createCookieString(this->cookie).c_str());
 	if (! this->cookie.empty()) {
 		curl_easy_setopt(curl, CURLOPT_COOKIE,

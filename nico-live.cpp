@@ -186,7 +186,7 @@ bool NicoLive::siteLoginNLE()
 	std::string result = this->webApi->loginNicoliveEncoder(
 		this->mail.toStdString(),
 		this->password.toStdString());
-	nicolive_log_debug("ticket: %s", result.c_str());
+	nicolive_log_debug("ticket: %20s", result.c_str());
 	if (!result.empty()) {
 		this->ticket = result.c_str();
 		return true;
@@ -197,9 +197,9 @@ bool NicoLive::siteLoginNLE()
 
 bool NicoLive::sitePubStat()
 {
-	nicolive_log_debug("session: %s",
+	nicolive_log_debug("session: %20s",
 			this->session.toStdString().c_str());
-	nicolive_log_debug("ticket: %s",
+	nicolive_log_debug("ticket: %20s",
 			this->ticket.toStdString().c_str());
 
 	bool useTicket = false;
