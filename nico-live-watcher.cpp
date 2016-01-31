@@ -2,7 +2,7 @@
 #include "nicolive.h"
 #include "nico-live.hpp"
 #include "nico-live-watcher.hpp"
-#include "nicolive-ui.h"
+#include "nicolive-operation.h"
 
 NicoLiveWatcher::NicoLiveWatcher(NicoLive *nicolive, int margin_sec) :
 	QObject(nicolive),
@@ -73,7 +73,7 @@ void NicoLiveWatcher::watch()
 	if (nicolive->getLiveId().isEmpty()) {
 		if (nicolive->isOnair()) {
 			nicolive_log_debug("stop streaming because live end");
-			nicolive_streaming_click();
+			nicolive_streaming_stop();
 			next_interval = this->marginTime;
 		}
 	} else {
@@ -81,11 +81,11 @@ void NicoLiveWatcher::watch()
 			if (nicolive->isOnair()) {
 				nicolive_log_debug(
 					"stop streaming for restart");
-				nicolive_streaming_click();
+				nicolive_streaming_stop();
 				QThread::sleep(1); // sleep 1 sec
 			}
 			nicolive_log_debug("start streaming for next live");
-			nicolive_streaming_click();
+			nicolive_streaming_start();
 		} else if (remaining_msec + this->marginTime < next_interval) {
 			next_interval = remaining_msec + this->marginTime;
 		}

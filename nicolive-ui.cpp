@@ -89,22 +89,3 @@ extern "C" void nicolive_msg_info(bool available_gui, const char *gui_message,
 	else
 		nicolive_log_info("%s", cui_message);
 }
-
-extern "C" void nicolive_streaming_click()
-{
-	QWidget *obs_widget = findTopLevelWidget("OBSBasic");
-	if (obs_widget == nullptr) {
-		nicolive_log_error("not found OBSBasic Window");
-		return;
-	}
-
-	QPushButton *stream_button = obs_widget->findChild<QPushButton *>(
-		"streamButton");
-	if (stream_button == nullptr) {
-		nicolive_log_error("not found streamButton");
-		return;
-	}
-
-	nicolive_log_debug("click streamButton");
-	stream_button->click();
-}

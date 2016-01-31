@@ -17,7 +17,7 @@ void nicolive_msg_warn(bool available_gui, const char *gui_message,
 void nicolive_msg_info(bool available_gui, const char *gui_message,
 		const char *cui_message);
 
-void nicolive_streaming_click(void);
+// void nicolive_streaming_click(void);
 
 #ifdef __cplusplus
 }
