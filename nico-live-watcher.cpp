@@ -1,8 +1,9 @@
 #include <QtCore>
 #include "nicolive.h"
+#include "nicolive-log.h"
+#include "nicolive-operation.h"
 #include "nico-live.hpp"
 #include "nico-live-watcher.hpp"
-#include "nicolive-operation.h"
 
 NicoLiveWatcher::NicoLiveWatcher(NicoLive *nicolive, int margin_sec) :
 	QObject(nicolive),

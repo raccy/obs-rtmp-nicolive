@@ -9,6 +9,7 @@
 #include "curl/curl.h"
 #include "pugixml.hpp"
 #include "nicolive.h"
+#include "nicolive-log.h"
 
 // static
 const std::string NicoLiveApi::LOGIN_SITE_URL =

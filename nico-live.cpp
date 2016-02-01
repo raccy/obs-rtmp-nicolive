@@ -4,6 +4,7 @@
 #include <QtCore>
 #include <curl/curl.h>
 #include "nicolive.h"
+#include "nicolive-log.h"
 #include "nico-live.hpp"
 #include "nico-live-watcher.hpp"
 #include "nico-live-api.hpp"

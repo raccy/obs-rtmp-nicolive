@@ -1,6 +1,7 @@
 #include <QtCore>
 #include <obs-module.h>
 #include "nicolive.h"
+#include "nicolive-log.h"
 #include "nico-live.hpp"
 
 // cannot use anonymouse struct because VS2013 bug

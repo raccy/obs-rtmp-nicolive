@@ -1,7 +1,7 @@
 #include <stdbool.h>
 #include <obs-module.h>
 #include "nicolive.h"
-#include "nicolive-ui.h"
+#include "nicolive-log.h"
 
 // use in rtmp_nicolive_update_internal for reset default settigs
 #define reset_obs_data(type, settings, name) \

@@ -69,7 +69,7 @@ set(rtmp-nicolive_SOURCES
 	nico-live.cpp
 	nico-live-watcher.cpp
 	nicolive.cpp
-	nicolive-ui.cpp
+	nicolive-log.cpp
 	nicolive-operation.c
 	rtmp-nicolive.c)
 

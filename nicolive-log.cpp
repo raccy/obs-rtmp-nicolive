@@ -2,7 +2,7 @@
 #include <QtWidgets>
 #include <obs-module.h>
 #include "nicolive.h"
-#include "nicolive-ui.h"
+#include "nicolive-log.h"
 
 static QWidget *findTopLevelWidget(const char *name) {
 	for(QWidget *widget: QApplication::topLevelWidgets()) {

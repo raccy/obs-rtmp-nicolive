@@ -3,6 +3,7 @@
 #include <obs-internal.h>
 #include <obs-hotkey.h>
 #include "nicolive.h"
+#include "nicolive-log.h"
 #include "nicolive-operation.h"
 
 #define START_STREAMING_HOTKEY_NAME "OBSBasic.StartStreaming"
