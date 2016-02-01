@@ -286,7 +286,7 @@ static void rtmp_nicolive_apply_encoder_settings(void *data,
 			nicolive_msg_warn(true,
 				obs_module_text(
 					"MessageFailedAdjustBitrate"),
-				"audio bitrate is too large")
+				"audio bitrate is too large");
 			return;
 		}
 

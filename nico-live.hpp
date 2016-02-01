@@ -1,10 +1,8 @@
 #pragma once
 
 #include <QtCore>
-// #include <QtNetwork>
 
 class NicoLiveWatcher;
-class NicoLiveCmdServer;
 class NicoLiveApi;
 
 class NicoLive : public QObject {
