@@ -283,9 +283,10 @@ static void rtmp_nicolive_apply_encoder_settings(void *data,
 
 		// the smallest video bitrate is 200?
 		if (bitrate - audio_bitrate < 200) {
-			nicolive_log_warn("audio bitrate is too large");
-			nicolive_mbox_warn(obs_module_text(
-				"MessageFailedAdjustBitrate"));
+			nicolive_msg_warn(true,
+				obs_module_text(
+					"MessageFailedAdjustBitrate"),
+				"audio bitrate is too large")
 			return;
 		}
 

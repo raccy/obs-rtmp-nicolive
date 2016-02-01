@@ -66,26 +66,23 @@ extern "C" void nicolive_mbox_info(const char *message)
 extern "C" void nicolive_msg_error(bool available_gui, const char *gui_message,
 		const char *cui_message)
 {
+	nicolive_log_error("%s", cui_message);
 	if (available_gui)
 		nicolive_mbox_error(gui_message);
-	else
-		nicolive_log_error("%s", cui_message);
 }
 
 extern "C" void nicolive_msg_warn(bool available_gui, const char *gui_message,
 		const char *cui_message)
 {
+	nicolive_log_warn("%s", cui_message);
 	if (available_gui)
 		nicolive_mbox_warn(gui_message);
-	else
-		nicolive_log_warn("%s", cui_message);
 }
 
 extern "C" void nicolive_msg_info(bool available_gui, const char *gui_message,
 		const char *cui_message)
 {
+	nicolive_log_info("%s", cui_message);
 	if (available_gui)
 		nicolive_mbox_info(gui_message);
-	else
-		nicolive_log_info("%s", cui_message);
 }
