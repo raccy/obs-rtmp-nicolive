@@ -5,9 +5,11 @@
 class NicoLiveWatcher;
 class NicoLiveApi;
 
-class NicoLive : public QObject {
+class NicoLive : public QObject
+{
 	Q_OBJECT
 	friend class NicoLiveWatcher;
+
 public:
 private:
 	QString mail;
@@ -38,6 +40,7 @@ private:
 	} flags;
 	NicoLiveWatcher *watcher;
 	NicoLiveApi *webApi;
+
 public:
 	NicoLive(QObject *parent = 0);
 	~NicoLive();
@@ -72,6 +75,7 @@ public:
 
 	void nextSilentOnce();
 	bool silentOnce();
+
 private:
 	// Access Niconico Site
 	bool siteLogin();

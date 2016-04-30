@@ -1,11 +1,12 @@
+#include "nicolive.h"
 #include <QtCore>
 #include <QtWidgets>
 #include <obs-module.h>
-#include "nicolive.h"
 #include "nicolive-log.h"
 
-static QWidget *findTopLevelWidget(const char *name) {
-	for(QWidget *widget: QApplication::topLevelWidgets()) {
+static QWidget *findTopLevelWidget(const char *name)
+{
+	for (QWidget *widget : QApplication::topLevelWidgets()) {
 		if (widget->objectName() == name) {
 			return widget;
 		}
@@ -13,11 +14,14 @@ static QWidget *findTopLevelWidget(const char *name) {
 	return nullptr;
 }
 
-static QWidget *getActiveWindowWidget() {
-	for(QWidget *widget: QApplication::topLevelWidgets()) {
+static QWidget *getActiveWindowWidget()
+{
+	for (QWidget *widget : QApplication::topLevelWidgets()) {
 		if (widget->isActiveWindow()) {
 			nicolive_log_debug("active window: %s",
-				widget->objectName().toStdString().c_str());
+					widget->objectName()
+							.toStdString()
+							.c_str());
 			return widget;
 		}
 	}
@@ -67,22 +71,19 @@ extern "C" void nicolive_msg_error(bool available_gui, const char *gui_message,
 		const char *cui_message)
 {
 	nicolive_log_error("%s", cui_message);
-	if (available_gui)
-		nicolive_mbox_error(gui_message);
+	if (available_gui) nicolive_mbox_error(gui_message);
 }
 
 extern "C" void nicolive_msg_warn(bool available_gui, const char *gui_message,
 		const char *cui_message)
 {
 	nicolive_log_warn("%s", cui_message);
-	if (available_gui)
-		nicolive_mbox_warn(gui_message);
+	if (available_gui) nicolive_mbox_warn(gui_message);
 }
 
 extern "C" void nicolive_msg_info(bool available_gui, const char *gui_message,
 		const char *cui_message)
 {
 	nicolive_log_info("%s", cui_message);
-	if (available_gui)
-		nicolive_mbox_info(gui_message);
+	if (available_gui) nicolive_mbox_info(gui_message);
 }

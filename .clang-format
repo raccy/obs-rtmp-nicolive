@@ -1,0 +1,32 @@
+---
+# Linux Kernel Style
+BasedOnStyle: LLVM
+IndentWidth: 8
+UseTab: Always
+BreakBeforeBraces: Linux
+AllowShortIfStatementsOnASingleLine: false
+IndentCaseLabels: false
+# Others
+AlignAfterOpenBracket: DontAlign
+AlignEscapedNewlinesLeft: true
+AllowShortIfStatementsOnASingleLine: true
+AllowShortLoopsOnASingleLine: true
+AlwaysBreakBeforeMultilineStrings: true
+AlwaysBreakTemplateDeclarations: true
+ContinuationIndentWidth: 16
+ContinuationIndentWidth: 16
+ContinuationIndentWidth: 16
+AccessModifierOffset: -8
+IncludeCategories:
+  - Regex: '^<obs'
+    Priority: 3
+  - Regex: '^<Qt'
+    Priority: 2
+  - Regex: '^<'
+    Priority: 1
+  - Regex: '^"nico-live'
+    Priority: 5
+  - Regex: '^"nicolive'
+    Priority: 6
+  - Regex: '^"'
+    Priority: 4
