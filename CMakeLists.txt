@@ -45,6 +45,10 @@ find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 
 # find libcurl
+if(EXISTS "${CMAKE_SOURCE_DIR}/tools/cmake/FindLibcurl.cmake")
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
+        "${CMAKE_CURRENT_SOURCE_DIR}/tools/cmake")
+endif()
 find_package(Libcurl REQUIRED)
 include_directories(${LIBCURL_INCLUDE_DIRS})
 add_definitions(${LIBCURL_DEFINITIONS})

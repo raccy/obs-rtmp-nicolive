@@ -242,6 +242,8 @@ make
 
 始めに OBS MultiPlatform をインストールします。ffmpeg も含めて、通常のレポジトリにではなく、追加のレポジトリからインストールします。レポジトリ追加には software-properties-common パッケージになる `add-apt-repository` が必要です。
 
+14.04では以下を実行してください。
+
 ```
 sudo apt-get install software-properties-common
 sudo add-apt-repository ppa:kirillshkrogalev/ffmpeg-next
@@ -249,6 +251,16 @@ sudo add-apt-repository ppa:obsproject/obs-studio
 sudo apt-get update
 sudo apt-get install ffmpeg obs-studio
 sudo apt-get install libcurl3-dev
+```
+
+16.04以降
+
+```
+sudo add-apt-repository ppa:obsproject/obs-studio
+sudo apt-get update
+sudo apt-get install obs-studio
+
+sudo apt-get install libcurl4-openssl-dev
 ```
 
 ビルドツールをインストールします。
@@ -270,6 +282,8 @@ sudo apt-get install qtbase5-dev
 ターミナルで、展開したソースのディレクトリに移動します。下記コマンドを実行します。
 
 ```
+wget https://github.com/jp9000/obs-studio/raw/master/cmake/Modules/FindLibcurl.cmake -P tools/cmake/
+
 mkdir build
 cd build
 cmake \
