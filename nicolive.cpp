@@ -1,5 +1,4 @@
 #include "nicolive.h"
-#include <QtCore>
 #include <obs-module.h>
 #include "nico-live.hpp"
 #include "nicolive-log.h"
