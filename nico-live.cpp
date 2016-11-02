@@ -239,9 +239,16 @@ bool NicoLive::sitePubStat()
 			this->live_info.stream = data[xpathMap.at("stream")]
 								 .at(0)
 								 .c_str();
-			this->live_info.ticket = data[xpathMap.at("ticket")]
-								 .at(0)
-								 .c_str();
+			if (data.find(xpathMap.at("ticket")) != data.end() &&
+					data[xpathMap.at("ticket")].size() !=
+							0) {
+				this->live_info.ticket =
+						data[xpathMap.at("ticket")]
+								.at(0)
+								.c_str();
+			} else {
+				this->live_info.ticket = QString();
+			}
 			this->live_info.bitrate = std::stoi(
 					data[xpathMap.at("bitrate")].at(0));
 			nicolive_log_info("live waku: %s",
@@ -290,8 +297,14 @@ bool NicoLive::siteLiveProf()
 		this->live_url = QString();
 		this->live_key = QString();
 		return false;
+	} else if (this->live_info.ticket.isEmpty()) {
+		nicolive_log_info("found live url and key without ticket");
+		this->live_url = QString();
+		this->live_url += this->live_info.url;
+		this->live_key = this->live_info.stream;
+		return true;
 	} else {
-		nicolive_log_info("found live url and key");
+		nicolive_log_info("found live url and key with ticket");
 		this->live_url = QString();
 		this->live_url += this->live_info.url;
 		this->live_url += "?";
