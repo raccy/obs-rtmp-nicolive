@@ -226,7 +226,6 @@ bool NicoLive::sitePubStat()
 	std::string status = data[statusXpath][0];
 
 	if (status == "ok") {
-		this->flags.onair = true;
 		try {
 			this->live_info.id =
 					data[xpathMap.at("id")].at(0).c_str();
