@@ -6,7 +6,8 @@
 #include "nicolive-operation.h"
 
 #define START_STREAMING_HOTKEY_NAME "OBSBasic.StartStreaming"
-#define STOP_STREAMING_HOTKEY_NAME "OBSBasic.StopStreaming"
+// #define STOP_STREAMING_HOTKEY_NAME "OBSBasic.StopStreaming"
+#define STOP_STREAMING_HOTKEY_NAME "OBSBasic.ForceStopStreaming"
 
 inline static bool nicolive_operation_click_enum_func(
 		void *data, obs_hotkey_id id, obs_hotkey_t *key)
