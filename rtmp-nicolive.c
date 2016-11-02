@@ -275,18 +275,32 @@ static void rtmp_nicolive_apply_encoder_settings(void *data,
 				video_encoder_settings, "bitrate");
 		long long audio_bitrate = obs_data_get_int(
 				audio_encoder_settings, "bitrate");
+		nicolive_log_debug("video bitrate: %lld", video_bitrate);
+		nicolive_log_debug("audio bitrate: %lld", audio_bitrate);
 
+		// FIXME: audio 0 ... bug?
+		if (audio_bitrate == 0) {
+			nicolive_msg_warn(false,
+					obs_module_text("MessageFailedA"
+							"djustBitrate"),
+					"audo bitrate is 0");
+			return;
+		}
+
+		long long adjust_bitrate = bitrate - audio_bitrate;
 		// the smallest video bitrate is 200?
-		if (bitrate - audio_bitrate < 200) {
+		if (adjust_bitrate < 200) {
 			nicolive_msg_warn(true, obs_module_text("MessageFailedA"
 								"djustBitrate"),
 					"audio bitrate is too large");
 			return;
 		}
 
-		if (bitrate != video_bitrate + audio_bitrate) {
+		if (adjust_bitrate != video_bitrate) {
 			obs_data_set_int(video_encoder_settings, "bitrate",
-					bitrate - audio_bitrate);
+					adjust_bitrate);
+			obs_data_set_int(video_encoder_settings, "buffer_size",
+					adjust_bitrate);
 			nicolive_log_debug("adjust bitrate: %lld",
 					bitrate - audio_bitrate);
 		} else {
