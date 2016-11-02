@@ -1,15 +1,15 @@
 #pragma once
 
 #include <QtCore>
-// #include <QtNetwork>
 
 class NicoLiveWatcher;
-class NicoLiveCmdServer;
 class NicoLiveApi;
 
-class NicoLive : public QObject {
+class NicoLive : public QObject
+{
 	Q_OBJECT
 	friend class NicoLiveWatcher;
+
 public:
 private:
 	QString mail;
@@ -40,6 +40,7 @@ private:
 	} flags;
 	NicoLiveWatcher *watcher;
 	NicoLiveApi *webApi;
+
 public:
 	NicoLive(QObject *parent = 0);
 	~NicoLive();
@@ -58,6 +59,7 @@ public:
 	long long getLiveBitrate() const;
 	const QString &getOnairLiveId() const;
 	int getRemainingLive() const;
+	bool enabledLive() const;
 
 	bool enabledAdjustBitrate() const;
 	bool enabledSession() const;
@@ -74,6 +76,7 @@ public:
 
 	void nextSilentOnce();
 	bool silentOnce();
+
 private:
 	// Access Niconico Site
 	bool siteLogin();

@@ -1,28 +1,29 @@
-#include <string>
-#include <unordered_map>
-#include <sstream>
+#include "nico-live-api.hpp"
+#include <ctime>
 #include <iomanip>
 #include <ios>
 #include <regex>
-#include <ctime>
-#include "nico-live-api.hpp"
+#include <sstream>
+#include <string>
+#include <unordered_map>
 #include "curl/curl.h"
 #include "pugixml.hpp"
+#include "nicolive-log.h"
 #include "nicolive.h"
 
 // static
 const std::string NicoLiveApi::LOGIN_SITE_URL =
-	"https://secure.nicovideo.jp/secure/login";
+		"https://secure.nicovideo.jp/secure/login";
 const std::string NicoLiveApi::LOGIN_API_URL =
-	"https://account.nicovideo.jp/api/v1/login";
+		"https://account.nicovideo.jp/api/v1/login";
 const std::string NicoLiveApi::PUBSTAT_URL =
-	"http://live.nicovideo.jp/api/getpublishstatus";
+		"http://live.nicovideo.jp/api/getpublishstatus";
 
 std::string NicoLiveApi::createWwwFormUrlencoded(
-	const std::unordered_map<std::string, std::string> &formData)
+		const std::unordered_map<std::string, std::string> &formData)
 {
 	std::string encodedData;
-	for (auto &data: formData) {
+	for (auto &data : formData) {
 		if (!encodedData.empty()) {
 			encodedData += "&";
 		}
@@ -34,10 +35,10 @@ std::string NicoLiveApi::createWwwFormUrlencoded(
 }
 
 std::string NicoLiveApi::createCookieString(
-	const std::unordered_map<std::string, std::string> &cookie)
+		const std::unordered_map<std::string, std::string> &cookie)
 {
 	std::string cookieStr;
-	for (auto &data: cookie) {
+	for (auto &data : cookie) {
 		if (!cookieStr.empty()) {
 			cookieStr += "; ";
 		}
@@ -48,25 +49,24 @@ std::string NicoLiveApi::createCookieString(
 	return cookieStr;
 }
 
-bool NicoLiveApi::parseXml(
-	const std::string &xml,
-	std::unordered_map<std::string, std::vector<std::string>> *data)
+bool NicoLiveApi::parseXml(const std::string &xml,
+		std::unordered_map<std::string, std::vector<std::string>> *data)
 {
 	pugi::xml_document doc;
 	pugi::xml_parse_result result = doc.load_string(xml.c_str());
 	if (result.status != pugi::status_ok) {
 		return false;
 	}
-	for (auto &entry: *data) {
+	for (auto &entry : *data) {
 		pugi::xpath_node_set nodes =
-			doc.select_nodes(entry.first.c_str());
-		for (auto &node: nodes) {
+				doc.select_nodes(entry.first.c_str());
+		for (auto &node : nodes) {
 			if (node.node() != nullptr) {
 				entry.second.push_back(std::string(
-					node.node().text().get()));
+						node.node().text().get()));
 			} else {
 				entry.second.push_back(std::string(
-					node.attribute().value()));
+						node.attribute().value()));
 			}
 		}
 	}
@@ -76,7 +76,7 @@ bool NicoLiveApi::parseXml(
 std::string NicoLiveApi::urlEncode(const std::string &str)
 {
 	std::stringstream stream;
-	for (const char &ch: str) {
+	for (const char &ch : str) {
 		if (0x20 <= ch && ch <= 0x7F) {
 			switch (ch) {
 			case '&':
@@ -84,11 +84,9 @@ std::string NicoLiveApi::urlEncode(const std::string &str)
 			case '+':
 			case '%':
 				stream << '%';
-				stream << std::setfill ('0')
-					<< std::setw(2)
-					<< std::hex
-					<< std::uppercase
-					<< static_cast<int>(ch);
+				stream << std::setfill('0') << std::setw(2)
+				       << std::hex << std::uppercase
+				       << static_cast<int>(ch);
 				break;
 			case ' ':
 				stream << '+';
@@ -98,19 +96,16 @@ std::string NicoLiveApi::urlEncode(const std::string &str)
 			}
 		} else {
 			stream << '%';
-			stream << std::setfill ('0')
-				<< std::setw(2)
-				<< std::hex
-				<< std::uppercase
-				<< static_cast<int>(ch);
+			stream << std::setfill('0') << std::setw(2) << std::hex
+			       << std::uppercase << static_cast<int>(ch);
 			break;
 		}
 	}
 	return stream.str();
 }
 
-size_t NicoLiveApi::writeString(char *ptr, size_t size, size_t nmemb,
-	void *userdata)
+size_t NicoLiveApi::writeString(
+		char *ptr, size_t size, size_t nmemb, void *userdata)
 {
 	size_t length = size * nmemb;
 	std::string *str = static_cast<std::string *>(userdata);
@@ -133,22 +128,17 @@ void NicoLiveApi::deleteCookie(const std::string &name)
 	this->cookie.erase(name);
 }
 
-void NicoLiveApi::clearCookie()
-{
-	this->cookie.clear();
-}
+void NicoLiveApi::clearCookie() { this->cookie.clear(); }
 
 const std::string NicoLiveApi::getCookie(const std::string &name) const
 {
 	return this->cookie.at(name);
 }
 
-bool NicoLiveApi::accessWeb(
-	const std::string &url,
-	const NicoLiveApi::Method &method,
-	const std::unordered_map<std::string, std::string> &formData,
-	int *code,
-	std::string *response)
+bool NicoLiveApi::accessWeb(const std::string &url,
+		const NicoLiveApi::Method &method,
+		const std::unordered_map<std::string, std::string> &formData,
+		int *code, std::string *response)
 {
 	*code = 0;
 	bool useSsl = false;
@@ -157,8 +147,7 @@ bool NicoLiveApi::accessWeb(
 	} else if (url.find("http://") == 0) {
 		;
 	} else {
-		nicolive_log_error("unknown scheam url: %s",
-			url.c_str());
+		nicolive_log_error("unknown scheam url: %s", url.c_str());
 		*code = -1;
 		*response = "unknown schema";
 		return false;
@@ -166,17 +155,16 @@ bool NicoLiveApi::accessWeb(
 
 	bool hasPost = false;
 	switch (method) {
-		case NicoLiveApi::Method::GET:
-			break;
-		case NicoLiveApi::Method::POST:
-			hasPost = true;
-			break;
-		default:
-			nicolive_log_error("unknown method type: %d",
-				method);
-			*code = -2;
-			*response = "unknown method";
-			return false;
+	case NicoLiveApi::Method::GET:
+		break;
+	case NicoLiveApi::Method::POST:
+		hasPost = true;
+		break;
+	default:
+		nicolive_log_error("unknown method type: %d", method);
+		*code = -2;
+		*response = "unknown method";
+		return false;
 	}
 
 	std::string headerData;
@@ -206,11 +194,10 @@ bool NicoLiveApi::accessWeb(
 
 	// header and body data
 	curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headerData);
-	curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION,
-		NicoLiveApi::writeString);
+	curl_easy_setopt(
+			curl, CURLOPT_HEADERFUNCTION, NicoLiveApi::writeString);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &bodyData);
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
-		NicoLiveApi::writeString);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NicoLiveApi::writeString);
 
 	if (useSsl) {
 		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
@@ -218,17 +205,18 @@ bool NicoLiveApi::accessWeb(
 	}
 
 	// Cookie
-	nicolive_log_debug("create cookie: %s",
+	nicolive_log_debug("create cookie: %40s",
 			NicoLiveApi::createCookieString(this->cookie).c_str());
-	if (! this->cookie.empty()) {
+	if (!this->cookie.empty()) {
 		curl_easy_setopt(curl, CURLOPT_COOKIE,
-			NicoLiveApi::createCookieString(this->cookie).c_str());
+				NicoLiveApi::createCookieString(this->cookie)
+						.c_str());
 	}
 
 	// POST data
 	if (hasPost) {
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE,
-			static_cast<long>(postData.size()));
+				static_cast<long>(postData.size()));
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postData.c_str());
 	}
 
@@ -238,8 +226,8 @@ bool NicoLiveApi::accessWeb(
 	curl_global_cleanup();
 
 	if (res != CURLE_OK) {
-		nicolive_log_error("curl failed: %s\n",
-			curl_easy_strerror(res));
+		nicolive_log_error(
+				"curl failed: %s\n", curl_easy_strerror(res));
 		*code = -4;
 		*response = "curl init error";
 		return false;
@@ -248,19 +236,20 @@ bool NicoLiveApi::accessWeb(
 	// Get code and set cookie
 	std::istringstream isHeader(headerData);
 	std::regex httpRe("HTTP/\\d+\\.\\d+\\s+(\\d+)\\s.*\\r?",
-		std::regex_constants::icase);
+			std::regex_constants::icase);
 	std::regex setCookieRe("Set-Cookie:\\s+([^=]+)=([^;]+);.*\\r?",
-		std::regex_constants::icase);
+			std::regex_constants::icase);
 	std::smatch results;
-	for (std::string line; std::getline(isHeader, line); ) {
+	for (std::string line; std::getline(isHeader, line);) {
 		nicolive_log_debug("header: %s", line.c_str());
 		if (std::regex_match(line, results, httpRe)) {
 			nicolive_log_debug("header httpRe: %s",
-				results.str(1).c_str());
+					results.str(1).c_str());
 			*code = std::stoi(results.str(1));
 		} else if (std::regex_match(line, results, setCookieRe)) {
 			nicolive_log_debug("header setCookieRe: %s, %s",
-				results.str(1).c_str(), results.str(2).c_str());
+					results.str(1).c_str(),
+					results.str(2).c_str());
 			this->cookie[results.str(1)] = results.str(2);
 		}
 	}
@@ -271,29 +260,23 @@ bool NicoLiveApi::accessWeb(
 	return true;
 }
 bool NicoLiveApi::getWeb(
-	const std::string &url,
-	int *code,
-	std::string *response)
+		const std::string &url, int *code, std::string *response)
 {
 	std::unordered_map<std::string, std::string> formData;
-	return this->accessWeb(url, NicoLiveApi::Method::GET,
-		formData, code, response);
+	return this->accessWeb(url, NicoLiveApi::Method::GET, formData, code,
+			response);
 }
 
-bool NicoLiveApi::postWeb(
-	const std::string &url,
-	const std::unordered_map<std::string, std::string> &formData,
-	int *code,
-	std::string *response)
+bool NicoLiveApi::postWeb(const std::string &url,
+		const std::unordered_map<std::string, std::string> &formData,
+		int *code, std::string *response)
 {
-	return this->accessWeb(url, NicoLiveApi::Method::POST,
-		formData, code, response);
+	return this->accessWeb(url, NicoLiveApi::Method::POST, formData, code,
+			response);
 }
 
-bool NicoLiveApi::loginSite(
-	const std::string &site,
-	const std::string &mail,
-	const std::string &password)
+bool NicoLiveApi::loginSite(const std::string &site, const std::string &mail,
+		const std::string &password)
 {
 	std::string url;
 	url += NicoLiveApi::LOGIN_SITE_URL;
@@ -315,7 +298,9 @@ bool NicoLiveApi::loginSite(
 		if (code == 302) {
 			// TODO: check redirect location?
 			if (this->getCookie("user_session")
-					.find("user_session_") == 0) {
+							.find("user_"
+							      "session_") ==
+					0) {
 				nicolive_log_info("login success");
 				return true;
 			} else {
@@ -323,8 +308,8 @@ bool NicoLiveApi::loginSite(
 				return false;
 			}
 		} else {
-			nicolive_log_error("login invalid return code: %d",
-				code);
+			nicolive_log_error(
+					"login invalid return code: %d", code);
 			return false;
 		}
 	} else {
@@ -340,16 +325,13 @@ bool NicoLiveApi::loginSite(
 // {}
 
 bool NicoLiveApi::loginSiteNicolive(
-	const std::string &mail,
-	const std::string &password)
+		const std::string &mail, const std::string &password)
 {
 	return this->loginSite("nicolive", mail, password);
 }
 
-std::string NicoLiveApi::loginApiTicket(
-	const std::string &site,
-	const std::string &mail,
-	const std::string &password)
+std::string NicoLiveApi::loginApiTicket(const std::string &site,
+		const std::string &mail, const std::string &password)
 {
 	std::stringstream unixTimeStream;
 	unixTimeStream << std::time(nullptr);
@@ -365,8 +347,8 @@ std::string NicoLiveApi::loginApiTicket(
 	this->clearCookie();
 
 	nicolive_log_info("login api site: %s", site.c_str());
-	bool result = this->postWeb(NicoLiveApi::LOGIN_API_URL, formData,
-		&code, &response);
+	bool result = this->postWeb(
+			NicoLiveApi::LOGIN_API_URL, formData, &code, &response);
 
 	if (!result) {
 		nicolive_log_error("access login api errror");
@@ -374,15 +356,14 @@ std::string NicoLiveApi::loginApiTicket(
 	}
 
 	if (code != 200) {
-		nicolive_log_error("login api invalid return code: %d",
-			code);
+		nicolive_log_error("login api invalid return code: %d", code);
 		return std::string();
 	}
 
 	std::unordered_map<std::string, std::vector<std::string>> data;
 	data["/nicovideo_user_response/@status"] = std::vector<std::string>();
 	data["/nicovideo_user_response/ticket/text()"] =
-		std::vector<std::string>();
+			std::vector<std::string>();
 
 	if (!NicoLiveApi::parseXml(response, &data)) {
 		nicolive_log_info("login api fail parse xml");
@@ -396,7 +377,9 @@ std::string NicoLiveApi::loginApiTicket(
 
 	if (data["/nicovideo_user_response/@status"].at(0) != "ok") {
 		nicolive_log_info("login api fail status: %s",
-			data["/nicovideo_user_response/@status"].at(0).c_str());
+				data["/nicovideo_user_response/@status"]
+						.at(0)
+						.c_str());
 		return std::string();
 	}
 
@@ -409,14 +392,13 @@ std::string NicoLiveApi::loginApiTicket(
 }
 
 std::string NicoLiveApi::loginNicoliveEncoder(
-	const std::string &mail,
-	const std::string &password)
+		const std::string &mail, const std::string &password)
 {
 	return this->loginApiTicket("nicolive_encoder", mail, password);
 }
 
 bool NicoLiveApi::getPublishStatus(
-	std::unordered_map<std::string, std::vector<std::string>> *data)
+		std::unordered_map<std::string, std::vector<std::string>> *data)
 {
 	int code;
 	std::string response;
@@ -427,16 +409,17 @@ bool NicoLiveApi::getPublishStatus(
 
 	if (code != 200) {
 		nicolive_log_error(
-			"failed to get publish status, return code = %d", code);
+				"failed to get publish status, return code = "
+				"%d",
+				code);
 		return false;
 	}
 
 	return NicoLiveApi::parseXml(response, data);
 }
 
-bool NicoLiveApi::getPublishStatusTicket(
-	const std::string &ticket,
-	std::unordered_map<std::string, std::vector<std::string>> *data)
+bool NicoLiveApi::getPublishStatusTicket(const std::string &ticket,
+		std::unordered_map<std::string, std::vector<std::string>> *data)
 {
 	std::unordered_map<std::string, std::string> formData;
 	formData["ticket"] = ticket;
@@ -444,16 +427,17 @@ bool NicoLiveApi::getPublishStatusTicket(
 
 	int code;
 	std::string response;
-	if (!this->postWeb(NicoLiveApi::PUBSTAT_URL, formData,
-			&code, &response)) {
+	if (!this->postWeb(NicoLiveApi::PUBSTAT_URL, formData, &code,
+			    &response)) {
 		nicolive_log_error("failed to get publish status ticket");
 		return false;
 	}
 
 	if (code != 200) {
 		nicolive_log_error(
-			"failed to get publish ticketstatus, return code = %d",
-			code);
+				"failed to get publish ticketstatus, return "
+				"code = %d",
+				code);
 		return false;
 	}
 

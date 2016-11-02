@@ -1,11 +1,11 @@
 #include <stdbool.h>
 #include <obs-module.h>
+#include "nicolive-log.h"
 #include "nicolive.h"
-#include "nicolive-ui.h"
 
 // use in rtmp_nicolive_update_internal for reset default settigs
-#define reset_obs_data(type, settings, name) \
-		obs_data_set_##type((settings), (name), \
+#define reset_obs_data(type, settings, name)    \
+	obs_data_set_##type((settings), (name), \
 			obs_data_get_##type((settings), (name)))
 
 enum rtmp_nicolive_login_type {
@@ -14,124 +14,58 @@ enum rtmp_nicolive_login_type {
 	RTMP_NICOLIVE_LOGIN_VIQO,
 };
 
-
-static bool adjust_bitrate(obs_output_t *output, long long bitrate)
+static const char *rtmp_nicolive_getname(void *type_data)
 {
-	obs_encoder_t *video_encoder = obs_output_get_video_encoder(output);
-	// get audio 0
-	obs_encoder_t *audio_encoder = obs_output_get_audio_encoder(output, 0);
-	obs_data_t *video_encoder_settings =
-			obs_encoder_get_settings(video_encoder);
-	obs_data_t *audio_encoder_settings =
-			obs_encoder_get_settings(audio_encoder);
-
-	long long video_bitrate = obs_data_get_int(video_encoder_settings,
-			"bitrate");
-	long long audio_bitrate = obs_data_get_int(audio_encoder_settings,
-			"bitrate");
-
-	// the smallest video bitrate is 200?
-	if (bitrate - audio_bitrate < 200) {
-		nicolive_log_warn("audio bitrate is too large");
-		return false;
-	}
-
-	if (bitrate != video_bitrate + audio_bitrate) {
-		obs_data_set_int(video_encoder_settings, "bitrate",
-			bitrate - audio_bitrate);
-		obs_encoder_update(video_encoder, video_encoder_settings);
-		nicolive_log_debug("adjust bitrate: %lld",
-				bitrate - audio_bitrate);
-	} else {
-		nicolive_log_debug("need not adjust bitrate");
-	}
-
-	return true;
-}
-
-static const char *rtmp_nicolive_getname(void)
-{
+	UNUSED_PARAMETER(type_data);
 	return obs_module_text("NiconicoLive");
 }
 
-static void rtmp_nicolive_update_internal(void *data, obs_data_t *settings,
-	bool msg_gui)
+static void rtmp_nicolive_update_internal(
+		void *data, obs_data_t *settings, bool msg_gui)
 {
 	switch (obs_data_get_int(settings, "login_type")) {
 	case RTMP_NICOLIVE_LOGIN_MAIL:
 		nicolive_set_settings(data,
 				obs_data_get_string(settings, "mail"),
-				obs_data_get_string(settings, "password"),
-				"");
+				obs_data_get_string(settings, "password"), "");
 		if (!nicolive_check_session(data)) {
 			nicolive_msg_warn(msg_gui,
-				obs_module_text("MessageFailedLogin"),
-				"failed login");
+					obs_module_text("MessageFailedLogin"),
+					"failed login");
 		}
 		break;
 	case RTMP_NICOLIVE_LOGIN_SESSION:
-		nicolive_set_settings(data,
-				"",
-				"",
+		nicolive_set_settings(data, "", "",
 				obs_data_get_string(settings, "session"));
 		if (!nicolive_check_session(data)) {
 			nicolive_msg_warn(msg_gui,
-				obs_module_text("MessageFailedLogin"),
-				"failed login");
+					obs_module_text("MessageFailedLogin"),
+					"failed login");
 		}
 		break;
 	case RTMP_NICOLIVE_LOGIN_VIQO:
 		if (nicolive_load_viqo_settings(data)) {
 			if (!nicolive_check_session(data)) {
 				nicolive_msg_warn(msg_gui,
-					obs_module_text("MessageFailedLogin"),
-					"failed login");
+						obs_module_text("MessageFailedL"
+								"ogin"),
+						"failed login");
 			}
 		} else {
 			nicolive_msg_warn(msg_gui,
-				obs_module_text(
-					"MessageFailedLoadViqoSettings"),
-				"failed load viqo settings");
+					obs_module_text("MessageFailedLoadViqoS"
+							"ettings"),
+					"failed load viqo settings");
 		}
 		break;
 	default:
 		nicolive_msg_error(msg_gui,
-			obs_module_text(
-				"MessageFailedLogin"),
-			"unknown login type");
+				obs_module_text("MessageFailedLogin"),
+				"unknown login type");
 	}
 
-	// if (obs_data_get_bool(settings, "load_viqo")) {
-	// 	if (nicolive_load_viqo_settings(data)) {
-	// 		if (!nicolive_check_session(data)) {
-	// 			nicolive_msg_warn(msg_gui,
-	// 				obs_module_text("MessageFailedLogin"),
-	// 				"failed login");
-	// 		}
-	// 	} else {
-	// 		nicolive_msg_warn(msg_gui,
-	// 			obs_module_text(
-	// 				"MessageFailedLoadViqoSettings"),
-	// 			"failed load viqo settings");
-	// 		obs_data_set_bool(settings, "load_viqo", false);
-	// 	}
-	// } else {
-	// 	nicolive_set_settings(data,
-	// 			obs_data_get_string(settings, "mail"),
-	// 			obs_data_get_string(settings, "password"),
-	// 			obs_data_get_string(settings, "session"));
-	// 	if (nicolive_check_session(data)) {
-	// 		obs_data_set_string(settings, "session",
-	// 				nicolive_get_session(data));
-	// 	} else {
-	// 		nicolive_msg_warn(msg_gui,
-	// 			obs_module_text("MessageFailedLogin"),
-	// 			"failed login");
-	// 	}
-	// }
-
-	nicolive_set_enabled_adjust_bitrate(data,
-			obs_data_get_bool(settings, "adjust_bitrate"));
+	nicolive_set_enabled_adjust_bitrate(
+			data, obs_data_get_bool(settings, "adjust_bitrate"));
 
 	if (obs_data_get_bool(settings, "auto_start")) {
 		nicolive_start_watching(data,
@@ -142,13 +76,9 @@ static void rtmp_nicolive_update_internal(void *data, obs_data_t *settings,
 
 	// OPTIMIZE: Default settisgs are not saved, so resetting data
 	// Maybe obs-studio 0.8.3 bug
-	// reset_obs_data(string, settings, "mail");
-	// reset_obs_data(string, settings, "password");
-	// reset_obs_data(string, settings, "session");
-	// reset_obs_data(bool,   settings, "load_viqo");
-	reset_obs_data(bool,   settings, "adjust_bitrate");
-	reset_obs_data(bool,   settings, "auto_start");
-	reset_obs_data(int,    settings, "watch_interval");
+	reset_obs_data(bool, settings, "adjust_bitrate");
+	reset_obs_data(bool, settings, "auto_start");
+	reset_obs_data(int, settings, "watch_interval");
 }
 
 // FIXME: why do not call this func. obs-studio 0.8.3 bug?
@@ -165,10 +95,7 @@ static void rtmp_nicolive_update_silent(void *data, obs_data_t *settings)
 	rtmp_nicolive_update_internal(data, settings, true);
 }
 
-static void rtmp_nicolive_destroy(void *data)
-{
-	nicolive_destroy(data);
-}
+static void rtmp_nicolive_destroy(void *data) { nicolive_destroy(data); }
 
 static void *rtmp_nicolive_create(obs_data_t *settings, obs_service_t *service)
 {
@@ -182,6 +109,7 @@ static void *rtmp_nicolive_create(obs_data_t *settings, obs_service_t *service)
 
 static bool rtmp_nicolive_initialize(void *data, obs_output_t *output)
 {
+	UNUSED_PARAMETER(output);
 	bool success = false;
 	bool msg_gui = !nicolive_silent_once(data);
 
@@ -201,16 +129,6 @@ static bool rtmp_nicolive_initialize(void *data, obs_output_t *output)
 		success = false;
 	}
 
-	if (success && nicolive_enabled_adjust_bitrate(data)) {
-		if (!adjust_bitrate(output, nicolive_get_live_bitrate(data))) {
-			nicolive_msg_warn(msg_gui,
-					obs_module_text(
-						"MessageFailedAdjustBitrate"),
-					"cannot start streaming: "
-					"failed adjust bitrate");
-			success = false;
-		}
-	}
 	return success;
 }
 
@@ -225,30 +143,8 @@ static void rtmp_nicolive_deactivate(void *data)
 	nicolive_stop_streaming(data);
 }
 
-// static bool load_viqo_modified(obs_properties_t *props,
-// 	obs_property_t *prop, obs_data_t *settings)
-// {
-// 	UNUSED_PARAMETER(prop);
-// 	if (obs_data_get_bool(settings, "load_viqo")) {
-// 		obs_property_set_enabled(
-// 				obs_properties_get(props, "mail"), false);
-// 		obs_property_set_enabled(
-// 				obs_properties_get(props, "password"), false);
-// 		obs_property_set_enabled(
-// 				obs_properties_get(props, "session"), false);
-// 	} else {
-// 		obs_property_set_enabled(
-// 				obs_properties_get(props, "mail"), true);
-// 		obs_property_set_enabled(
-// 				obs_properties_get(props, "password"), true);
-// 		obs_property_set_enabled(
-// 				obs_properties_get(props, "session"), true);
-// 	}
-// 	return true;
-// }
-
-static bool change_login_type(obs_properties_t *props,
-	obs_property_t *prop, obs_data_t *settings)
+static bool change_login_type(obs_properties_t *props, obs_property_t *prop,
+		obs_data_t *settings)
 {
 	UNUSED_PARAMETER(prop);
 	switch (obs_data_get_int(settings, "login_type")) {
@@ -283,16 +179,18 @@ static bool change_login_type(obs_properties_t *props,
 	return true;
 }
 
-static bool auto_start_modified(obs_properties_t *props,
-	obs_property_t *prop, obs_data_t *settings)
+static bool auto_start_modified(obs_properties_t *props, obs_property_t *prop,
+		obs_data_t *settings)
 {
 	UNUSED_PARAMETER(prop);
 	if (obs_data_get_bool(settings, "auto_start")) {
-		obs_property_set_enabled(obs_properties_get(props,
-			"watch_interval"), true);
+		obs_property_set_enabled(
+				obs_properties_get(props, "watch_interval"),
+				true);
 	} else {
-		obs_property_set_enabled(obs_properties_get(props,
-			"watch_interval"), false);
+		obs_property_set_enabled(
+				obs_properties_get(props, "watch_interval"),
+				false);
 	}
 	return true;
 }
@@ -300,13 +198,13 @@ static bool auto_start_modified(obs_properties_t *props,
 static obs_properties_t *rtmp_nicolive_properties(void *data)
 {
 	UNUSED_PARAMETER(data);
-	obs_property_t   *list;
+	obs_property_t *list;
 	obs_property_t *prop;
 	obs_properties_t *ppts = obs_properties_create();
 
 	list = obs_properties_add_list(ppts, "login_type",
-			obs_module_text("LoginType"),
-			OBS_COMBO_TYPE_LIST, OBS_COMBO_FORMAT_INT);
+			obs_module_text("LoginType"), OBS_COMBO_TYPE_LIST,
+			OBS_COMBO_FORMAT_INT);
 	obs_property_list_add_int(list, obs_module_text("LoginMailPassowrd"),
 			RTMP_NICOLIVE_LOGIN_MAIL);
 	obs_property_list_add_int(list, obs_module_text("UseCookieUserSession"),
@@ -322,34 +220,28 @@ static obs_properties_t *rtmp_nicolive_properties(void *data)
 	obs_properties_add_text(ppts, "session", obs_module_text("Session"),
 			OBS_TEXT_PASSWORD);
 
-	// prop = obs_properties_add_bool(ppts, "load_viqo",
-	// 		obs_module_text("LoadViqoSettings"));
-	// obs_property_set_modified_callback(prop, load_viqo_modified);
-
 	obs_properties_add_bool(ppts, "adjust_bitrate",
 			obs_module_text("AdjustBitrate"));
 
-	prop = obs_properties_add_bool(ppts, "auto_start",
-			obs_module_text("AutoStart"));
+	prop = obs_properties_add_bool(
+			ppts, "auto_start", obs_module_text("AutoStart"));
 	obs_property_set_modified_callback(prop, auto_start_modified);
 	obs_properties_add_int(ppts, "watch_interval",
-			obs_module_text("WatchInterval"),
-			10, 300, 1);
+			obs_module_text("WatchInterval"), 10, 300, 1);
 
 	return ppts;
 }
 
 static void rtmp_nicolive_defaults(obs_data_t *settings)
 {
-	obs_data_set_default_int   (settings, "login_type",
-			RTMP_NICOLIVE_LOGIN_MAIL);
-	obs_data_set_default_string(settings, "mail",            "");
-	obs_data_set_default_string(settings, "password",        "");
-	obs_data_set_default_string(settings, "session",         "");
-	// obs_data_set_default_bool  (settings, "load_viqo",       false);
-	obs_data_set_default_bool  (settings, "adjust_bitrate",  true);
-	obs_data_set_default_bool  (settings, "auto_start",      false);
-	obs_data_set_default_int   (settings, "watch_interval",  60);
+	obs_data_set_default_int(
+			settings, "login_type", RTMP_NICOLIVE_LOGIN_MAIL);
+	obs_data_set_default_string(settings, "mail", "");
+	obs_data_set_default_string(settings, "password", "");
+	obs_data_set_default_string(settings, "session", "");
+	obs_data_set_default_bool(settings, "adjust_bitrate", true);
+	obs_data_set_default_bool(settings, "auto_start", false);
+	obs_data_set_default_int(settings, "watch_interval", 60);
 }
 
 static const char *rtmp_nicolive_url(void *data)
@@ -368,21 +260,55 @@ static bool rtmp_nicolive_supports_multitrack(void *data)
 	return false;
 }
 
-struct obs_service_info rtmp_nicolive_service = {
-	.id             = "rtmp_nicolive",
-	.get_name       = rtmp_nicolive_getname,
-	.create         = rtmp_nicolive_create,
-	.destroy        = rtmp_nicolive_destroy,
-	.update         = rtmp_nicolive_update,
-	.initialize     = rtmp_nicolive_initialize,
-	.activate       = rtmp_nicolive_activate,
-	.deactivate     = rtmp_nicolive_deactivate,
-	.get_defaults   = rtmp_nicolive_defaults,
-	.get_properties = rtmp_nicolive_properties,
-	.get_url        = rtmp_nicolive_url,
-	.get_key        = rtmp_nicolive_key,
-	.supports_multitrack = rtmp_nicolive_supports_multitrack
-};
+// call func before start
+static void rtmp_nicolive_apply_encoder_settings(void *data,
+		obs_data_t *video_encoder_settings,
+		obs_data_t *audio_encoder_settings)
+{
+	if (!(nicolive_check_session(data) && nicolive_check_live(data))) {
+		return;
+	}
+
+	long long bitrate = nicolive_get_live_bitrate(data);
+	if (nicolive_enabled_adjust_bitrate(data) && bitrate > 0) {
+		long long video_bitrate = obs_data_get_int(
+				video_encoder_settings, "bitrate");
+		long long audio_bitrate = obs_data_get_int(
+				audio_encoder_settings, "bitrate");
+
+		// the smallest video bitrate is 200?
+		if (bitrate - audio_bitrate < 200) {
+			nicolive_msg_warn(true, obs_module_text("MessageFailedA"
+								"djustBitrate"),
+					"audio bitrate is too large");
+			return;
+		}
+
+		if (bitrate != video_bitrate + audio_bitrate) {
+			obs_data_set_int(video_encoder_settings, "bitrate",
+					bitrate - audio_bitrate);
+			nicolive_log_debug("adjust bitrate: %lld",
+					bitrate - audio_bitrate);
+		} else {
+			nicolive_log_debug("need not adjust bitrate");
+		}
+	}
+}
+
+struct obs_service_info rtmp_nicolive_service = {.id = "rtmp_nicolive",
+		.get_name = rtmp_nicolive_getname,
+		.create = rtmp_nicolive_create,
+		.destroy = rtmp_nicolive_destroy,
+		.activate = rtmp_nicolive_activate,
+		.deactivate = rtmp_nicolive_deactivate,
+		.update = rtmp_nicolive_update,
+		.get_defaults = rtmp_nicolive_defaults,
+		.get_properties = rtmp_nicolive_properties,
+		.initialize = rtmp_nicolive_initialize,
+		.get_url = rtmp_nicolive_url,
+		.get_key = rtmp_nicolive_key,
+		.supports_multitrack = rtmp_nicolive_supports_multitrack,
+		.apply_encoder_settings = rtmp_nicolive_apply_encoder_settings};
 
 /* module initialize */
 

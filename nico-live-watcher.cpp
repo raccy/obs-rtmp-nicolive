@@ -1,13 +1,12 @@
-#include <QtCore>
-#include "nicolive.h"
 #include "nico-live.hpp"
+#include <QtCore>
 #include "nico-live-watcher.hpp"
-#include "nicolive-ui.h"
+#include "nicolive-log.h"
+#include "nicolive-operation.h"
+#include "nicolive.h"
 
-NicoLiveWatcher::NicoLiveWatcher(NicoLive *nicolive, int margin_sec) :
-	QObject(nicolive),
-	nicolive(nicolive),
-	marginTime(margin_sec * 1000)
+NicoLiveWatcher::NicoLiveWatcher(NicoLive *nicolive, int margin_sec)
+    : QObject(nicolive), nicolive(nicolive), marginTime(margin_sec * 1000)
 {
 	this->timer = new QTimer(this);
 	this->timer->setSingleShot(true);
@@ -16,8 +15,7 @@ NicoLiveWatcher::NicoLiveWatcher(NicoLive *nicolive, int margin_sec) :
 
 NicoLiveWatcher::~NicoLiveWatcher()
 {
-	if (isActive())
-		stop();
+	if (isActive()) stop();
 }
 
 void NicoLiveWatcher::start(long long sec)
@@ -31,8 +29,7 @@ void NicoLiveWatcher::start(long long sec)
 	if (!this->timer->isActive()) {
 		nicolive_log_debug("check session before timer start");
 		nicolive->checkSession();
-		nicolive_log_debug("start watch, interval: %d",
-				this->interval);
+		nicolive_log_debug("start watch, interval: %d", this->interval);
 		// this->timer->start(this->interval);
 		this->timer->start(this->marginTime);
 	}
@@ -48,10 +45,7 @@ void NicoLiveWatcher::stop()
 	this->active = false;
 }
 
-bool NicoLiveWatcher::isActive()
-{
-	return this->active;
-}
+bool NicoLiveWatcher::isActive() { return this->active; }
 
 int NicoLiveWatcher::remainingTime()
 {
@@ -67,25 +61,24 @@ void NicoLiveWatcher::watch()
 
 	nicolive->sitePubStat();
 	remaining_msec = nicolive->getRemainingLive() * 1000;
-	if (remaining_msec < 0)
-		remaining_msec = 0;
+	if (remaining_msec < 0) remaining_msec = 0;
 
-	if (nicolive->getLiveId().isEmpty()) {
+	if (nicolive->getLiveId().isEmpty() or !nicolive->enabledLive()) {
 		if (nicolive->isOnair()) {
 			nicolive_log_debug("stop streaming because live end");
-			nicolive_streaming_click();
+			nicolive_streaming_stop();
 			next_interval = this->marginTime;
 		}
 	} else {
 		if (nicolive->getLiveId() != nicolive->getOnairLiveId()) {
 			if (nicolive->isOnair()) {
 				nicolive_log_debug(
-					"stop streaming for restart");
-				nicolive_streaming_click();
+						"stop streaming for restart");
+				nicolive_streaming_stop();
 				QThread::sleep(1); // sleep 1 sec
 			}
 			nicolive_log_debug("start streaming for next live");
-			nicolive_streaming_click();
+			nicolive_streaming_start();
 		} else if (remaining_msec + this->marginTime < next_interval) {
 			next_interval = remaining_msec + this->marginTime;
 		}
