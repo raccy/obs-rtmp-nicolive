@@ -75,7 +75,16 @@ void NicoLiveWatcher::watch()
 				nicolive_log_debug(
 						"stop streaming for restart");
 				nicolive_streaming_stop();
-				QThread::sleep(1); // sleep 1 sec
+				// wait stoping 60 secs
+				for (int i = 0; i < 60; ++i) {
+					QThread::sleep(1); // sleep 1 sec
+					if (!nicolive->isOnair()) {
+						break;
+					}
+					nicolive_log_debug(
+							"wait stopping... %d",
+							i);
+				}
 			}
 			nicolive_log_debug("start streaming for next live");
 			nicolive_streaming_start();
