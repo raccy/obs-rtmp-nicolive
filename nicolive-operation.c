@@ -26,6 +26,7 @@ inline static bool nicolive_operation_click_enum_func(
 void nicolive_streaming_start(void)
 {
 	nicolive_log_debug_call_func();
+	nicolive_log_info("click start streaming hotkey");
 	obs_enum_hotkeys(nicolive_operation_click_enum_func,
 			START_STREAMING_HOTKEY_NAME);
 }
@@ -33,6 +34,7 @@ void nicolive_streaming_start(void)
 void nicolive_streaming_stop(void)
 {
 	nicolive_log_debug_call_func();
+	nicolive_log_info("click stop streaming hotkey");
 	obs_enum_hotkeys(nicolive_operation_click_enum_func,
 			STOP_STREAMING_HOTKEY_NAME);
 }
