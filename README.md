@@ -8,7 +8,7 @@ OBS Studio 対応バージョン: 0.15.x 以上
 概要
 ----
 
-ニコニコ生放送の配信用URLとストリームキーを自動取得して、[OBS MultiPlatform (obs-studio)](https://obsproject.com) で簡単に配信できるようにするプラグインです。
+ニコニコ生放送の配信用URLとストリームキーを自動取得して、[OBS Stuido (obs-studio)](https://obsproject.com) で簡単に配信できるようにするプラグインです。
 
 インストール方法
 ----------------
