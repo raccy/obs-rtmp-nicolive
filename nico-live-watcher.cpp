@@ -63,7 +63,7 @@ void NicoLiveWatcher::watch()
 	remaining_msec = nicolive->getRemainingLive() * 1000;
 	if (remaining_msec < 0) remaining_msec = 0;
 
-	if (nicolive->getLiveId().isEmpty()) {
+	if (nicolive->getLiveId().isEmpty() or !nicolive->enabledLive()) {
 		if (nicolive->isOnair()) {
 			nicolive_log_debug("stop streaming because live end");
 			nicolive_streaming_stop();

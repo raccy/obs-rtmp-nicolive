@@ -77,6 +77,13 @@ int NicoLive::getRemainingLive() const
 		return 0;
 }
 
+bool NicoLive::enabledLive() const
+{
+	QDateTime now = QDateTime::currentDateTime();
+	return this->live_info.start_time <= now &&
+	       this->live_info.end_time >= now;
+}
+
 bool NicoLive::enabledAdjustBitrate() const
 {
 	return this->flags.adjust_bitrate;

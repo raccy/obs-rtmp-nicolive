@@ -59,6 +59,7 @@ public:
 	long long getLiveBitrate() const;
 	const QString &getOnairLiveId() const;
 	int getRemainingLive() const;
+	bool enabledLive() const;
 
 	bool enabledAdjustBitrate() const;
 	bool enabledSession() const;
