@@ -1,9 +1,9 @@
-RTMP NicoLive Plugin for OBS MultiPlatform
+RTMP NicoLive Plugin for OBS Studio
 ==========================================
 
-ニコニコ生放送用 OBS MultiPlatform プラグイン
+ニコニコ生放送用 OBS Sudio プラグイン
 
-OBS MultiPlatofrm 対応バージョン: 0.11.x 以上
+OBS Studio 対応バージョン: 0.15.x 以上
 
 概要
 ----
