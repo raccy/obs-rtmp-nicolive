@@ -3,7 +3,7 @@ RTMP NicoLive Plugin for OBS Studio
 
 ニコニコ生放送用 OBS Sudio プラグイン
 
-OBS Studio 対応バージョン: 0.15.x 以上
+OBS Studio 対応バージョン: 0.16.x 以上
 
 概要
 ----
