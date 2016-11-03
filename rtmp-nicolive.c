@@ -14,6 +14,53 @@ enum rtmp_nicolive_login_type {
 	RTMP_NICOLIVE_LOGIN_VIQO,
 };
 
+static inline bool adjust_bitrate(long long bitrate,
+		obs_data_t *video_encoder_settings,
+		obs_data_t *audio_encoder_settings)
+{
+	if (bitrate <= 0) {
+		nicolive_log_warn("total bitrate is zero or negative");
+		return false;
+	}
+
+	long long video_bitrate =
+			obs_data_get_int(video_encoder_settings, "bitrate");
+	long long audio_bitrate =
+			obs_data_get_int(audio_encoder_settings, "bitrate");
+	nicolive_log_debug("video bitrate: %lld", video_bitrate);
+	nicolive_log_debug("audio bitrate: %lld", audio_bitrate);
+
+	// FIXME: audio 0 ... bug?
+	if (audio_bitrate <= 0) {
+		nicolive_log_warn("audo bitrate is zero or negative");
+		return false;
+	}
+
+	long long adjust_bitrate = bitrate - audio_bitrate;
+
+	// the smallest video bitrate is ...
+	if (adjust_bitrate < 0) {
+		nicolive_msg_warn(true,
+				obs_module_text("MessageFailedAdjustBitrate"),
+				"audio bitrate is too high");
+		return false;
+	}
+
+	if (adjust_bitrate != video_bitrate) {
+		obs_data_set_int(video_encoder_settings, "bitrate",
+				adjust_bitrate);
+		nicolive_log_debug(
+				"adjust video bitrate: %lld", adjust_bitrate);
+	} else {
+		nicolive_log_debug("need not to adjust video bitrate");
+	}
+	return true;
+}
+
+static void rtmp_nicolive_apply_encoder_settings(void *data,
+		obs_data_t *video_encoder_settings,
+		obs_data_t *audio_encoder_settings);
+
 static const char *rtmp_nicolive_getname(void *type_data)
 {
 	UNUSED_PARAMETER(type_data);
@@ -127,6 +174,19 @@ static bool rtmp_nicolive_initialize(void *data, obs_output_t *output)
 				obs_module_text("MessageFailedLogin"),
 				"cannot start streaming: failed login");
 		success = false;
+	}
+
+	// force to adjust bitrate before starting
+	long long bitrate = nicolive_get_live_bitrate(data);
+	if (success && nicolive_enabled_adjust_bitrate(data) && bitrate > 0) {
+		// ignore fails
+		adjust_bitrate(bitrate,
+				obs_encoder_get_settings(
+						obs_output_get_video_encoder(
+								output)),
+				obs_encoder_get_settings(
+						obs_output_get_audio_encoder(
+								output, 0)));
 	}
 
 	return success;
@@ -260,7 +320,7 @@ static bool rtmp_nicolive_supports_multitrack(void *data)
 	return false;
 }
 
-// call func before start
+// call func with to update settings
 static void rtmp_nicolive_apply_encoder_settings(void *data,
 		obs_data_t *video_encoder_settings,
 		obs_data_t *audio_encoder_settings)
@@ -271,41 +331,8 @@ static void rtmp_nicolive_apply_encoder_settings(void *data,
 
 	long long bitrate = nicolive_get_live_bitrate(data);
 	if (nicolive_enabled_adjust_bitrate(data) && bitrate > 0) {
-		long long video_bitrate = obs_data_get_int(
-				video_encoder_settings, "bitrate");
-		long long audio_bitrate = obs_data_get_int(
-				audio_encoder_settings, "bitrate");
-		nicolive_log_debug("video bitrate: %lld", video_bitrate);
-		nicolive_log_debug("audio bitrate: %lld", audio_bitrate);
-
-		// FIXME: audio 0 ... bug?
-		if (audio_bitrate == 0) {
-			nicolive_msg_warn(false,
-					obs_module_text("MessageFailedA"
-							"djustBitrate"),
-					"audo bitrate is 0");
-			return;
-		}
-
-		long long adjust_bitrate = bitrate - audio_bitrate;
-		// the smallest video bitrate is 200?
-		if (adjust_bitrate < 200) {
-			nicolive_msg_warn(true, obs_module_text("MessageFailedA"
-								"djustBitrate"),
-					"audio bitrate is too large");
-			return;
-		}
-
-		if (adjust_bitrate != video_bitrate) {
-			obs_data_set_int(video_encoder_settings, "bitrate",
-					adjust_bitrate);
-			obs_data_set_int(video_encoder_settings, "buffer_size",
-					adjust_bitrate);
-			nicolive_log_debug("adjust bitrate: %lld",
-					bitrate - audio_bitrate);
-		} else {
-			nicolive_log_debug("need not adjust bitrate");
-		}
+		adjust_bitrate(bitrate, video_encoder_settings,
+				audio_encoder_settings);
 	}
 }
 
