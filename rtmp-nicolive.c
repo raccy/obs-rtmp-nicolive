@@ -167,14 +167,16 @@ inline static bool adjust_bitrate(long long bitrate,
 
 static const char *rtmp_nicolive_getname(void *type_data)
 {
+	nicolive_log_debug_call_func();
 	UNUSED_PARAMETER(type_data);
 	return obs_module_text("NiconicoLive");
 }
 
 static void *rtmp_nicolive_create(obs_data_t *settings, obs_service_t *service)
 {
-	void *data = nicolive_create();
+	nicolive_log_debug_call_func();
 	UNUSED_PARAMETER(service);
+	void *data = nicolive_create();
 
 	// FIXME: I want to silent with start obs-studio, but saving to setting
 	//        call to create service, so I can not silent here.
@@ -184,27 +186,35 @@ static void *rtmp_nicolive_create(obs_data_t *settings, obs_service_t *service)
 	return data;
 }
 
-static void rtmp_nicolive_destroy(void *data) { nicolive_destroy(data); }
+static void rtmp_nicolive_destroy(void *data)
+{
+	nicolive_log_debug_call_func();
+	nicolive_destroy(data);
+}
 
 static void rtmp_nicolive_activate(void *data, obs_data_t *settings)
 {
+	nicolive_log_debug_call_func();
 	UNUSED_PARAMETER(settings);
 	nicolive_start_streaming(data);
 }
 
 static void rtmp_nicolive_deactivate(void *data)
 {
+	nicolive_log_debug_call_func();
 	nicolive_stop_streaming(data);
 }
 
 // FIXME: why do not call this func. obs-studio 0.8.3 bug?
 static void rtmp_nicolive_update(void *data, obs_data_t *settings)
 {
+	nicolive_log_debug_call_func();
 	set_data_nicolive(data, settings, true);
 }
 
 static void rtmp_nicolive_defaults(obs_data_t *settings)
 {
+	nicolive_log_debug_call_func();
 	obs_data_set_default_int(
 	    settings, "login_type", RTMP_NICOLIVE_LOGIN_MAIL);
 	obs_data_set_default_string(settings, "mail", "");
@@ -217,6 +227,7 @@ static void rtmp_nicolive_defaults(obs_data_t *settings)
 
 static obs_properties_t *rtmp_nicolive_properties(void *data)
 {
+	nicolive_log_debug_call_func();
 	UNUSED_PARAMETER(data);
 	obs_property_t *list;
 	obs_property_t *prop;
@@ -254,6 +265,7 @@ static obs_properties_t *rtmp_nicolive_properties(void *data)
 
 static bool rtmp_nicolive_initialize(void *data, obs_output_t *output)
 {
+	nicolive_log_debug_call_func();
 	UNUSED_PARAMETER(output);
 	bool success = false;
 	bool msg_gui = !nicolive_silent_once(data);
@@ -290,16 +302,19 @@ static bool rtmp_nicolive_initialize(void *data, obs_output_t *output)
 
 static const char *rtmp_nicolive_url(void *data)
 {
+	nicolive_log_debug_call_func();
 	return nicolive_get_live_url(data);
 }
 
 static const char *rtmp_nicolive_key(void *data)
 {
+	nicolive_log_debug_call_func();
 	return nicolive_get_live_key(data);
 }
 
 static bool rtmp_nicolive_supports_multitrack(void *data)
 {
+	nicolive_log_debug_call_func();
 	UNUSED_PARAMETER(data);
 	return false;
 }
@@ -308,6 +323,7 @@ static bool rtmp_nicolive_supports_multitrack(void *data)
 static void rtmp_nicolive_apply_encoder_settings(void *data,
     obs_data_t *video_encoder_settings, obs_data_t *audio_encoder_settings)
 {
+	nicolive_log_debug_call_func();
 	if (!(nicolive_check_session(data) && nicolive_check_live(data))) {
 		return;
 	}
