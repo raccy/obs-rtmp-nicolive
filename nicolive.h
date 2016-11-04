@@ -9,8 +9,8 @@ extern "C" {
 void *nicolive_create(void);
 void nicolive_destroy(void *data);
 
-void nicolive_set_settings(void *data, const char *mail, const char *password,
-		const char *session);
+void nicolive_set_settings(
+    void *data, const char *mail, const char *password, const char *session);
 void nicolive_set_enabled_adjust_bitrate(void *data, bool enabled);
 
 const char *nicolive_get_mail(const void *data);

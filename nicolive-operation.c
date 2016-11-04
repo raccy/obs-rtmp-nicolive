@@ -10,7 +10,7 @@
 #define STOP_STREAMING_HOTKEY_NAME "OBSBasic.ForceStopStreaming"
 
 inline static bool nicolive_operation_click_enum_func(
-		void *data, obs_hotkey_id id, obs_hotkey_t *key)
+    void *data, obs_hotkey_id id, obs_hotkey_t *key)
 {
 	nicolive_log_debug_call_func();
 	const char *target = data;
@@ -27,14 +27,14 @@ void nicolive_streaming_start(void)
 {
 	nicolive_log_debug_call_func();
 	nicolive_log_info("click start streaming hotkey");
-	obs_enum_hotkeys(nicolive_operation_click_enum_func,
-			START_STREAMING_HOTKEY_NAME);
+	obs_enum_hotkeys(
+	    nicolive_operation_click_enum_func, START_STREAMING_HOTKEY_NAME);
 }
 
 void nicolive_streaming_stop(void)
 {
 	nicolive_log_debug_call_func();
 	nicolive_log_info("click stop streaming hotkey");
-	obs_enum_hotkeys(nicolive_operation_click_enum_func,
-			STOP_STREAMING_HOTKEY_NAME);
+	obs_enum_hotkeys(
+	    nicolive_operation_click_enum_func, STOP_STREAMING_HOTKEY_NAME);
 }

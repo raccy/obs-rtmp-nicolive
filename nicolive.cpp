@@ -25,8 +25,8 @@ extern "C" void nicolive_destroy(void *data)
 	nicolive->deleteLater();
 }
 
-extern "C" void nicolive_set_settings(void *data, const char *mail,
-		const char *password, const char *session)
+extern "C" void nicolive_set_settings(
+    void *data, const char *mail, const char *password, const char *session)
 {
 	NicoLive *nicolive = static_cast<NicoLive *>(data);
 	nicolive_log_debug("password: %s", password);
@@ -53,7 +53,7 @@ extern "C" const char *nicolive_get_password(const void *data)
 	const NicoLive *nicolive = static_cast<const NicoLive *>(data);
 	bfree(nicolive_buff.password);
 	nicolive_buff.password =
-			bstrdup(nicolive->getPassword().toStdString().c_str());
+	    bstrdup(nicolive->getPassword().toStdString().c_str());
 	return nicolive_buff.password;
 }
 
@@ -62,7 +62,7 @@ extern "C" const char *nicolive_get_session(const void *data)
 	const NicoLive *nicolive = static_cast<const NicoLive *>(data);
 	bfree(nicolive_buff.session);
 	nicolive_buff.session =
-			bstrdup(nicolive->getSession().toStdString().c_str());
+	    bstrdup(nicolive->getSession().toStdString().c_str());
 	return nicolive_buff.session;
 }
 
@@ -71,7 +71,7 @@ extern "C" const char *nicolive_get_live_id(const void *data)
 	const NicoLive *nicolive = static_cast<const NicoLive *>(data);
 	bfree(nicolive_buff.live_id);
 	nicolive_buff.live_id =
-			bstrdup(nicolive->getLiveId().toStdString().c_str());
+	    bstrdup(nicolive->getLiveId().toStdString().c_str());
 	return nicolive_buff.live_id;
 }
 
@@ -80,7 +80,7 @@ extern "C" const char *nicolive_get_live_url(const void *data)
 	const NicoLive *nicolive = static_cast<const NicoLive *>(data);
 	bfree(nicolive_buff.live_url);
 	nicolive_buff.live_url =
-			bstrdup(nicolive->getLiveUrl().toStdString().c_str());
+	    bstrdup(nicolive->getLiveUrl().toStdString().c_str());
 	return nicolive_buff.live_url;
 }
 
@@ -89,7 +89,7 @@ extern "C" const char *nicolive_get_live_key(const void *data)
 	const NicoLive *nicolive = static_cast<const NicoLive *>(data);
 	bfree(nicolive_buff.live_key);
 	nicolive_buff.live_key =
-			bstrdup(nicolive->getLiveKey().toStdString().c_str());
+	    bstrdup(nicolive->getLiveKey().toStdString().c_str());
 	return nicolive_buff.live_key;
 }
 

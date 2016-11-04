@@ -12,7 +12,7 @@ AlignEscapedNewlinesLeft: true
 AllowShortLoopsOnASingleLine: true
 AlwaysBreakBeforeMultilineStrings: true
 AlwaysBreakTemplateDeclarations: true
-ContinuationIndentWidth: 16
+ContinuationIndentWidth: 4
 AccessModifierOffset: -8
 IncludeCategories:
   - Regex: '^<obs'

@@ -13,14 +13,14 @@
 
 // static
 const std::string NicoLiveApi::LOGIN_SITE_URL =
-		"https://secure.nicovideo.jp/secure/login";
+    "https://secure.nicovideo.jp/secure/login";
 const std::string NicoLiveApi::LOGIN_API_URL =
-		"https://account.nicovideo.jp/api/v1/login";
+    "https://account.nicovideo.jp/api/v1/login";
 const std::string NicoLiveApi::PUBSTAT_URL =
-		"http://live.nicovideo.jp/api/getpublishstatus";
+    "http://live.nicovideo.jp/api/getpublishstatus";
 
 std::string NicoLiveApi::createWwwFormUrlencoded(
-		const std::unordered_map<std::string, std::string> &formData)
+    const std::unordered_map<std::string, std::string> &formData)
 {
 	std::string encodedData;
 	for (auto &data : formData) {
@@ -35,7 +35,7 @@ std::string NicoLiveApi::createWwwFormUrlencoded(
 }
 
 std::string NicoLiveApi::createCookieString(
-		const std::unordered_map<std::string, std::string> &cookie)
+    const std::unordered_map<std::string, std::string> &cookie)
 {
 	std::string cookieStr;
 	for (auto &data : cookie) {
@@ -50,7 +50,7 @@ std::string NicoLiveApi::createCookieString(
 }
 
 bool NicoLiveApi::parseXml(const std::string &xml,
-		std::unordered_map<std::string, std::vector<std::string>> *data)
+    std::unordered_map<std::string, std::vector<std::string>> *data)
 {
 	pugi::xml_document doc;
 	pugi::xml_parse_result result = doc.load_string(xml.c_str());
@@ -59,14 +59,14 @@ bool NicoLiveApi::parseXml(const std::string &xml,
 	}
 	for (auto &entry : *data) {
 		pugi::xpath_node_set nodes =
-				doc.select_nodes(entry.first.c_str());
+		    doc.select_nodes(entry.first.c_str());
 		for (auto &node : nodes) {
 			if (node.node() != nullptr) {
-				entry.second.push_back(std::string(
-						node.node().text().get()));
+				entry.second.push_back(
+				    std::string(node.node().text().get()));
 			} else {
-				entry.second.push_back(std::string(
-						node.attribute().value()));
+				entry.second.push_back(
+				    std::string(node.attribute().value()));
 			}
 		}
 	}
@@ -105,7 +105,7 @@ std::string NicoLiveApi::urlEncode(const std::string &str)
 }
 
 size_t NicoLiveApi::writeString(
-		char *ptr, size_t size, size_t nmemb, void *userdata)
+    char *ptr, size_t size, size_t nmemb, void *userdata)
 {
 	size_t length = size * nmemb;
 	std::string *str = static_cast<std::string *>(userdata);
@@ -136,9 +136,9 @@ const std::string NicoLiveApi::getCookie(const std::string &name) const
 }
 
 bool NicoLiveApi::accessWeb(const std::string &url,
-		const NicoLiveApi::Method &method,
-		const std::unordered_map<std::string, std::string> &formData,
-		int *code, std::string *response)
+    const NicoLiveApi::Method &method,
+    const std::unordered_map<std::string, std::string> &formData, int *code,
+    std::string *response)
 {
 	*code = 0;
 	bool useSsl = false;
@@ -195,7 +195,7 @@ bool NicoLiveApi::accessWeb(const std::string &url,
 	// header and body data
 	curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headerData);
 	curl_easy_setopt(
-			curl, CURLOPT_HEADERFUNCTION, NicoLiveApi::writeString);
+	    curl, CURLOPT_HEADERFUNCTION, NicoLiveApi::writeString);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &bodyData);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NicoLiveApi::writeString);
 
@@ -206,17 +206,16 @@ bool NicoLiveApi::accessWeb(const std::string &url,
 
 	// Cookie
 	nicolive_log_debug("create cookie: %40s",
-			NicoLiveApi::createCookieString(this->cookie).c_str());
+	    NicoLiveApi::createCookieString(this->cookie).c_str());
 	if (!this->cookie.empty()) {
 		curl_easy_setopt(curl, CURLOPT_COOKIE,
-				NicoLiveApi::createCookieString(this->cookie)
-						.c_str());
+		    NicoLiveApi::createCookieString(this->cookie).c_str());
 	}
 
 	// POST data
 	if (hasPost) {
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE,
-				static_cast<long>(postData.size()));
+		    static_cast<long>(postData.size()));
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postData.c_str());
 	}
 
@@ -227,7 +226,7 @@ bool NicoLiveApi::accessWeb(const std::string &url,
 
 	if (res != CURLE_OK) {
 		nicolive_log_error(
-				"curl failed: %s\n", curl_easy_strerror(res));
+		    "curl failed: %s\n", curl_easy_strerror(res));
 		*code = -4;
 		*response = "curl init error";
 		return false;
@@ -235,21 +234,20 @@ bool NicoLiveApi::accessWeb(const std::string &url,
 
 	// Get code and set cookie
 	std::istringstream isHeader(headerData);
-	std::regex httpRe("HTTP/\\d+\\.\\d+\\s+(\\d+)\\s.*\\r?",
-			std::regex_constants::icase);
+	std::regex httpRe(
+	    "HTTP/\\d+\\.\\d+\\s+(\\d+)\\s.*\\r?", std::regex_constants::icase);
 	std::regex setCookieRe("Set-Cookie:\\s+([^=]+)=([^;]+);.*\\r?",
-			std::regex_constants::icase);
+	    std::regex_constants::icase);
 	std::smatch results;
 	for (std::string line; std::getline(isHeader, line);) {
 		nicolive_log_debug("header: %s", line.c_str());
 		if (std::regex_match(line, results, httpRe)) {
-			nicolive_log_debug("header httpRe: %s",
-					results.str(1).c_str());
+			nicolive_log_debug(
+			    "header httpRe: %s", results.str(1).c_str());
 			*code = std::stoi(results.str(1));
 		} else if (std::regex_match(line, results, setCookieRe)) {
 			nicolive_log_debug("header setCookieRe: %s, %s",
-					results.str(1).c_str(),
-					results.str(2).c_str());
+			    results.str(1).c_str(), results.str(2).c_str());
 			this->cookie[results.str(1)] = results.str(2);
 		}
 	}
@@ -260,23 +258,23 @@ bool NicoLiveApi::accessWeb(const std::string &url,
 	return true;
 }
 bool NicoLiveApi::getWeb(
-		const std::string &url, int *code, std::string *response)
+    const std::string &url, int *code, std::string *response)
 {
 	std::unordered_map<std::string, std::string> formData;
-	return this->accessWeb(url, NicoLiveApi::Method::GET, formData, code,
-			response);
+	return this->accessWeb(
+	    url, NicoLiveApi::Method::GET, formData, code, response);
 }
 
 bool NicoLiveApi::postWeb(const std::string &url,
-		const std::unordered_map<std::string, std::string> &formData,
-		int *code, std::string *response)
+    const std::unordered_map<std::string, std::string> &formData, int *code,
+    std::string *response)
 {
-	return this->accessWeb(url, NicoLiveApi::Method::POST, formData, code,
-			response);
+	return this->accessWeb(
+	    url, NicoLiveApi::Method::POST, formData, code, response);
 }
 
 bool NicoLiveApi::loginSite(const std::string &site, const std::string &mail,
-		const std::string &password)
+    const std::string &password)
 {
 	std::string url;
 	url += NicoLiveApi::LOGIN_SITE_URL;
@@ -298,9 +296,8 @@ bool NicoLiveApi::loginSite(const std::string &site, const std::string &mail,
 		if (code == 302) {
 			// TODO: check redirect location?
 			if (this->getCookie("user_session")
-							.find("user_"
-							      "session_") ==
-					0) {
+				.find("user_"
+				      "session_") == 0) {
 				nicolive_log_info("login success");
 				return true;
 			} else {
@@ -309,7 +306,7 @@ bool NicoLiveApi::loginSite(const std::string &site, const std::string &mail,
 			}
 		} else {
 			nicolive_log_error(
-					"login invalid return code: %d", code);
+			    "login invalid return code: %d", code);
 			return false;
 		}
 	} else {
@@ -325,13 +322,13 @@ bool NicoLiveApi::loginSite(const std::string &site, const std::string &mail,
 // {}
 
 bool NicoLiveApi::loginSiteNicolive(
-		const std::string &mail, const std::string &password)
+    const std::string &mail, const std::string &password)
 {
 	return this->loginSite("nicolive", mail, password);
 }
 
 std::string NicoLiveApi::loginApiTicket(const std::string &site,
-		const std::string &mail, const std::string &password)
+    const std::string &mail, const std::string &password)
 {
 	std::stringstream unixTimeStream;
 	unixTimeStream << std::time(nullptr);
@@ -348,7 +345,7 @@ std::string NicoLiveApi::loginApiTicket(const std::string &site,
 
 	nicolive_log_info("login api site: %s", site.c_str());
 	bool result = this->postWeb(
-			NicoLiveApi::LOGIN_API_URL, formData, &code, &response);
+	    NicoLiveApi::LOGIN_API_URL, formData, &code, &response);
 
 	if (!result) {
 		nicolive_log_error("access login api errror");
@@ -363,7 +360,7 @@ std::string NicoLiveApi::loginApiTicket(const std::string &site,
 	std::unordered_map<std::string, std::vector<std::string>> data;
 	data["/nicovideo_user_response/@status"] = std::vector<std::string>();
 	data["/nicovideo_user_response/ticket/text()"] =
-			std::vector<std::string>();
+	    std::vector<std::string>();
 
 	if (!NicoLiveApi::parseXml(response, &data)) {
 		nicolive_log_info("login api fail parse xml");
@@ -377,9 +374,7 @@ std::string NicoLiveApi::loginApiTicket(const std::string &site,
 
 	if (data["/nicovideo_user_response/@status"].at(0) != "ok") {
 		nicolive_log_info("login api fail status: %s",
-				data["/nicovideo_user_response/@status"]
-						.at(0)
-						.c_str());
+		    data["/nicovideo_user_response/@status"].at(0).c_str());
 		return std::string();
 	}
 
@@ -392,13 +387,13 @@ std::string NicoLiveApi::loginApiTicket(const std::string &site,
 }
 
 std::string NicoLiveApi::loginNicoliveEncoder(
-		const std::string &mail, const std::string &password)
+    const std::string &mail, const std::string &password)
 {
 	return this->loginApiTicket("nicolive_encoder", mail, password);
 }
 
 bool NicoLiveApi::getPublishStatus(
-		std::unordered_map<std::string, std::vector<std::string>> *data)
+    std::unordered_map<std::string, std::vector<std::string>> *data)
 {
 	int code;
 	std::string response;
@@ -409,9 +404,9 @@ bool NicoLiveApi::getPublishStatus(
 
 	if (code != 200) {
 		nicolive_log_error(
-				"failed to get publish status, return code = "
-				"%d",
-				code);
+		    "failed to get publish status, return code = "
+		    "%d",
+		    code);
 		return false;
 	}
 
@@ -419,7 +414,7 @@ bool NicoLiveApi::getPublishStatus(
 }
 
 bool NicoLiveApi::getPublishStatusTicket(const std::string &ticket,
-		std::unordered_map<std::string, std::vector<std::string>> *data)
+    std::unordered_map<std::string, std::vector<std::string>> *data)
 {
 	std::unordered_map<std::string, std::string> formData;
 	formData["ticket"] = ticket;
@@ -427,17 +422,17 @@ bool NicoLiveApi::getPublishStatusTicket(const std::string &ticket,
 
 	int code;
 	std::string response;
-	if (!this->postWeb(NicoLiveApi::PUBSTAT_URL, formData, &code,
-			    &response)) {
+	if (!this->postWeb(
+		NicoLiveApi::PUBSTAT_URL, formData, &code, &response)) {
 		nicolive_log_error("failed to get publish status ticket");
 		return false;
 	}
 
 	if (code != 200) {
 		nicolive_log_error(
-				"failed to get publish ticketstatus, return "
-				"code = %d",
-				code);
+		    "failed to get publish ticketstatus, return "
+		    "code = %d",
+		    code);
 		return false;
 	}
 

@@ -73,7 +73,7 @@ void NicoLiveWatcher::watch()
 		if (nicolive->getLiveId() != nicolive->getOnairLiveId()) {
 			if (nicolive->isOnair()) {
 				nicolive_log_debug(
-						"stop streaming for restart");
+				    "stop streaming for restart");
 				nicolive_streaming_stop();
 				// wait stoping 60 secs
 				for (int i = 0; i < 60; ++i) {
@@ -82,8 +82,7 @@ void NicoLiveWatcher::watch()
 						break;
 					}
 					nicolive_log_debug(
-							"wait stopping... %d",
-							i);
+					    "wait stopping... %d", i);
 				}
 			}
 			nicolive_log_debug("start streaming for next live");
