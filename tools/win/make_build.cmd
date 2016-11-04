@@ -4,16 +4,16 @@ rem make build tool for obs-rtmp-nicolive
 rem ##### Settings #####
 rem You must change follow lines to suite your environment.
 set OBS_APP=C:\Program Files (x86)\obs-studio
-set OBS_SRC=%HOMEDRIVE%%HOMEPATH%\Documents\obs-studio-0.11.1
-set CURL_SRC=%HOMEDRIVE%%HOMEPATH%\Documents\curl-7.43.0
+set OBS_SRC=%HOMEDRIVE%%HOMEPATH%\Documents\obs-studio-0.16.2
+set CURL_SRC=%HOMEDRIVE%%HOMEPATH%\Documents\curl-7.49.0
 
-set QT_VERSION=5.4
+set QT_VERSION=5.7
 set QT_DIR=C:\Qt
 set QT32_DIR=%QT_DIR%
 set QT64_DIR=%QT_DIR%
 
 set MINGW_DIR=C:\MinGW
-set VS2013_DIR=C:\Program Files (x86)\Microsoft Visual Studio 12.0
+set VS2013_DIR=C:\Program Files (x86)\Microsoft Visual Studio 14.0
 
 rem ##### Create variables (should not modified) #####
 set PEXPORTS_EXE=%MINGW_DIR%\bin\pexports.exe
