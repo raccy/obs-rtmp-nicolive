@@ -4,16 +4,6 @@
 #include <obs-module.h>
 #include "nicolive-log.h"
 
-static QWidget *findTopLevelWidget(const char *name)
-{
-	for (QWidget *widget : QApplication::topLevelWidgets()) {
-		if (widget->objectName() == name) {
-			return widget;
-		}
-	}
-	return nullptr;
-}
-
 static QWidget *getActiveWindowWidget()
 {
 	for (QWidget *widget : QApplication::topLevelWidgets()) {
