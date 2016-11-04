@@ -14,12 +14,14 @@ set QT64_DIR=%QT_DIR%
 
 set MINGW_DIR=C:\MinGW
 set VS2015_DIR=C:\Program Files (x86)\Microsoft Visual Studio 14.0
+set CMAKE_DIR=C:\Program Files\CMake\bin
 
 rem ##### Create variables (should not modified) #####
 set PEXPORTS_EXE=%MINGW_DIR%\bin\pexports.exe
 set LIB_EXE=%VS2015_DIR%\VC\bin\lib.exe
 set QT32_CMAKE=%QT32_DIR%\%QT_VERSION%\msvc2015\lib\cmake
 set QT64_CMAKE=%QT64_DIR%\%QT_VERSION%\msvc2015_64\lib\cmake
+set CMAKE_EXE=%CMAKE_DIR%\cmake.exe
 
 rem ##### Checking #####
 rem check current directory
@@ -34,6 +36,7 @@ call :check_exist "%QT64_CMAKE%" "Not found qt 64bit cmake. Please install Qt ms
 call :check_exist "%OBS_APP%" "Not found obs-studio application. Please install obs-stduio application or change OBS_APP"
 call :check_exist "%OBS_SRC%" "Not found obs-studio sourcs. Please install obs-stduio soruces or change OBS_SRC"
 call :check_exist "%CURL_SRC%" "Not found curl sourcs. Please install curl soruces or change CURL_SRC"
+call :check_exist "%CMAKE_EXE%" "Not found cmake. Please install cmake or change CMAKE_DIR"
 
 cmake > NUL 2>&1
 if errorlevel 1 call :die "Failed check CMake. Please install CMake ant set PATH"
