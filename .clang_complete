@@ -1,4 +1,5 @@
 -I../../libobs
 -I/usr/local/opt/qt5/include
 -I/usr/local/opt/qt5/include/QtCore
+-I/usr/local/opt/qt5/include/QtWidgets
 -Wno-pragma-once-outside-header
