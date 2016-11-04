@@ -3,7 +3,7 @@
 #include "nicolive-log.h"
 #include "nicolive.h"
 
-// use in data_setting for reset default settigs
+// use in set_data_nicolive for reset default settigs
 #define reset_obs_data(type, settings, name) \
 	obs_data_set_##type(                 \
 	    (settings), (name), obs_data_get_##type((settings), (name)))
@@ -14,7 +14,7 @@ enum rtmp_nicolive_login_type {
 	RTMP_NICOLIVE_LOGIN_VIQO,
 };
 
-inline static bool change_login_type(
+inline static bool on_modified_login_type(
     obs_properties_t *props, obs_property_t *prop, obs_data_t *settings)
 {
 	UNUSED_PARAMETER(prop);
@@ -50,7 +50,7 @@ inline static bool change_login_type(
 	return true;
 }
 
-inline static bool auto_start_modified(
+inline static bool on_modified_auto_start(
     obs_properties_t *props, obs_property_t *prop, obs_data_t *settings)
 {
 	UNUSED_PARAMETER(prop);
@@ -64,7 +64,8 @@ inline static bool auto_start_modified(
 	return true;
 }
 
-inline static void data_setting(void *data, obs_data_t *settings, bool msg_gui)
+inline static void set_data_nicolive(
+    void *data, obs_data_t *settings, bool msg_gui)
 {
 	switch (obs_data_get_int(settings, "login_type")) {
 	case RTMP_NICOLIVE_LOGIN_MAIL:
@@ -177,8 +178,8 @@ static void *rtmp_nicolive_create(obs_data_t *settings, obs_service_t *service)
 
 	// FIXME: I want to silent with start obs-studio, but saving to setting
 	//        call to create service, so I can not silent here.
-	// data_setting(data, settings, false);
-	data_setting(data, settings, true);
+	// set_data_nicolive(data, settings, false);
+	set_data_nicolive(data, settings, true);
 
 	return data;
 }
@@ -199,7 +200,7 @@ static void rtmp_nicolive_deactivate(void *data)
 // FIXME: why do not call this func. obs-studio 0.8.3 bug?
 static void rtmp_nicolive_update(void *data, obs_data_t *settings)
 {
-	data_setting(data, settings, true);
+	set_data_nicolive(data, settings, true);
 }
 
 static void rtmp_nicolive_defaults(obs_data_t *settings)
@@ -230,7 +231,7 @@ static obs_properties_t *rtmp_nicolive_properties(void *data)
 	    RTMP_NICOLIVE_LOGIN_SESSION);
 	obs_property_list_add_int(list, obs_module_text("LoadViqoSettings"),
 	    RTMP_NICOLIVE_LOGIN_VIQO);
-	obs_property_set_modified_callback(list, change_login_type);
+	obs_property_set_modified_callback(list, on_modified_login_type);
 
 	obs_properties_add_text(
 	    ppts, "mail", obs_module_text("MailAddress"), OBS_TEXT_DEFAULT);
@@ -244,7 +245,7 @@ static obs_properties_t *rtmp_nicolive_properties(void *data)
 
 	prop = obs_properties_add_bool(
 	    ppts, "auto_start", obs_module_text("AutoStart"));
-	obs_property_set_modified_callback(prop, auto_start_modified);
+	obs_property_set_modified_callback(prop, on_modified_auto_start);
 	obs_properties_add_int(ppts, "watch_interval",
 	    obs_module_text("WatchInterval"), 10, 300, 1);
 
