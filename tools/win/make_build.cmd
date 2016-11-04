@@ -38,7 +38,7 @@ call :check_exist "%OBS_SRC%" "Not found obs-studio sourcs. Please install obs-s
 call :check_exist "%CURL_SRC%" "Not found curl sourcs. Please install curl soruces or change CURL_SRC"
 call :check_exist "%CMAKE_EXE%" "Not found cmake. Please install cmake or change CMAKE_DIR"
 
-cmake > NUL 2>&1
+"%CMAKE_EXE%" > NUL 2>&1
 if errorlevel 1 call :die "Failed check CMake. Please install CMake ant set PATH"
 
 echo Check all ok, and will create build environments.
@@ -73,12 +73,12 @@ rem libcurl.dll
 "%LIB_EXE%" /MACHINE:x64 /def:"build\lib64\libcurl.def" /out:"build\lib64\libcurl.lib"
 
 rem TODO
-echo cmake -G"Visual Studio 14 2015" -DCMAKE_PREFIX_PATH="%QT32_CMAKE:\=/%" -DOBS_SRC="%OBS_SRC:\=/%" -DOBS_APP="%OBS_APP:\=/%" -DcurlPath="%CURL_SRC:\=/%" -D_CURL_LIBRARY_DIRS=./build .. > build32\run_cmake.cmd
+echo "%CMAKE_EXE%" -G"Visual Studio 14 2015" -DCMAKE_PREFIX_PATH="%QT32_CMAKE:\=/%" -DOBS_SRC="%OBS_SRC:\=/%" -DOBS_APP="%OBS_APP:\=/%" -DcurlPath="%CURL_SRC:\=/%" -D_CURL_LIBRARY_DIRS=./build .. > build32\run_cmake.cmd
 echo @echo ##### CMake done. Please open rtmp-nicolive.sln ##### >> build32\run_cmake.cmd
 echo @echo You MUST change Debug to Release before build! >> build32\run_cmake.cmd
 echo pause >> build32\run_cmake.cmd
 
-echo cmake -G"Visual Studio 14 2015 Win64" -DCMAKE_PREFIX_PATH="%QT64_CMAKE:\=/%" -DOBS_SRC="%OBS_SRC:\=/%" -DOBS_APP="%OBS_APP:\=/%" -DcurlPath="%CURL_SRC:\=/%" -D_CURL_LIBRARY_DIRS=./build .. > build64\run_cmake.cmd
+echo "%CMAKE_EXE%" -G"Visual Studio 14 2015 Win64" -DCMAKE_PREFIX_PATH="%QT64_CMAKE:\=/%" -DOBS_SRC="%OBS_SRC:\=/%" -DOBS_APP="%OBS_APP:\=/%" -DcurlPath="%CURL_SRC:\=/%" -D_CURL_LIBRARY_DIRS=./build .. > build64\run_cmake.cmd
 echo @echo ##### CMake done. Please open rtmp-nicolive.sln ##### >> build64\run_cmake.cmd
 echo @echo You MUST change Debug to Release before build! >> build64\run_cmake.cmd
 echo pause >> build64\run_cmake.cmd
