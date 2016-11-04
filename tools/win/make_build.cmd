@@ -13,13 +13,13 @@ set QT32_DIR=%QT_DIR%
 set QT64_DIR=%QT_DIR%
 
 set MINGW_DIR=C:\MinGW
-set VS2013_DIR=C:\Program Files (x86)\Microsoft Visual Studio 14.0
+set VS2015_DIR=C:\Program Files (x86)\Microsoft Visual Studio 14.0
 
 rem ##### Create variables (should not modified) #####
 set PEXPORTS_EXE=%MINGW_DIR%\bin\pexports.exe
-set LIB_EXE=%VS2013_DIR%\VC\bin\lib.exe
-set QT32_CMAKE=%QT32_DIR%\%QT_VERSION%\msvc2013\lib\cmake
-set QT64_CMAKE=%QT64_DIR%\%QT_VERSION%\msvc2013_64\lib\cmake
+set LIB_EXE=%VS2015_DIR%\VC\bin\lib.exe
+set QT32_CMAKE=%QT32_DIR%\%QT_VERSION%\msvc2015\lib\cmake
+set QT64_CMAKE=%QT64_DIR%\%QT_VERSION%\msvc2015_64\lib\cmake
 
 rem ##### Checking #####
 rem check current directory
@@ -28,9 +28,9 @@ if /i "%CD%\tools\win\make_build.cmd" neq "%~f0" call :die "You must run this ba
 
 rem check file
 call :check_exist "%PEXPORTS_EXE%" "Not found pexports.exe. Please install mingw32-pexpots or change MINGW_DIR"
-call :check_exist "%LIB_EXE%" "Not found lib.exe. Please install VS2013 or change VS2013_DIR"
-call :check_exist "%QT32_CMAKE%" "Not found qt 32bit cmake. Please install Qt msvc2013_opengl or change QT32_DIR"
-call :check_exist "%QT64_CMAKE%" "Not found qt 64bit cmake. Please install Qt msvc2013_64_opengl or change QT64_DIR"
+call :check_exist "%LIB_EXE%" "Not found lib.exe. Please install VS2015 or change VS2015_DIR"
+call :check_exist "%QT32_CMAKE%" "Not found qt 32bit cmake. Please install Qt msvc2015_opengl or change QT32_DIR"
+call :check_exist "%QT64_CMAKE%" "Not found qt 64bit cmake. Please install Qt msvc2015_64_opengl or change QT64_DIR"
 call :check_exist "%OBS_APP%" "Not found obs-studio application. Please install obs-stduio application or change OBS_APP"
 call :check_exist "%OBS_SRC%" "Not found obs-studio sourcs. Please install obs-stduio soruces or change OBS_SRC"
 call :check_exist "%CURL_SRC%" "Not found curl sourcs. Please install curl soruces or change CURL_SRC"
