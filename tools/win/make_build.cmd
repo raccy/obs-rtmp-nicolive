@@ -4,7 +4,7 @@ rem make build tool for obs-rtmp-nicolive
 rem ##### Settings #####
 rem You must change follow lines to suite your environment.
 set OBS_APP=C:\Program Files (x86)\obs-studio
-set OBS_SRC=%HOMEDRIVE%%HOMEPATH%\Documents\obs-studio-0.16.2
+set OBS_SRC=%HOMEDRIVE%%HOMEPATH%\Documents\obs-studio-0.16.3
 set CURL_SRC=%HOMEDRIVE%%HOMEPATH%\Documents\curl-7.49.0
 
 set QT_VERSION=5.7
@@ -70,12 +70,12 @@ rem libcurl.dll
 "%LIB_EXE%" /MACHINE:x64 /def:"build\lib64\libcurl.def" /out:"build\lib64\libcurl.lib"
 
 rem TODO
-echo cmake -G"Visual Studio 12 2013" -DCMAKE_PREFIX_PATH="%QT32_CMAKE:\=/%" -DOBS_SRC="%OBS_SRC:\=/%" -DOBS_APP="%OBS_APP:\=/%" -DcurlPath="%CURL_SRC:\=/%" -D_CURL_LIBRARY_DIRS=./build .. > build32\run_cmake.cmd
+echo cmake -G"Visual Studio 14 2015" -DCMAKE_PREFIX_PATH="%QT32_CMAKE:\=/%" -DOBS_SRC="%OBS_SRC:\=/%" -DOBS_APP="%OBS_APP:\=/%" -DcurlPath="%CURL_SRC:\=/%" -D_CURL_LIBRARY_DIRS=./build .. > build32\run_cmake.cmd
 echo @echo ##### CMake done. Please open rtmp-nicolive.sln ##### >> build32\run_cmake.cmd
 echo @echo You MUST change Debug to Release before build! >> build32\run_cmake.cmd
 echo pause >> build32\run_cmake.cmd
 
-echo cmake -G"Visual Studio 12 2013 Win64" -DCMAKE_PREFIX_PATH="%QT64_CMAKE:\=/%" -DOBS_SRC="%OBS_SRC:\=/%" -DOBS_APP="%OBS_APP:\=/%" -DcurlPath="%CURL_SRC:\=/%" -D_CURL_LIBRARY_DIRS=./build .. > build64\run_cmake.cmd
+echo cmake -G"Visual Studio 14 2015 Win64" -DCMAKE_PREFIX_PATH="%QT64_CMAKE:\=/%" -DOBS_SRC="%OBS_SRC:\=/%" -DOBS_APP="%OBS_APP:\=/%" -DcurlPath="%CURL_SRC:\=/%" -D_CURL_LIBRARY_DIRS=./build .. > build64\run_cmake.cmd
 echo @echo ##### CMake done. Please open rtmp-nicolive.sln ##### >> build64\run_cmake.cmd
 echo @echo You MUST change Debug to Release before build! >> build64\run_cmake.cmd
 echo pause >> build64\run_cmake.cmd
