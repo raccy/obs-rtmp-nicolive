@@ -71,6 +71,7 @@ set(rtmp-nicolive_SOURCES
 	pugixml.cpp
 	nico-live-api.cpp
 	nico-live.cpp
+	nico-live-timer.cpp
 	nico-live-watcher.cpp
 	nicolive.cpp
 	nicolive-log.cpp
