@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ctime>
 #include <QtCore>
 
 class NicoLiveWatcher;
@@ -9,6 +10,12 @@ class NicoLive : public QObject
 {
 	Q_OBJECT
 	friend class NicoLiveWatcher;
+
+	enum class LiveState {
+		BEFORE_START,
+		ENABLE_LIVE,
+		AFTER_END,
+	};
 
 public:
 private:
@@ -60,6 +67,9 @@ public:
 	const QString &getOnairLiveId() const;
 	int getRemainingLive() const;
 	bool enabledLive() const;
+	LiveState getLiveState() const;
+	std::time_t getLiveStartTime() const;
+	std::time_t getLiveEndTime() const;
 
 	bool enabledAdjustBitrate() const;
 	bool enabledSession() const;

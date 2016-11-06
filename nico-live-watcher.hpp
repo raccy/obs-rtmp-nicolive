@@ -1,21 +1,19 @@
 #pragma once
-
-#include <QtCore>
+#include <ctime>
 
 class NicoLive;
+class NicoLiveTimer;
 
-class NicoLiveWatcher : public QObject
+class NicoLiveWatcher
 {
-	Q_OBJECT
 public:
 	static const int MIN_INTERVAL_SEC = 10;      // 10s
 	static const int MAX_INTERVAL_SEC = 60 * 60; // 1h
 private:
 	NicoLive *nicolive;
-	int marginTime;
-	int interval = 60 * 1000;
-	bool active = false;
-	QTimer *timer;
+	long long marginTime;
+	long long interval = 60 * 1000;
+	NicoLiveTimer *timer;
 
 public:
 	NicoLiveWatcher(NicoLive *nicolive, int margin_sec = 10);
@@ -24,6 +22,9 @@ public:
 	void stop();
 	bool isActive();
 	int remainingTime();
-private slots:
-	void watch();
+
+private:
+	std::time_t watch(std::time_t);
+	void startStreaming();
+	void stopStreaming();
 };

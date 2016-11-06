@@ -27,7 +27,7 @@ public:
 	void Start();
 	void Stop();
 	bool IsActive() const;
-	void SetIntevalMsec(long long intervalMsec);
+	void SetIntervalMsec(long long intervalMsec);
 
 private:
 	static void Loop(int id, NicoLiveTimer *timer);

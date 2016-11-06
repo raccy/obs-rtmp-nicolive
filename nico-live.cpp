@@ -1,4 +1,5 @@
 #include "nico-live.hpp"
+#include <ctime>
 #include <curl/curl.h>
 #include <string>
 #include <unordered_map>
@@ -82,6 +83,28 @@ bool NicoLive::enabledLive() const
 	QDateTime now = QDateTime::currentDateTime();
 	return this->live_info.start_time <= now &&
 	       this->live_info.end_time >= now;
+}
+
+NicoLive::LiveState NicoLive::getLiveState() const
+{
+	auto now = time(NULL);
+	if (now < getLiveStartTime()) {
+		return NicoLive::LiveState::BEFORE_START;
+	} else if (now <= getLiveEndTime()) {
+		return NicoLive::LiveState::ENABLE_LIVE;
+	} else {
+		return NicoLive::LiveState::AFTER_END;
+	}
+}
+
+std::time_t NicoLive::getLiveStartTime() const
+{
+	return static_cast<std::time_t>(this->live_info.start_time.toTime_t());
+}
+
+std::time_t NicoLive::getLiveEndTime() const
+{
+	return static_cast<std::time_t>(this->live_info.end_time.toTime_t());
 }
 
 bool NicoLive::enabledAdjustBitrate() const

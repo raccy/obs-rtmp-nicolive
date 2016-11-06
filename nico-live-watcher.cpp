@@ -1,16 +1,16 @@
-#include "nico-live.hpp"
-#include <QtCore>
 #include "nico-live-watcher.hpp"
+#include <ctime>
+#include "nico-live-timer.hpp"
+#include "nico-live.hpp"
 #include "nicolive-log.h"
 #include "nicolive-operation.h"
 #include "nicolive.h"
 
 NicoLiveWatcher::NicoLiveWatcher(NicoLive *nicolive, int margin_sec)
-    : QObject(nicolive), nicolive(nicolive), marginTime(margin_sec * 1000)
+    : nicolive(nicolive), marginTime(margin_sec * 1000)
 {
-	this->timer = new QTimer(this);
-	this->timer->setSingleShot(true);
-	connect(timer, SIGNAL(timeout()), this, SLOT(watch()));
+	this->timer = new NicoLiveTimer(
+	    this->interval, [this](std::time_t t) { return this->watch(t); });
 }
 
 NicoLiveWatcher::~NicoLiveWatcher()
@@ -24,72 +24,56 @@ void NicoLiveWatcher::start(long long sec)
 		sec = NicoLiveWatcher::MIN_INTERVAL_SEC;
 	else if (sec > NicoLiveWatcher::MAX_INTERVAL_SEC)
 		sec = NicoLiveWatcher::MAX_INTERVAL_SEC;
-	this->interval = static_cast<int>(sec * 1000);
-
-	if (!this->timer->isActive()) {
-		nicolive_log_debug("check session before timer start");
-		nicolive->checkSession();
-		nicolive_log_debug("start watch, interval: %d", this->interval);
-		// this->timer->start(this->interval);
-		this->timer->start(this->marginTime);
-	}
-	this->active = true;
+	this->interval = sec * 1000;
+	nicolive_log_debug("start watch, interval: %lld", this->interval);
+	this->timer->SetIntervalMsec(this->interval);
+	this->timer->Start();
 }
 
 void NicoLiveWatcher::stop()
 {
-	if (this->timer->isActive()) {
-		nicolive_log_debug("stop watch ");
-		this->timer->stop();
-	}
-	this->active = false;
+	nicolive_log_debug("stop watch ");
+	this->timer->Stop();
 }
 
-bool NicoLiveWatcher::isActive() { return this->active; }
+bool NicoLiveWatcher::isActive() { return this->timer->IsActive(); }
 
-int NicoLiveWatcher::remainingTime()
+std::time_t NicoLiveWatcher::watch(std::time_t t)
 {
-	return this->timer->remainingTime() / 1000;
-}
+	// TODO: 再考！！！！
+	nicolive_log_debug("watching! %lld", static_cast<long long>(t));
+	t += this->interval / 1000;
 
-void NicoLiveWatcher::watch()
-{
-	nicolive_log_debug("watching!");
-
-	int next_interval = this->interval;
-	int remaining_msec;
-
-	nicolive->sitePubStat();
-	remaining_msec = nicolive->getRemainingLive() * 1000;
-	if (remaining_msec < 0) remaining_msec = 0;
-
-	if (nicolive->getLiveId().isEmpty() || !nicolive->enabledLive()) {
-		if (nicolive->isOnair()) {
-			nicolive_log_debug("stop streaming because live end");
-			nicolive_streaming_stop();
-			next_interval = this->marginTime;
-		}
+	this->nicolive->sitePubStat();
+	auto liveId = this->nicolive->getLiveId();
+	if (liveId.isEmpty()) {
+		this->stopStreaming();
+	} else if (liveId != nicolive->getOnairLiveId()) {
+		this->stopStreaming();
+		// wait... 1 sec
+		t += 1;
 	} else {
-		if (nicolive->getLiveId() != nicolive->getOnairLiveId()) {
-			if (nicolive->isOnair()) {
-				nicolive_log_debug(
-				    "stop streaming for restart");
-				nicolive_streaming_stop();
-				// wait stoping 60 secs
-				for (int i = 0; i < 60; ++i) {
-					QThread::sleep(1); // sleep 1 sec
-					if (!nicolive->isOnair()) {
-						break;
-					}
-					nicolive_log_debug(
-					    "wait stopping... %d", i);
-				}
-			}
-			nicolive_log_debug("start streaming for next live");
-			nicolive_streaming_start();
-		} else if (remaining_msec + this->marginTime < next_interval) {
-			next_interval = remaining_msec + this->marginTime;
+		switch (nicolive->getLiveState()) {
+		case NicoLive::LiveState::BEFORE_START:
+			t = this->nicolive->getLiveStartTime();
+			break;
+		case NicoLive::LiveState::ENABLE_LIVE:
+			t = this->nicolive->getLiveEndTime();
+			break;
+		case NicoLive::LiveState::AFTER_END:
+			this->stopStreaming();
+			break;
 		}
 	}
-	this->timer->start(next_interval);
+	return t;
+}
+
+void NicoLiveWatcher::startStreaming()
+{
+	if (!this->nicolive->isOnair()) nicolive_streaming_start();
+}
+
+void NicoLiveWatcher::stopStreaming()
+{
+	if (this->nicolive->isOnair()) nicolive_streaming_stop();
 }

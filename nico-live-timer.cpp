@@ -38,7 +38,7 @@ void NicoLiveTimer::Stop()
 }
 bool NicoLiveTimer::IsActive() const { return this->active; }
 
-void NicoLiveTimer::SetIntevalMsec(long long intervalMsec)
+void NicoLiveTimer::SetIntervalMsec(long long intervalMsec)
 {
 	this->intervalMsec = intervalMsec;
 }
