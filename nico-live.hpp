@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <ctime>
 #include <QtCore>
 
@@ -28,6 +29,7 @@ private:
 		QString url;
 		QString stream;
 		QString ticket;
+		QDateTime server_time;
 		QDateTime base_time;
 		QDateTime open_time;
 		QDateTime start_time;
@@ -70,6 +72,10 @@ public:
 	LiveState getLiveState() const;
 	std::time_t getLiveStartTime() const;
 	std::time_t getLiveEndTime() const;
+	std::chrono::milliseconds getRemainingStartTime() const;
+	std::chrono::milliseconds getRemainingEndTime() const;
+	bool enabledStopBeforeEndTime() const;
+	bool enabledStartBeforeStartTime() const;
 
 	bool enabledAdjustBitrate() const;
 	bool enabledSession() const;

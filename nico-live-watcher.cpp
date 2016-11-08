@@ -1,16 +1,23 @@
 #include "nico-live-watcher.hpp"
-#include <ctime>
+#include <algorithm>
+#include <chrono>
+// #include <ctime>
 #include "nico-live-timer.hpp"
 #include "nico-live.hpp"
 #include "nicolive-log.h"
 #include "nicolive-operation.h"
 #include "nicolive.h"
 
-NicoLiveWatcher::NicoLiveWatcher(NicoLive *nicolive, int margin_sec)
-    : nicolive(nicolive), marginTime(margin_sec * 1000)
+// static consntexpr
+constexpr std::chrono::milliseconds NicoLiveWatcher::MARGIN_TIME;
+constexpr std::chrono::milliseconds NicoLiveWatcher::ON_AIR_INTERVAL_TIME;
+constexpr std::chrono::milliseconds NicoLiveWatcher::OFF_AIR_INTERVAL_TIME;
+constexpr std::chrono::milliseconds NicoLiveWatcher::BOOST_INTERVAL_TIME;
+
+NicoLiveWatcher::NicoLiveWatcher(NicoLive *nicolive) : nicolive(nicolive)
 {
-	this->timer = new NicoLiveTimer(
-	    this->interval, [this](std::time_t t) { return this->watch(t); });
+	this->timer = new NicoLiveTimer([this]() { return this->watch(); },
+	    std::chrono::milliseconds(1000));
 }
 
 NicoLiveWatcher::~NicoLiveWatcher()
@@ -18,15 +25,16 @@ NicoLiveWatcher::~NicoLiveWatcher()
 	if (isActive()) stop();
 }
 
-void NicoLiveWatcher::start(long long sec)
+void NicoLiveWatcher::start()
 {
-	if (sec < NicoLiveWatcher::MIN_INTERVAL_SEC)
-		sec = NicoLiveWatcher::MIN_INTERVAL_SEC;
-	else if (sec > NicoLiveWatcher::MAX_INTERVAL_SEC)
-		sec = NicoLiveWatcher::MAX_INTERVAL_SEC;
-	this->interval = sec * 1000;
-	nicolive_log_debug("start watch, interval: %lld", this->interval);
-	this->timer->SetIntervalMsec(this->interval);
+	// if (sec < NicoLiveWatcher::MIN_INTERVAL_SEC)
+	// 	sec = NicoLiveWatcher::MIN_INTERVAL_SEC;
+	// else if (sec > NicoLiveWatcher::MAX_INTERVAL_SEC)
+	// 	sec = NicoLiveWatcher::MAX_INTERVAL_SEC;
+	// this->interval = sec * 1000;
+	nicolive_log_debug("start watch");
+	this->boostCount = 0;
+	// this->timer->SetIntervalMsec(this->interval);
 	this->timer->Start();
 }
 
@@ -38,42 +46,72 @@ void NicoLiveWatcher::stop()
 
 bool NicoLiveWatcher::isActive() { return this->timer->IsActive(); }
 
-std::time_t NicoLiveWatcher::watch(std::time_t t)
+std::chrono::milliseconds NicoLiveWatcher::watch()
 {
-	// TODO: 再考！！！！
-	nicolive_log_debug("watching! %lld", static_cast<long long>(t));
-	t += this->interval / 1000;
+	nicolive_log_debug(
+	    "watching! since epoch (ms) %lld",
+	    static_cast<long long>(
+		std::chrono::duration_cast<std::chrono::milliseconds>(
+		    std::chrono::system_clock::now().time_since_epoch())
+		    .count()));
+	if (this->boostCount > 0) {
+		this->boostCount--;
+	}
 
 	this->nicolive->sitePubStat();
-	auto liveId = this->nicolive->getLiveId();
-	if (liveId.isEmpty()) {
-		this->stopStreaming();
-	} else if (liveId != nicolive->getOnairLiveId()) {
-		this->stopStreaming();
-		// wait... 1 sec
-		t += 1;
+
+	if (this->nicolive->isOnair()) {
+		return this->watchOnAir();
 	} else {
-		switch (nicolive->getLiveState()) {
-		case NicoLive::LiveState::BEFORE_START:
-			t = this->nicolive->getLiveStartTime();
-			break;
-		case NicoLive::LiveState::ENABLE_LIVE:
-			t = this->nicolive->getLiveEndTime();
-			break;
-		case NicoLive::LiveState::AFTER_END:
-			this->stopStreaming();
-			break;
+		return this->watchOffAir();
+	}
+}
+
+std::chrono::milliseconds NicoLiveWatcher::watchOnAir()
+{
+	if (!this->nicolive->enabledLive() ||
+	    this->nicolive->getLiveId() != this->nicolive->getOnairLiveId()) {
+		nicolive_streaming_stop();
+		this->boostCount = NicoLiveWatcher::BOOST_NUMBER_AFTER_STOP;
+		return NicoLiveWatcher::MARGIN_TIME;
+	}
+
+	auto remainingEndTime = this->nicolive->getRemainingEndTime();
+
+	if (this->nicolive->enabledStopBeforeEndTime()) {
+		if (remainingEndTime <= NicoLiveWatcher::MARGIN_TIME) {
+			nicolive_streaming_stop();
+			this->boostCount =
+			    NicoLiveWatcher::BOOST_NUMBER_AFTER_STOP;
+			return NicoLiveWatcher::MARGIN_TIME;
+		} else {
+			return std::min(NicoLiveWatcher::ON_AIR_INTERVAL_TIME,
+			    remainingEndTime - NicoLiveWatcher::MARGIN_TIME);
 		}
 	}
-	return t;
+
+	return std::min(NicoLiveWatcher::ON_AIR_INTERVAL_TIME,
+	    remainingEndTime + NicoLiveWatcher::MARGIN_TIME);
 }
 
-void NicoLiveWatcher::startStreaming()
+std::chrono::milliseconds NicoLiveWatcher::watchOffAir()
 {
-	if (!this->nicolive->isOnair()) nicolive_streaming_start();
-}
+	if (!this->nicolive->enabledLive()) {
+		if (this->boostCount > 0) {
+			return NicoLiveWatcher::BOOST_INTERVAL_TIME;
+		} else {
+			return NicoLiveWatcher::OFF_AIR_INTERVAL_TIME;
+		}
+	}
 
-void NicoLiveWatcher::stopStreaming()
-{
-	if (this->nicolive->isOnair()) nicolive_streaming_stop();
+	if (!this->nicolive->enabledStartBeforeStartTime()) {
+		auto remainingStartTime =
+		    this->nicolive->getRemainingStartTime();
+		if (remainingStartTime < std::chrono::milliseconds::zero()) {
+			return std::min(NicoLiveWatcher::OFF_AIR_INTERVAL_TIME,
+			    remainingStartTime);
+		}
+	}
+
+	return NicoLiveWatcher::OFF_AIR_INTERVAL_TIME;
 }

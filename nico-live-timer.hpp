@@ -1,7 +1,7 @@
 #pragma once
 
 #include <atomic>
-#include <ctime>
+#include <chrono>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -9,8 +9,8 @@
 
 class NicoLiveTimer
 {
-	std::atomic_llong intervalMsec;
-	const std::function<std::time_t(std::time_t)> callable;
+	const std::function<std::chrono::milliseconds(void)> callable;
+	std::chrono::milliseconds minInterval;
 
 	std::atomic_bool active;
 	std::atomic_int loopId;
@@ -21,13 +21,13 @@ class NicoLiveTimer
 
 public:
 	NicoLiveTimer() = delete;
-	NicoLiveTimer(long long intervalMsec,
-	    std::function<std::time_t(std::time_t)> callable);
+	NicoLiveTimer(std::function<std::chrono::milliseconds(void)> callable,
+	    std::chrono::milliseconds minInterval = std::chrono::milliseconds(
+		0));
 	~NicoLiveTimer();
 	void Start();
 	void Stop();
 	bool IsActive() const;
-	void SetIntervalMsec(long long intervalMsec);
 
 private:
 	static void Loop(int id, NicoLiveTimer *timer);

@@ -107,6 +107,30 @@ std::time_t NicoLive::getLiveEndTime() const
 	return static_cast<std::time_t>(this->live_info.end_time.toTime_t());
 }
 
+std::chrono::milliseconds NicoLive::getRemainingStartTime() const
+{
+	return std::chrono::seconds(this->live_info.start_time.toTime_t() -
+				    this->live_info.server_time.toTime_t());
+}
+
+std::chrono::milliseconds NicoLive::getRemainingEndTime() const
+{
+	return std::chrono::seconds(this->live_info.end_time.toTime_t() -
+				    this->live_info.server_time.toTime_t());
+}
+
+bool NicoLive::enabledStopBeforeEndTime() const
+{
+	// TODO: 実装！
+	return true;
+}
+
+bool NicoLive::enabledStartBeforeStartTime() const
+{
+	// TODO: 実装！
+	return true;
+}
+
 bool NicoLive::enabledAdjustBitrate() const
 {
 	return this->flags.adjust_bitrate;
@@ -128,7 +152,7 @@ void NicoLive::stopStreaming()
 	this->flags.onair = false;
 }
 
-void NicoLive::startWatching(long long sec) { this->watcher->start(sec); }
+void NicoLive::startWatching(long long sec) { this->watcher->start(); }
 
 void NicoLive::stopWatching() { this->watcher->stop(); }
 
@@ -204,6 +228,7 @@ bool NicoLive::sitePubStat()
 	const std::string errorCodeXpath =
 	    "/getpublishstatus/error/code/text()";
 	const std::unordered_map<std::string, std::string> xpathMap = {
+	    {"server_time", "/getpublishstatus/@time"},
 	    {"id", "/getpublishstatus//stream/id/text()"},
 	    {"exclude", "/getpublishstatus//stream/exclude/text()"},
 	    {"base_time", "/getpublishstatus//stream/base_time/text()"},
@@ -246,6 +271,8 @@ bool NicoLive::sitePubStat()
 
 	if (status == "ok") {
 		try {
+			this->live_info.server_time.setTime_t(
+			    std::stoi(data[xpathMap.at("server_time")].at(0)));
 			this->live_info.id =
 			    data[xpathMap.at("id")].at(0).c_str();
 			this->live_info.exclude =

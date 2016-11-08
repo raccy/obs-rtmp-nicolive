@@ -1,15 +1,16 @@
 #include "nico-live-timer.hpp"
+#include <algorithm>
 #include <atomic>
 #include <chrono>
-#include <ctime>
 #include <functional>
 #include <memory>
 #include <mutex>
 #include <thread>
 
 NicoLiveTimer::NicoLiveTimer(
-    long long intervalMsec, std::function<std::time_t(std::time_t)> callable)
-    : intervalMsec(intervalMsec), callable(callable), active(false), loopId(0),
+    std::function<std::chrono::milliseconds(void)> callable,
+    std::chrono::milliseconds minInterval)
+    : callable(callable), minInterval(minInterval), active(false), loopId(0),
       alive(std::make_shared<bool>(true))
 {
 }
@@ -38,29 +39,13 @@ void NicoLiveTimer::Stop()
 }
 bool NicoLiveTimer::IsActive() const { return this->active; }
 
-void NicoLiveTimer::SetIntervalMsec(long long intervalMsec)
-{
-	this->intervalMsec = intervalMsec;
-}
-
 void NicoLiveTimer::Loop(int id, NicoLiveTimer *timer)
 {
 	std::shared_ptr<bool> timerAlive = timer->alive;
 	while (*timerAlive && timer->IsActive() && id == timer->loopId) {
-		auto before_time = std::chrono::system_clock::now();
-		auto next_intervaled_time =
-		    before_time +
-		    std::chrono::milliseconds(timer->intervalMsec);
-		auto next_time =
-		    std::chrono::system_clock::from_time_t(timer->callable(
-			std::chrono::system_clock::to_time_t(before_time)));
-		if (next_time > next_intervaled_time) {
-			next_time = next_intervaled_time;
-		}
-		auto after_time = std::chrono::system_clock::now();
-		if (after_time < next_time) {
-			std::this_thread::sleep_for(next_time - after_time);
-		}
+		auto interval_time = timer->callable();
+		std::this_thread::sleep_for(
+		    std::min(timer->minInterval, interval_time));
 	}
 	timerAlive.reset();
 }
