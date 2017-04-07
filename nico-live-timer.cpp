@@ -45,7 +45,7 @@ void NicoLiveTimer::Loop(int id, NicoLiveTimer *timer)
 	while (*timerAlive && timer->IsActive() && id == timer->loopId) {
 		auto interval_time = timer->callable();
 		std::this_thread::sleep_for(
-		    std::min(timer->minInterval, interval_time));
+		    std::max(timer->minInterval, interval_time));
 	}
 	timerAlive.reset();
 }
