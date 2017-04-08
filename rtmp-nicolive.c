@@ -268,20 +268,18 @@ static bool rtmp_nicolive_initialize(void *data, obs_output_t *output)
 	nicolive_log_debug_call_func();
 	UNUSED_PARAMETER(output);
 	bool success = false;
-	bool msg_gui = !nicolive_silent_once(data);
 
 	if (nicolive_check_session(data)) {
 		if (nicolive_check_live(data)) {
 			success = true;
 		} else {
-			nicolive_msg_warn(msg_gui,
+			nicolive_msg_warn(false,
 			    obs_module_text("MessageNoLive"),
 			    "cannot start streaming: no live");
 			success = false;
 		}
 	} else {
-		nicolive_msg_warn(msg_gui,
-		    obs_module_text("MessageFailedLogin"),
+		nicolive_msg_warn(false, obs_module_text("MessageFailedLogin"),
 		    "cannot start streaming: failed login");
 		success = false;
 	}
@@ -292,9 +290,9 @@ static bool rtmp_nicolive_initialize(void *data, obs_output_t *output)
 		// ignore fails
 		adjust_bitrate(bitrate,
 		    obs_encoder_get_settings(
-				   obs_output_get_video_encoder(output)),
+			obs_output_get_video_encoder(output)),
 		    obs_encoder_get_settings(
-				   obs_output_get_audio_encoder(output, 0)));
+			obs_output_get_audio_encoder(output, 0)));
 	}
 
 	return success;
