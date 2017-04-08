@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <ctime>
+#include <memory>
 #include <QtCore>
 
 class NicoLiveWatcher;
@@ -47,8 +48,8 @@ private:
 		bool adjust_bitrate = false;
 		bool silent_once = false;
 	} flags;
-	NicoLiveWatcher *watcher;
-	NicoLiveApi *webApi;
+	std::unique_ptr<NicoLiveWatcher> watcher;
+	std::unique_ptr<NicoLiveApi> webApi;
 
 public:
 	NicoLive(QObject *parent = 0);

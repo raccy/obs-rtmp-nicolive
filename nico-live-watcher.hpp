@@ -1,6 +1,7 @@
 #pragma once
 #include <chrono>
 #include <ctime>
+#include <memory>
 
 class NicoLive;
 class NicoLiveTimer;
@@ -31,7 +32,7 @@ private:
 	// long long marginTime;
 	// long long interval = 60 * 1000;
 	int boostCount = 0;
-	NicoLiveTimer *timer;
+	std::unique_ptr<NicoLiveTimer> timer;
 
 public:
 	NicoLiveWatcher(NicoLive *nicolive);

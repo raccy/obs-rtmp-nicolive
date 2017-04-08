@@ -1,6 +1,7 @@
 #include "nico-live-watcher.hpp"
 #include <algorithm>
 #include <chrono>
+#include <memory>
 // #include <ctime>
 #include "nico-live-timer.hpp"
 #include "nico-live.hpp"
@@ -16,8 +17,9 @@ constexpr std::chrono::milliseconds NicoLiveWatcher::BOOST_INTERVAL_TIME;
 
 NicoLiveWatcher::NicoLiveWatcher(NicoLive *nicolive) : nicolive(nicolive)
 {
-	this->timer = new NicoLiveTimer([this]() { return this->watch(); },
-	    std::chrono::milliseconds(1000));
+	this->timer = std::unique_ptr<NicoLiveTimer>(
+	    new NicoLiveTimer([this]() { return this->watch(); },
+		std::chrono::milliseconds(1000)));
 }
 
 NicoLiveWatcher::~NicoLiveWatcher()
@@ -48,8 +50,7 @@ bool NicoLiveWatcher::isActive() { return this->timer->IsActive(); }
 
 std::chrono::milliseconds NicoLiveWatcher::watch()
 {
-	nicolive_log_debug(
-	    "watching! since epoch (ms) %lld",
+	nicolive_log_debug("watching! since epoch (ms) %lld",
 	    static_cast<long long>(
 		std::chrono::duration_cast<std::chrono::milliseconds>(
 		    std::chrono::system_clock::now().time_since_epoch())

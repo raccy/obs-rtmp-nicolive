@@ -1,6 +1,7 @@
 #include "nico-live.hpp"
 #include <ctime>
 #include <curl/curl.h>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -13,11 +14,11 @@
 NicoLive::NicoLive(QObject *parent)
 {
 	(void)parent;
-	watcher = new NicoLiveWatcher(this);
-	webApi = new NicoLiveApi();
+	watcher = std::unique_ptr<NicoLiveWatcher>(new NicoLiveWatcher(this));
+	webApi = std::unique_ptr<NicoLiveApi>(new NicoLiveApi());
 }
 
-NicoLive::~NicoLive() { delete webApi; }
+NicoLive::~NicoLive() {}
 
 void NicoLive::setSession(const QString &session)
 {
