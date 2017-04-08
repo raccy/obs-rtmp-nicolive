@@ -35,14 +35,18 @@ void NicoLiveTimer::Start()
 void NicoLiveTimer::Stop()
 {
 	std::lock_guard<std::mutex> lock(this->loopMutex);
-	this->active = false;
+	this->active.store(false);
 }
 bool NicoLiveTimer::IsActive() const { return this->active; }
 
 void NicoLiveTimer::Loop(int id, NicoLiveTimer *timer)
 {
 	std::shared_ptr<bool> timerAlive = timer->alive;
-	while (*timerAlive && timer->IsActive() && id == timer->loopId) {
+	while (*timerAlive) {
+		std::lock_guard<std::mutex> lock(timer->loopMutex);
+		if (!timer->active || id != timer->loopId) {
+			break;
+		}
 		auto interval_time = timer->callable();
 		std::this_thread::sleep_for(
 		    std::max(timer->minInterval, interval_time));
