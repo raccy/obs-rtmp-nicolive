@@ -135,10 +135,10 @@ extern "C" void nicolive_stop_streaming(void *data)
 	nicolive->stopStreaming();
 }
 
-extern "C" void nicolive_start_watching(void *data, long long sec)
+extern "C" void nicolive_start_watching(void *data)
 {
 	NicoLive *nicolive = static_cast<NicoLive *>(data);
-	nicolive->startWatching(sec);
+	nicolive->startWatching();
 }
 
 extern "C" void nicolive_stop_watching(void *data)

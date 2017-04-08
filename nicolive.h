@@ -29,7 +29,7 @@ bool nicolive_check_live(void *data);
 void nicolive_start_streaming(void *data);
 void nicolive_stop_streaming(void *data);
 
-void nicolive_start_watching(void *data, long long sec);
+void nicolive_start_watching(void *data);
 void nicolive_stop_watching(void *data);
 
 bool nicolive_silent_once(void *data);

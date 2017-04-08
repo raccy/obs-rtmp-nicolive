@@ -84,7 +84,7 @@ public:
 
 	void startStreaming();
 	void stopStreaming();
-	void startWatching(long long sec = 60);
+	void startWatching();
 	void stopWatching();
 
 	bool checkSession();

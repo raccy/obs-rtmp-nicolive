@@ -153,7 +153,7 @@ void NicoLive::stopStreaming()
 	this->flags.onair = false;
 }
 
-void NicoLive::startWatching(long long sec) { this->watcher->start(); }
+void NicoLive::startWatching() { this->watcher->start(); }
 
 void NicoLive::stopWatching() { this->watcher->stop(); }
 

@@ -50,20 +50,6 @@ inline static bool on_modified_login_type(
 	return true;
 }
 
-inline static bool on_modified_auto_start(
-    obs_properties_t *props, obs_property_t *prop, obs_data_t *settings)
-{
-	UNUSED_PARAMETER(prop);
-	if (obs_data_get_bool(settings, "auto_start")) {
-		obs_property_set_enabled(
-		    obs_properties_get(props, "watch_interval"), true);
-	} else {
-		obs_property_set_enabled(
-		    obs_properties_get(props, "watch_interval"), false);
-	}
-	return true;
-}
-
 inline static void set_data_nicolive(
     void *data, obs_data_t *settings, bool msg_gui)
 {
@@ -110,8 +96,7 @@ inline static void set_data_nicolive(
 	    data, obs_data_get_bool(settings, "adjust_bitrate"));
 
 	if (obs_data_get_bool(settings, "auto_start")) {
-		nicolive_start_watching(
-		    data, obs_data_get_int(settings, "watch_interval"));
+		nicolive_start_watching(data);
 	} else {
 		nicolive_stop_watching(data);
 	}
@@ -120,7 +105,6 @@ inline static void set_data_nicolive(
 	// Maybe obs-studio 0.8.3 bug
 	reset_obs_data(bool, settings, "adjust_bitrate");
 	reset_obs_data(bool, settings, "auto_start");
-	reset_obs_data(int, settings, "watch_interval");
 }
 
 inline static bool adjust_bitrate(long long bitrate,
@@ -222,7 +206,6 @@ static void rtmp_nicolive_defaults(obs_data_t *settings)
 	obs_data_set_default_string(settings, "session", "");
 	obs_data_set_default_bool(settings, "adjust_bitrate", true);
 	obs_data_set_default_bool(settings, "auto_start", false);
-	obs_data_set_default_int(settings, "watch_interval", 60);
 }
 
 static obs_properties_t *rtmp_nicolive_properties(void *data)
@@ -230,7 +213,6 @@ static obs_properties_t *rtmp_nicolive_properties(void *data)
 	nicolive_log_debug_call_func();
 	UNUSED_PARAMETER(data);
 	obs_property_t *list;
-	obs_property_t *prop;
 	obs_properties_t *ppts = obs_properties_create();
 
 	list = obs_properties_add_list(ppts, "login_type",
@@ -254,11 +236,8 @@ static obs_properties_t *rtmp_nicolive_properties(void *data)
 	obs_properties_add_bool(
 	    ppts, "adjust_bitrate", obs_module_text("AdjustBitrate"));
 
-	prop = obs_properties_add_bool(
+	obs_properties_add_bool(
 	    ppts, "auto_start", obs_module_text("AutoStart"));
-	obs_property_set_modified_callback(prop, on_modified_auto_start);
-	obs_properties_add_int(ppts, "watch_interval",
-	    obs_module_text("WatchInterval"), 10, 300, 1);
 
 	return ppts;
 }
