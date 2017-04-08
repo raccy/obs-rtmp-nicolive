@@ -2,15 +2,21 @@
  * Nicookie C++ (better C)
  */
 #include "nicookie.h"
+#include <cerrno>
+#include <cstdlib>
+#include <fstream>
 #include <string>
 #include <vector>
+#include "json/src/json.hpp"
 #include "sqlite/sqlite3.h"
 
-// global object
+// Globale Objects
 int nicookie_errno = NICOOKIE_ERROR_NONE;
 
 namespace
 {
+using json = nlohmann::json;
+// Private Globale Objects
 const int availableApps[] = {
 #ifdef _WIN32
     NICOOKIE_APP_IE, NICOOKIE_APP_EDGE,
@@ -21,7 +27,74 @@ const int availableApps[] = {
     NICOOKIE_APP_NONE};
 std::string cookieSession = "";
 
-std::string FindViqo() { return ""; };
+// Directory Paths
+#ifdef _WIN32
+const char *PATH_SEPARATOR = "\\";
+#else
+const char *PATH_SEPARATOR = "/";
+#endif
+inline std::string HomeDirectory()
+{
+	std::string str = "";
+#ifdef _WIN32
+	str += getenv("HOMEDRIVE");
+	str += getenv("HOMEPATH");
+#else
+	str += getenv("HOME");
+#endif
+	return str;
+}
+#ifdef _WIN32
+inline std::string AppDataDirectory() { return getenv("APPDATA"); }
+inline std::string LocalAppDataDirectory() { return getenv("LOCALAPPDATA"); }
+#elif __APPLE__
+inline std::string AppDataDirectory()
+{
+	std::string str = "";
+	str += HomeDirectory();
+	str += "/Library/Application Support";
+	return str;
+}
+#else
+#endif
+
+std::string FindViqo();
+
+std::string FindViqo()
+{
+	std::string settingsJson = "";
+#ifdef _WIN32
+	settingsJson += AppDataDirectory();
+#elif __APPLE__
+	settingsJson += AppDataDirectory();
+#else
+	settingsJson += HomeDirectory();
+	settingsJson += "/.local/share"
+#endif
+	settingsJson += PATH_SEPARATOR;
+	settingsJson += "Viqo";
+	settingsJson += PATH_SEPARATOR;
+	settingsJson += "settings.json";
+
+	errno = 0;
+	std::ifstream ifs(settingsJson);
+	if (ifs.fail()) {
+		if (errno == ENOENT) {
+			nicookie_errno = NICOOKIE_ERROR_NOT_FOUND_DATA_FILE;
+		} else {
+			nicookie_errno = NICOOKIE_ERROR_FAILED_OPEN_DATA_FILE;
+		}
+		return "";
+	}
+	json j;
+	ifs >> j;
+	std::string session = j["login_way"]["user_session"];
+	if (session.empty()) {
+		nicookie_errno = NICOOKIE_ERROR_NOT_FOUND_DATA;
+		return "";
+	}
+	return session;
+};
 
 // class Nicookie
 // {
@@ -38,7 +111,8 @@ std::string FindViqo() { return ""; };
 // 	static const std::string &StrError(enum nicookie_error errnum);
 // };
 //
-// Nicookie::Nicookie() : error(NICOOKIE_ERROR_NONE), session(""), appList()
+// Nicookie::Nicookie() : error(NICOOKIE_ERROR_NONE), session(""),
+// appList()
 // {
 // #ifdef _WIN32
 // 	this->appList.push_back(NICOOKIE_APP_IE);
@@ -60,7 +134,8 @@ std::string FindViqo() { return ""; };
 // 	// TODO
 // 	return this->session;
 // }
-// enum nicookie_error Nicookie::GetError() const { return this->error; };
+// enum nicookie_error Nicookie::GetError() const { return this->error;
+// };
 // const std::string &Nicookie::AppName(enum nicookie_app app) {}
 // const std::string &Nicookie::StrError(enum nicookie_error errnum) {}
 // static Nicookie nc;
@@ -153,8 +228,8 @@ extern "C" const char *nicookie_strerror(int errnum)
 	case NICOOKIE_ERROR_NOT_FOUND_DATA:
 		return "Data was not found.";
 		break;
-	case NICOOKIE_ERROR_NOT_FOUND_COKIES_FILE:
-		return "Cookie stored file was not found.";
+	case NICOOKIE_ERROR_NOT_FOUND_DATA_FILE:
+		return "Data file was not found.";
 		break;
 	case NICOOKIE_ERROR_INVALID_DATA_FORMAT:
 		return "The data format is invaild.";
@@ -162,8 +237,8 @@ extern "C" const char *nicookie_strerror(int errnum)
 	case NICOOKIE_ERROR_FAILED_DECRYT:
 		return "Decryption failed.";
 		break;
-	case NICOOKIE_ERROR_FAILED_OPEN_COOKIES_FILE:
-		return "Could not open file.";
+	case NICOOKIE_ERROR_FAILED_OPEN_DATA_FILE:
+		return "Could not open data file.";
 		break;
 	case NICOOKIE_ERROR_FAILED_READ_DATA:
 		return "Could not read file.";
