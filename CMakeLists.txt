@@ -68,7 +68,6 @@ if(NOT BUILD_IN_OBS AND NOT LibObs_FOUND)
 endif(NOT BUILD_IN_OBS AND NOT LibObs_FOUND)
 
 set(rtmp-nicolive_SOURCES
-	pugixml.cpp
 	nico-live-api.cpp
 	nico-live.cpp
 	nico-live-timer.cpp
@@ -79,6 +78,7 @@ set(rtmp-nicolive_SOURCES
 	rtmp-nicolive.c)
 
 add_library(rtmp-nicolive MODULE
+	pugixml/src/pugixml.cpp
 	${rtmp-nicolive_SOURCES})
 
 target_link_libraries(rtmp-nicolive
