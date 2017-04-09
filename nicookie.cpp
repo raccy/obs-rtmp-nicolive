@@ -24,7 +24,7 @@ const int availableApps[] = {
     NICOOKIE_APP_SAFARI,
 #endif
     NICOOKIE_APP_FIREFOX, NICOOKIE_APP_CHROME, NICOOKIE_APP_OPERA,
-    NICOOKIE_APP_VIQO NICOOKIE_APP_NONE};
+    NICOOKIE_APP_VIQO, NICOOKIE_APP_NONE};
 std::string cookieSession = "";
 
 // Directory Paths
