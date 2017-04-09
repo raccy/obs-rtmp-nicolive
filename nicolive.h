@@ -34,6 +34,9 @@ void nicolive_stop_watching(void *data);
 
 bool nicolive_silent_once(void *data);
 
+bool nicolive_test_login(const char *mail, const char *password);
+bool nicolive_test_session(const char *session);
+
 #ifdef __cplusplus
 }
 #endif

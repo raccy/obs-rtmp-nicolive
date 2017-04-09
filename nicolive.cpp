@@ -1,5 +1,6 @@
 #include "nicolive.h"
 #include <obs-module.h>
+#include "nico-live-api.hpp"
 #include "nico-live.hpp"
 #include "nicolive-log.h"
 
@@ -151,4 +152,21 @@ extern "C" bool nicolive_silent_once(void *data)
 {
 	NicoLive *nicolive = static_cast<NicoLive *>(data);
 	return nicolive->silentOnce();
+}
+
+extern "C" bool nicolive_test_login(const char *mail, const char *password)
+{
+	std::string mail_str(mail);
+	std::string password_str(password);
+	NicoLiveApi nla;
+	auto ticket = nla.loginNicoliveEncoder(mail_str, password_str);
+	return !ticket.empty();
+}
+
+extern "C" bool nicolive_test_session(const char *session)
+{
+	std::string session_str(session);
+	NicoLiveApi nla;
+	nla.setCookie("user_session", session_str);
+	return nla.getPublishStatus();
 }
