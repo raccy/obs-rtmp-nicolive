@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <obs-module.h>
+#include "nicookie.h"
 #include "nicolive-log.h"
 #include "nicolive.h"
 
@@ -11,13 +12,19 @@
 enum rtmp_nicolive_login_type {
 	RTMP_NICOLIVE_LOGIN_MAIL,
 	RTMP_NICOLIVE_LOGIN_SESSION,
-	RTMP_NICOLIVE_LOGIN_VIQO,
+	RTMP_NICOLIVE_LOGIN_APP,
 };
+
+// use on callback for check button
+static obs_data_t *current_settings;
 
 inline static bool on_modified_login_type(
     obs_properties_t *props, obs_property_t *prop, obs_data_t *settings)
 {
 	UNUSED_PARAMETER(prop);
+	// update current settings
+	current_settings = settings;
+
 	switch (obs_data_get_int(settings, "login_type")) {
 	case RTMP_NICOLIVE_LOGIN_MAIL:
 		obs_property_set_visible(
@@ -26,6 +33,8 @@ inline static bool on_modified_login_type(
 		    obs_properties_get(props, "password"), true);
 		obs_property_set_visible(
 		    obs_properties_get(props, "session"), false);
+		obs_property_set_visible(
+		    obs_properties_get(props, "cookie_app"), false);
 		break;
 	case RTMP_NICOLIVE_LOGIN_SESSION:
 		obs_property_set_visible(
@@ -34,19 +43,31 @@ inline static bool on_modified_login_type(
 		    obs_properties_get(props, "password"), false);
 		obs_property_set_visible(
 		    obs_properties_get(props, "session"), true);
+		obs_property_set_visible(
+		    obs_properties_get(props, "cookie_app"), false);
 		break;
-	case RTMP_NICOLIVE_LOGIN_VIQO:
+	case RTMP_NICOLIVE_LOGIN_APP:
 		obs_property_set_visible(
 		    obs_properties_get(props, "mail"), false);
 		obs_property_set_visible(
 		    obs_properties_get(props, "password"), false);
 		obs_property_set_visible(
 		    obs_properties_get(props, "session"), false);
+		obs_property_set_visible(
+		    obs_properties_get(props, "cookie_app"), true);
 		break;
 	default:
 		nicolive_log_error("unknown login type");
 		return false;
 	}
+	return true;
+}
+
+inline static bool on_clicked_check(
+    obs_properties_t *props, obs_property_t *property, void *data)
+{
+	UNUSED_PARAMETER(data);
+	obs_data_set_string(current_settings, "check_message", "checked");
 	return true;
 }
 
@@ -73,7 +94,7 @@ inline static void set_data_nicolive(
 			    "failed login");
 		}
 		break;
-	case RTMP_NICOLIVE_LOGIN_VIQO:
+	case RTMP_NICOLIVE_LOGIN_APP:
 		if (nicolive_load_viqo_settings(data)) {
 			if (!nicolive_check_session(data)) {
 				nicolive_msg_warn(msg_gui,
@@ -204,6 +225,7 @@ static void rtmp_nicolive_defaults(obs_data_t *settings)
 	obs_data_set_default_string(settings, "mail", "");
 	obs_data_set_default_string(settings, "password", "");
 	obs_data_set_default_string(settings, "session", "");
+	obs_data_set_default_string(settings, "cookie_app", NICOOKIE_APP_NONE);
 	obs_data_set_default_bool(settings, "adjust_bitrate", true);
 	obs_data_set_default_bool(settings, "auto_start", false);
 }
@@ -212,26 +234,48 @@ static obs_properties_t *rtmp_nicolive_properties(void *data)
 {
 	nicolive_log_debug_call_func();
 	UNUSED_PARAMETER(data);
-	obs_property_t *list;
 	obs_properties_t *ppts = obs_properties_create();
 
-	list = obs_properties_add_list(ppts, "login_type",
-	    obs_module_text("LoginType"), OBS_COMBO_TYPE_LIST,
+	obs_property_t *prop_login_type = obs_properties_add_list(ppts,
+	    "login_type", obs_module_text("LoginType"), OBS_COMBO_TYPE_LIST,
 	    OBS_COMBO_FORMAT_INT);
-	obs_property_list_add_int(list, obs_module_text("LoginMailPassowrd"),
-	    RTMP_NICOLIVE_LOGIN_MAIL);
-	obs_property_list_add_int(list, obs_module_text("UseCookieUserSession"),
+	obs_property_list_add_int(prop_login_type,
+	    obs_module_text("LoginMailPassowrd"), RTMP_NICOLIVE_LOGIN_MAIL);
+	obs_property_list_add_int(prop_login_type,
+	    obs_module_text("UseCookieUserSession"),
 	    RTMP_NICOLIVE_LOGIN_SESSION);
-	obs_property_list_add_int(list, obs_module_text("LoadViqoSettings"),
-	    RTMP_NICOLIVE_LOGIN_VIQO);
-	obs_property_set_modified_callback(list, on_modified_login_type);
+	obs_property_list_add_int(prop_login_type,
+	    obs_module_text("LoadAppSettings"), RTMP_NICOLIVE_LOGIN_APP);
+	obs_property_set_modified_callback(
+	    prop_login_type, on_modified_login_type);
 
+	// login mail
 	obs_properties_add_text(
 	    ppts, "mail", obs_module_text("MailAddress"), OBS_TEXT_DEFAULT);
 	obs_properties_add_text(
 	    ppts, "password", obs_module_text("Password"), OBS_TEXT_PASSWORD);
+
+	// login session
 	obs_properties_add_text(
 	    ppts, "session", obs_module_text("Session"), OBS_TEXT_PASSWORD);
+
+	// login app
+	obs_property_t *prop_cookie_app = obs_properties_add_list(ppts,
+	    "cookie_app", obs_module_text("LoadCookieApp"), OBS_COMBO_TYPE_LIST,
+	    OBS_COMBO_FORMAT_INT);
+	const int *available_apps = nicookie_available_apps();
+	for (const int *app_p = available_apps; *app_p != NICOOKIE_APP_NONE;
+	     app_p++) {
+		nicolive_log_debug("add list app: %d", *app_p);
+		obs_property_list_add_int(
+		    prop_cookie_app, nicookie_app_name(*app_p), *app_p);
+	}
+
+	obs_properties_add_button(
+	    ppts, "check", obs_module_text("Check"), on_clicked_check);
+	obs_property_t *prop_check_message = obs_properties_add_text(
+	    ppts, "check_message", "", OBS_TEXT_DEFAULT);
+	obs_property_set_enabled(prop_check_message, false);
 
 	obs_properties_add_bool(
 	    ppts, "adjust_bitrate", obs_module_text("AdjustBitrate"));
