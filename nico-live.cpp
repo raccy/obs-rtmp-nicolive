@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <vector>
 #include <QtCore>
+#include "nicookie.h"
 #include "nico-live-api.hpp"
 #include "nico-live-watcher.hpp"
 #include "nicolive-log.h"
@@ -361,55 +362,17 @@ bool NicoLive::siteLiveProf()
 	}
 }
 
-/*
-original code by https://github.com/diginatu/Viqo
-file: src/settings.cpp
-Licensed under the MIT License Copyright (c) 2014 diginatu
-see https://github.com/diginatu/Viqo/raw/master/LICENSE
-*/
 bool NicoLive::loadViqoSettings()
 {
-	QStringList dir =
-	    QStandardPaths::standardLocations(QStandardPaths::DataLocation);
-	if (dir.empty()) {
-		nicolive_log_error("failed find save directory");
+	const char *session = nicookie_get_session(NICOOKIE_APP_VIQO);
+	if (session == nullptr) {
+		const char *errMessage = nicookie_strerror(nicookie_errno);
+		nicolive_log_error("%s", errMessage);
 		return false;
 	}
+	this->setSession(session);
+	return true;
 
-	QString viqo_data_dir = dir[0];
-	int last_sep_index = viqo_data_dir.lastIndexOf('/');
-	if (last_sep_index >= 0) {
-		// last name -> Viqo
-		viqo_data_dir.replace(last_sep_index + 1,
-		    viqo_data_dir.length() - last_sep_index - 1, "Viqo");
-	} else {
-		nicolive_log_error("found invalid save directory");
-		this->flags.load_viqo = false;
-		return false;
-	}
-	nicolive_log_debug("save dir: %s", viqo_data_dir.toStdString().c_str());
-
-	QFile file(viqo_data_dir + "/settings.json");
-	if (!file.exists()) {
-		nicolive_log_warn("viqo save file is not available");
-		this->flags.load_viqo = false;
-		return false;
-	}
-
-	file.open(QIODevice::ReadOnly | QIODevice::Text);
-
-	QJsonDocument jsd = QJsonDocument::fromJson(file.readAll());
-
-	QJsonObject login_way = jsd.object()["login_way"].toObject();
-	// this->session = login_way["user_session"].toString();
-	this->setSession(login_way["user_session"].toString());
-
-	QJsonObject user_data = jsd.object()["user_data"].toObject();
-	// FIXME: no mail and password
-	// this->mail = user_data["mail"].toString();
-	// this->password = user_data["pass"].toString();
-
-	file.close();
 	this->flags.load_viqo = true;
 	return true;
 }
