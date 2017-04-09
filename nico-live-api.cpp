@@ -57,6 +57,10 @@ bool NicoLiveApi::parseXml(const std::string &xml,
 	if (result.status != pugi::status_ok) {
 		return false;
 	}
+	if (data == nullptr) {
+		// do nothing, but ok
+		return true;
+	}
 	for (auto &entry : *data) {
 		pugi::xpath_node_set nodes =
 		    doc.select_nodes(entry.first.c_str());

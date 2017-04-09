@@ -61,7 +61,9 @@ public:
 	std::string loginNicoliveEncoder(
 	    const std::string &mail, const std::string &password);
 	bool getPublishStatus(
-	    std::unordered_map<std::string, std::vector<std::string>> *data);
+	    std::unordered_map<std::string, std::vector<std::string>> *data =
+		nullptr);
 	bool getPublishStatusTicket(const std::string &ticket,
-	    std::unordered_map<std::string, std::vector<std::string>> *data);
+	    std::unordered_map<std::string, std::vector<std::string>> *data =
+		nullptr);
 };
