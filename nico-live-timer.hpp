@@ -14,10 +14,8 @@ class NicoLiveTimer
 
 	std::atomic_bool active;
 	std::atomic_int loopId;
-	std::thread loopThread;
-	std::mutex loopMutex;
-
-	std::shared_ptr<bool> alive;
+	std::shared_ptr<std::mutex> loopMutex;
+	std::shared_ptr<std::atomic_bool> alive;
 
 public:
 	NicoLiveTimer() = delete;
