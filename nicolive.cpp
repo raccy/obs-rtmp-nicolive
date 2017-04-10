@@ -168,5 +168,19 @@ extern "C" bool nicolive_test_session(const char *session)
 	std::string session_str(session);
 	NicoLiveApi nla;
 	nla.setCookie("user_session", session_str);
-	return nla.getPublishStatus();
+	const std::string statusXpath = "/getpublishstatus/@status";
+	const std::string errorCodeXpath =
+	    "/getpublishstatus/error/code/text()";
+	std::unordered_map<std::string, std::vector<std::string>> data;
+	data[statusXpath] = std::vector<std::string>();
+	data[errorCodeXpath] = std::vector<std::string>();
+	bool result = nla.getPublishStatus(&data);
+
+	if (!result) return false;
+	if (!data[statusXpath].empty()) return false;
+	if (data[statusXpath][0] == "ok") return true;
+	if (data[statusXpath][0] == "fail" && !data[errorCodeXpath].empty() &&
+	    data[errorCodeXpath][0] == "notfound")
+		return true;
+	return false;
 }
