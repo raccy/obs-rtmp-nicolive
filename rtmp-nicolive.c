@@ -18,50 +18,7 @@ enum rtmp_nicolive_login_type {
 // use on callback for check button
 static obs_data_t *current_settings;
 
-inline static bool on_modified_login_type(
-    obs_properties_t *props, obs_property_t *property, obs_data_t *settings)
-{
-	UNUSED_PARAMETER(property);
-	// update current settings
-	current_settings = settings;
-
-	switch (obs_data_get_int(settings, "login_type")) {
-	case RTMP_NICOLIVE_LOGIN_MAIL:
-		obs_property_set_visible(
-		    obs_properties_get(props, "mail"), true);
-		obs_property_set_visible(
-		    obs_properties_get(props, "password"), true);
-		obs_property_set_visible(
-		    obs_properties_get(props, "session"), false);
-		obs_property_set_visible(
-		    obs_properties_get(props, "cookie_app"), false);
-		break;
-	case RTMP_NICOLIVE_LOGIN_SESSION:
-		obs_property_set_visible(
-		    obs_properties_get(props, "mail"), false);
-		obs_property_set_visible(
-		    obs_properties_get(props, "password"), false);
-		obs_property_set_visible(
-		    obs_properties_get(props, "session"), true);
-		obs_property_set_visible(
-		    obs_properties_get(props, "cookie_app"), false);
-		break;
-	case RTMP_NICOLIVE_LOGIN_APP:
-		obs_property_set_visible(
-		    obs_properties_get(props, "mail"), false);
-		obs_property_set_visible(
-		    obs_properties_get(props, "password"), false);
-		obs_property_set_visible(
-		    obs_properties_get(props, "session"), false);
-		obs_property_set_visible(
-		    obs_properties_get(props, "cookie_app"), true);
-		break;
-	default:
-		nicolive_log_error("unknown login type");
-		return false;
-	}
-	return true;
-}
+/* utilities */
 
 inline static bool check_settings(obs_data_t *settings)
 {
@@ -101,15 +58,6 @@ inline static bool check_settings(obs_data_t *settings)
 		    settings, "check_message", obs_module_text("Failed"));
 	}
 	return true;
-}
-
-inline static bool on_clicked_check(
-    obs_properties_t *props, obs_property_t *property, void *data)
-{
-	UNUSED_PARAMETER(props);
-	UNUSED_PARAMETER(property);
-	UNUSED_PARAMETER(data);
-	return check_settings(current_settings);
 }
 
 inline static void set_data_nicolive(void *data, obs_data_t *settings)
@@ -192,6 +140,64 @@ inline static bool adjust_bitrate(long long bitrate,
 	}
 	return true;
 }
+
+/* property events */
+
+inline static bool on_modified_login_type(
+    obs_properties_t *props, obs_property_t *property, obs_data_t *settings)
+{
+	UNUSED_PARAMETER(property);
+	// update current settings
+	current_settings = settings;
+
+	switch (obs_data_get_int(settings, "login_type")) {
+	case RTMP_NICOLIVE_LOGIN_MAIL:
+		obs_property_set_visible(
+		    obs_properties_get(props, "mail"), true);
+		obs_property_set_visible(
+		    obs_properties_get(props, "password"), true);
+		obs_property_set_visible(
+		    obs_properties_get(props, "session"), false);
+		obs_property_set_visible(
+		    obs_properties_get(props, "cookie_app"), false);
+		break;
+	case RTMP_NICOLIVE_LOGIN_SESSION:
+		obs_property_set_visible(
+		    obs_properties_get(props, "mail"), false);
+		obs_property_set_visible(
+		    obs_properties_get(props, "password"), false);
+		obs_property_set_visible(
+		    obs_properties_get(props, "session"), true);
+		obs_property_set_visible(
+		    obs_properties_get(props, "cookie_app"), false);
+		break;
+	case RTMP_NICOLIVE_LOGIN_APP:
+		obs_property_set_visible(
+		    obs_properties_get(props, "mail"), false);
+		obs_property_set_visible(
+		    obs_properties_get(props, "password"), false);
+		obs_property_set_visible(
+		    obs_properties_get(props, "session"), false);
+		obs_property_set_visible(
+		    obs_properties_get(props, "cookie_app"), true);
+		break;
+	default:
+		nicolive_log_error("unknown login type");
+		return false;
+	}
+	return true;
+}
+
+inline static bool on_clicked_check(
+    obs_properties_t *props, obs_property_t *property, void *data)
+{
+	UNUSED_PARAMETER(props);
+	UNUSED_PARAMETER(property);
+	UNUSED_PARAMETER(data);
+	return check_settings(current_settings);
+}
+
+/* module operations */
 
 static const char *rtmp_nicolive_getname(void *type_data)
 {
@@ -376,6 +382,8 @@ static void rtmp_nicolive_apply_encoder_settings(void *data,
 		    bitrate, video_encoder_settings, audio_encoder_settings);
 	}
 }
+
+/* module structure */
 
 struct obs_service_info rtmp_nicolive_service = {.id = "rtmp_nicolive",
     .get_name = rtmp_nicolive_getname,
