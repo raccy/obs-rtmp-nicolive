@@ -7,7 +7,7 @@
 #include <string>
 #include <unordered_map>
 #include "curl/curl.h"
-#include "pugixml/src/pugixml.hpp"
+#include "pugixml/pugixml.hpp"
 #include "nicolive-log.h"
 #include "nicolive.h"
 

@@ -7,7 +7,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include "json/src/json.hpp"
+#include "json/json.hpp"
 #include "sqlite/sqlite3.h"
 
 // Globale Objects
