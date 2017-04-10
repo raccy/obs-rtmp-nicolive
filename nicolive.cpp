@@ -177,9 +177,10 @@ extern "C" bool nicolive_test_session(const char *session)
 	bool result = nla.getPublishStatus(&data);
 
 	if (!result) return false;
-	if (!data[statusXpath].empty()) return false;
-	if (data[statusXpath][0] == "ok") return true;
-	if (data[statusXpath][0] == "fail" && !data[errorCodeXpath].empty() &&
+	if (data[statusXpath].empty()) return false;
+	std::string &status = data[statusXpath][0];
+	if (status == "ok") return true;
+	if (status == "fail" && !data[errorCodeXpath].empty() &&
 	    data[errorCodeXpath][0] == "notfound")
 		return true;
 	return false;
