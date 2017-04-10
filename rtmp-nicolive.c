@@ -63,27 +63,23 @@ inline static bool on_modified_login_type(
 	return true;
 }
 
-inline static bool on_clicked_check(
-    obs_properties_t *props, obs_property_t *property, void *data)
+inline static bool check_settings(obs_data_t *settings)
 {
-	UNUSED_PARAMETER(props);
-	UNUSED_PARAMETER(property);
-	UNUSED_PARAMETER(data);
 	bool check_ok = false;
 	const char *session = NULL;
-	switch (obs_data_get_int(current_settings, "login_type")) {
+	switch (obs_data_get_int(settings, "login_type")) {
 	case RTMP_NICOLIVE_LOGIN_MAIL:
-		check_ok = nicolive_test_login(
-		    obs_data_get_string(current_settings, "mail"),
-		    obs_data_get_string(current_settings, "password"));
+		check_ok =
+		    nicolive_test_login(obs_data_get_string(settings, "mail"),
+			obs_data_get_string(settings, "password"));
 		break;
 	case RTMP_NICOLIVE_LOGIN_SESSION:
 		check_ok = nicolive_test_session(
-		    obs_data_get_string(current_settings, "session"));
+		    obs_data_get_string(settings, "session"));
 		break;
 	case RTMP_NICOLIVE_LOGIN_APP:
 		session = nicookie_get_session(
-		    obs_data_get_int(current_settings, "cookie_app"));
+		    obs_data_get_int(settings, "cookie_app"));
 		if (session == NULL) {
 			nicolive_log_error(
 			    "failed load cookie session from app");
@@ -94,22 +90,32 @@ inline static bool on_clicked_check(
 		break;
 	default:
 		nicolive_log_error("unknown login type");
-		obs_data_set_string(current_settings, "check_message",
-		    obs_module_text("Failed"));
+		obs_data_set_string(
+		    settings, "check_message", obs_module_text("Failed"));
 	}
 	if (check_ok) {
-		obs_data_set_string(current_settings, "check_message",
-		    obs_module_text("Succeeded"));
+		obs_data_set_string(
+		    settings, "check_message", obs_module_text("Succeeded"));
 	} else {
-		obs_data_set_string(current_settings, "check_message",
-		    obs_module_text("Failed"));
+		obs_data_set_string(
+		    settings, "check_message", obs_module_text("Failed"));
 	}
 	return true;
+}
+
+inline static bool on_clicked_check(
+    obs_properties_t *props, obs_property_t *property, void *data)
+{
+	UNUSED_PARAMETER(props);
+	UNUSED_PARAMETER(property);
+	UNUSED_PARAMETER(data);
+	return check_settings(current_settings);
 }
 
 inline static void set_data_nicolive(
     void *data, obs_data_t *settings, bool msg_gui)
 {
+	check_settings(settings);
 	switch (obs_data_get_int(settings, "login_type")) {
 	case RTMP_NICOLIVE_LOGIN_MAIL:
 		nicolive_set_settings(data,
