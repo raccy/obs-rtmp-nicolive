@@ -99,7 +99,7 @@ inline static bool on_clicked_check(
 	}
 	if (check_ok) {
 		obs_data_set_string(current_settings, "check_message",
-		    obs_module_text("Suceeded"));
+		    obs_module_text("Succeeded"));
 	} else {
 		obs_data_set_string(current_settings, "check_message",
 		    obs_module_text("Failed"));
