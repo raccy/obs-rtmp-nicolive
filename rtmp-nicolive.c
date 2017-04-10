@@ -157,11 +157,6 @@ inline static void set_data_nicolive(
 	} else {
 		nicolive_stop_watching(data);
 	}
-
-	// OPTIMIZE: Default settisgs are not saved, so resetting data
-	// Maybe obs-studio 0.8.3 bug
-	reset_obs_data(bool, settings, "adjust_bitrate");
-	reset_obs_data(bool, settings, "auto_start");
 }
 
 inline static bool adjust_bitrate(long long bitrate,
