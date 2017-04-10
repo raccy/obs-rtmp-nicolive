@@ -19,9 +19,9 @@ enum rtmp_nicolive_login_type {
 static obs_data_t *current_settings;
 
 inline static bool on_modified_login_type(
-    obs_properties_t *props, obs_property_t *prop, obs_data_t *settings)
+    obs_properties_t *props, obs_property_t *property, obs_data_t *settings)
 {
-	UNUSED_PARAMETER(prop);
+	UNUSED_PARAMETER(property);
 	// update current settings
 	current_settings = settings;
 
@@ -66,8 +66,44 @@ inline static bool on_modified_login_type(
 inline static bool on_clicked_check(
     obs_properties_t *props, obs_property_t *property, void *data)
 {
+	UNUSED_PARAMETER(props);
+	UNUSED_PARAMETER(property);
 	UNUSED_PARAMETER(data);
-	obs_data_set_string(current_settings, "check_message", "checked");
+	bool check_ok = false;
+	const char *session = NULL;
+	switch (obs_data_get_int(current_settings, "login_type")) {
+	case RTMP_NICOLIVE_LOGIN_MAIL:
+		check_ok = nicolive_test_login(
+		    obs_data_get_string(current_settings, "mail"),
+		    obs_data_get_string(current_settings, "password"));
+		break;
+	case RTMP_NICOLIVE_LOGIN_SESSION:
+		check_ok = nicolive_test_session(
+		    obs_data_get_string(current_settings, "session"));
+		break;
+	case RTMP_NICOLIVE_LOGIN_APP:
+		session = nicookie_get_session(
+		    obs_data_get_int(current_settings, "cookie_app"));
+		if (session == NULL) {
+			nicolive_log_error(
+			    "failed load cookie session from app");
+			check_ok = false;
+			break;
+		}
+		check_ok = nicolive_test_session(session);
+		break;
+	default:
+		nicolive_log_error("unknown login type");
+		obs_data_set_string(current_settings, "check_message",
+		    obs_module_text("Failed"));
+	}
+	if (check_ok) {
+		obs_data_set_string(current_settings, "check_message",
+		    obs_module_text("Suceeded"));
+	} else {
+		obs_data_set_string(current_settings, "check_message",
+		    obs_module_text("Failed"));
+	}
 	return true;
 }
 
@@ -225,7 +261,9 @@ static void rtmp_nicolive_defaults(obs_data_t *settings)
 	obs_data_set_default_string(settings, "mail", "");
 	obs_data_set_default_string(settings, "password", "");
 	obs_data_set_default_string(settings, "session", "");
-	obs_data_set_default_string(settings, "cookie_app", NICOOKIE_APP_NONE);
+	obs_data_set_default_int(settings, "cookie_app", NICOOKIE_APP_NONE);
+	obs_data_set_default_string(
+	    settings, "check_message", obs_module_text("Unchecked"));
 	obs_data_set_default_bool(settings, "adjust_bitrate", true);
 	obs_data_set_default_bool(settings, "auto_start", false);
 }
