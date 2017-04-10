@@ -112,47 +112,35 @@ inline static bool on_clicked_check(
 	return check_settings(current_settings);
 }
 
-inline static void set_data_nicolive(
-    void *data, obs_data_t *settings, bool msg_gui)
+inline static void set_data_nicolive(void *data, obs_data_t *settings)
 {
-	check_settings(settings);
 	switch (obs_data_get_int(settings, "login_type")) {
 	case RTMP_NICOLIVE_LOGIN_MAIL:
 		nicolive_set_settings(data,
 		    obs_data_get_string(settings, "mail"),
 		    obs_data_get_string(settings, "password"), "");
 		if (!nicolive_check_session(data)) {
-			nicolive_msg_warn(msg_gui,
-			    obs_module_text("MessageFailedLogin"),
-			    "failed login");
+			nicolive_log_warn("failed login");
 		}
 		break;
 	case RTMP_NICOLIVE_LOGIN_SESSION:
 		nicolive_set_settings(
 		    data, "", "", obs_data_get_string(settings, "session"));
 		if (!nicolive_check_session(data)) {
-			nicolive_msg_warn(msg_gui,
-			    obs_module_text("MessageFailedLogin"),
-			    "failed login");
+			nicolive_log_warn("failed login");
 		}
 		break;
 	case RTMP_NICOLIVE_LOGIN_APP:
 		if (nicolive_load_viqo_settings(data)) {
 			if (!nicolive_check_session(data)) {
-				nicolive_msg_warn(msg_gui,
-				    obs_module_text("MessageFailedLogin"),
-				    "failed login");
+				nicolive_log_warn("failed login");
 			}
 		} else {
-			nicolive_msg_warn(msg_gui,
-			    obs_module_text("MessageFailedLoadViqoSettings"),
-			    "failed load viqo settings");
+			nicolive_log_warn("failed load app settings");
 		}
 		break;
 	default:
-		nicolive_msg_error(msg_gui,
-		    obs_module_text("MessageFailedLogin"),
-		    "unknown login type");
+		nicolive_log_error("unknown login type");
 	}
 
 	nicolive_set_enabled_adjust_bitrate(
@@ -190,9 +178,7 @@ inline static bool adjust_bitrate(long long bitrate,
 
 	// the smallest video bitrate is ...
 	if (adjust_bitrate < 0) {
-		nicolive_msg_warn(true,
-		    obs_module_text("MessageFailedAdjustBitrate"),
-		    "audio bitrate is too high");
+		nicolive_log_warn("audio bitrate is too high");
 		return false;
 	}
 
@@ -219,12 +205,9 @@ static void *rtmp_nicolive_create(obs_data_t *settings, obs_service_t *service)
 	nicolive_log_debug_call_func();
 	UNUSED_PARAMETER(service);
 	void *data = nicolive_create();
-
-	// FIXME: I want to silent with start obs-studio, but saving to setting
-	//        call to create service, so I can not silent here.
-	// set_data_nicolive(data, settings, false);
-	set_data_nicolive(data, settings, true);
-
+	if (check_settings(settings)) {
+		set_data_nicolive(data, settings);
+	}
 	return data;
 }
 
@@ -251,7 +234,9 @@ static void rtmp_nicolive_deactivate(void *data)
 static void rtmp_nicolive_update(void *data, obs_data_t *settings)
 {
 	nicolive_log_debug_call_func();
-	set_data_nicolive(data, settings, true);
+	if (check_settings(settings)) {
+		set_data_nicolive(data, settings);
+	}
 }
 
 static void rtmp_nicolive_defaults(obs_data_t *settings)
@@ -335,14 +320,11 @@ static bool rtmp_nicolive_initialize(void *data, obs_output_t *output)
 		if (nicolive_check_live(data)) {
 			success = true;
 		} else {
-			nicolive_msg_warn(false,
-			    obs_module_text("MessageNoLive"),
-			    "cannot start streaming: no live");
+			nicolive_log_warn("cannot start streaming: no live");
 			success = false;
 		}
 	} else {
-		nicolive_msg_warn(false, obs_module_text("MessageFailedLogin"),
-		    "cannot start streaming: failed login");
+		nicolive_log_warn("cannot start streaming: failed login");
 		success = false;
 	}
 
