@@ -73,7 +73,6 @@ set(rtmp-nicolive_SOURCES
 	nico-live-timer.cpp
 	nico-live-watcher.cpp
 	nicolive.cpp
-	nicolive-log.cpp
 	nicolive-operation.c
 	rtmp-nicolive.c)
 
