@@ -40,10 +40,6 @@ if(NOT BUILD_IN_OBS)
 	endif(LibObs_FOUND)
 endif(NOT BUILD_IN_OBS)
 
-# find Qt5
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Widgets REQUIRED)
-
 # find libcurl
 if(EXISTS "${CMAKE_SOURCE_DIR}/tools/cmake/FindLibcurl.cmake")
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
@@ -83,8 +79,6 @@ add_library(rtmp-nicolive MODULE
 	${rtmp-nicolive_SOURCES})
 
 target_link_libraries(rtmp-nicolive
-	Qt5::Core
-	Qt5::Widgets
 	${LIBCURL_LIBRARIES}
 	libobs)
 
