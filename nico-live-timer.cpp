@@ -8,8 +8,8 @@
 #include <thread>
 
 NicoLiveTimer::NicoLiveTimer(
-    std::function<std::chrono::milliseconds(void)> callable,
-    std::chrono::milliseconds minInterval)
+    std::function<std::chrono::system_clock::duration(void)> callable,
+    std::chrono::system_clock::duration minInterval)
     : callable(callable), minInterval(minInterval), active(false), loopId(0),
       loopMutex(std::make_shared<std::mutex>()),
       alive(std::make_shared<std::atomic_bool>(true))

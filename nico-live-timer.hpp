@@ -9,8 +9,8 @@
 
 class NicoLiveTimer
 {
-	const std::function<std::chrono::milliseconds(void)> callable;
-	std::chrono::milliseconds minInterval;
+	const std::function<std::chrono::system_clock::duration(void)> callable;
+	std::chrono::system_clock::duration minInterval;
 
 	std::atomic_bool active;
 	std::atomic_int loopId;
@@ -19,9 +19,10 @@ class NicoLiveTimer
 
 public:
 	NicoLiveTimer() = delete;
-	NicoLiveTimer(std::function<std::chrono::milliseconds(void)> callable,
-	    std::chrono::milliseconds minInterval = std::chrono::milliseconds(
-		0));
+	NicoLiveTimer(
+	    std::function<std::chrono::system_clock::duration(void)> callable,
+	    std::chrono::system_clock::duration minInterval =
+		std::chrono::system_clock::duration(std::chrono::seconds(1)));
 	~NicoLiveTimer();
 	void Start();
 	void Stop();

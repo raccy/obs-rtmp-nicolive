@@ -9,28 +9,23 @@ class NicoLiveTimer;
 class NicoLiveWatcher
 {
 public:
-	// static const int MIN_INTERVAL_SEC = 10;      // 10s
-	// static const int MAX_INTERVAL_SEC = 60 * 60; // 1h
-	// time is in milliseconds
-	// stopping and starting margin time
+	// stopping and starting margin time 2s
 	static constexpr auto MARGIN_TIME =
-	    std::chrono::milliseconds(2 * 1000); // 2s
-	// interval time on air
+	    std::chrono::system_clock::duration(std::chrono::seconds(2));
+	// interval time on air 60s
 	static constexpr auto ON_AIR_INTERVAL_TIME =
-	    std::chrono::milliseconds(60 * 1000); // 60s
-	// interval time off air
+	    std::chrono::system_clock::duration(std::chrono::seconds(60));
+	// interval time off air 10s
 	static constexpr auto OFF_AIR_INTERVAL_TIME =
-	    std::chrono::milliseconds(10 * 1000); // 10s
-	// interval time in boost
+	    std::chrono::system_clock::duration(std::chrono::seconds(10));
+	// interval time in boost 2s
 	static constexpr auto BOOST_INTERVAL_TIME =
-	    std::chrono::milliseconds(2 * 1000); // 2s
+	    std::chrono::system_clock::duration(std::chrono::seconds(2));
 	// boost the number of times after stopping
 	static const int BOOST_NUMBER_AFTER_STOP = 5;
 
 private:
 	NicoLive *nicolive;
-	// long long marginTime;
-	// long long interval = 60 * 1000;
 	int boostCount = 0;
 	std::unique_ptr<NicoLiveTimer> timer;
 
@@ -43,7 +38,7 @@ public:
 	// int remainingTime();
 
 private:
-	std::chrono::milliseconds watch();
-	std::chrono::milliseconds watchOnAir();
-	std::chrono::milliseconds watchOffAir();
+	std::chrono::system_clock::duration watch();
+	std::chrono::system_clock::duration watchOnAir();
+	std::chrono::system_clock::duration watchOffAir();
 };

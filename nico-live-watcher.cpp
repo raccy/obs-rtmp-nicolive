@@ -10,16 +10,18 @@
 #include "nicolive.h"
 
 // static consntexpr
-constexpr std::chrono::milliseconds NicoLiveWatcher::MARGIN_TIME;
-constexpr std::chrono::milliseconds NicoLiveWatcher::ON_AIR_INTERVAL_TIME;
-constexpr std::chrono::milliseconds NicoLiveWatcher::OFF_AIR_INTERVAL_TIME;
-constexpr std::chrono::milliseconds NicoLiveWatcher::BOOST_INTERVAL_TIME;
+constexpr std::chrono::system_clock::duration NicoLiveWatcher::MARGIN_TIME;
+constexpr std::chrono::system_clock::duration
+    NicoLiveWatcher::ON_AIR_INTERVAL_TIME;
+constexpr std::chrono::system_clock::duration
+    NicoLiveWatcher::OFF_AIR_INTERVAL_TIME;
+constexpr std::chrono::system_clock::duration
+    NicoLiveWatcher::BOOST_INTERVAL_TIME;
 
 NicoLiveWatcher::NicoLiveWatcher(NicoLive *nicolive) : nicolive(nicolive)
 {
 	this->timer = std::unique_ptr<NicoLiveTimer>(
-	    new NicoLiveTimer([this]() { return this->watch(); },
-		std::chrono::milliseconds(1000)));
+	    new NicoLiveTimer([this]() { return this->watch(); }));
 }
 
 NicoLiveWatcher::~NicoLiveWatcher()
@@ -48,13 +50,12 @@ void NicoLiveWatcher::stop()
 
 bool NicoLiveWatcher::isActive() { return this->timer->IsActive(); }
 
-std::chrono::milliseconds NicoLiveWatcher::watch()
+std::chrono::system_clock::duration NicoLiveWatcher::watch()
 {
-	nicolive_log_debug("watching! since epoch (ms) %lld",
-	    static_cast<long long>(
-		std::chrono::duration_cast<std::chrono::milliseconds>(
-		    std::chrono::system_clock::now().time_since_epoch())
-		    .count()));
+	nicolive_log_debug("watching! since epoch (s) %d",
+	    static_cast<int>(std::chrono::duration_cast<std::chrono::seconds>(
+		std::chrono::system_clock::now().time_since_epoch())
+				 .count()));
 	if (this->boostCount > 0) {
 		this->boostCount--;
 	}
@@ -68,7 +69,7 @@ std::chrono::milliseconds NicoLiveWatcher::watch()
 	}
 }
 
-std::chrono::milliseconds NicoLiveWatcher::watchOnAir()
+std::chrono::system_clock::duration NicoLiveWatcher::watchOnAir()
 {
 	if (!this->nicolive->enabledLive() ||
 	    this->nicolive->getLiveId() != this->nicolive->getOnairLiveId()) {
@@ -95,7 +96,7 @@ std::chrono::milliseconds NicoLiveWatcher::watchOnAir()
 	    remainingEndTime + NicoLiveWatcher::MARGIN_TIME);
 }
 
-std::chrono::milliseconds NicoLiveWatcher::watchOffAir()
+std::chrono::system_clock::duration NicoLiveWatcher::watchOffAir()
 {
 	if (!this->nicolive->enabledLive()) {
 		if (this->boostCount > 0) {
@@ -108,7 +109,8 @@ std::chrono::milliseconds NicoLiveWatcher::watchOffAir()
 	if (!this->nicolive->enabledStartBeforeStartTime()) {
 		auto remainingStartTime =
 		    this->nicolive->getRemainingStartTime();
-		if (remainingStartTime < std::chrono::milliseconds::zero()) {
+		if (remainingStartTime <
+		    std::chrono::system_clock::duration::zero()) {
 			return std::min(NicoLiveWatcher::OFF_AIR_INTERVAL_TIME,
 			    remainingStartTime);
 		}
