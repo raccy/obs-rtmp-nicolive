@@ -1,40 +1,103 @@
 #include "nico-live.hpp"
+#include <chrono>
 #include <ctime>
 #include <curl/curl.h>
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <QtCore>
 #include "nicookie.h"
 #include "nico-live-api.hpp"
 #include "nico-live-watcher.hpp"
 #include "nicolive-log.h"
 #include "nicolive.h"
 
-NicoLive::NicoLive(QObject *parent)
+namespace
 {
-	(void)parent;
+// umsvs std::unordered_map<std::string, std::vector<std::string>
+// umss std::unordered_map<std::string, std::string>
+inline const std::string &get_umsvs_str(
+    const std::unordered_map<std::string, std::vector<std::string>> &data,
+    const std::unordered_map<std::string, std::string> &map,
+    const std::string &name, int pos = 0)
+{
+	return data.at(map.at(name)).at(pos);
+}
+inline int get_umsvs_int(
+    const std::unordered_map<std::string, std::vector<std::string>> &data,
+    const std::unordered_map<std::string, std::string> &map,
+    const std::string &name, int pos = 0)
+{
+	return std::stoi(get_umsvs_str(data, map, name, pos));
+}
+inline bool get_umsvs_bool(
+    const std::unordered_map<std::string, std::vector<std::string>> &data,
+    const std::unordered_map<std::string, std::string> &map,
+    const std::string &name, int pos = 0)
+{
+	return !!get_umsvs_int(data, map, name, pos);
+}
+inline std::chrono::system_clock::time_point get_umsvs_time(
+    const std::unordered_map<std::string, std::vector<std::string>> &data,
+    const std::unordered_map<std::string, std::string> &map,
+    const std::string &name, int pos = 0)
+{
+	return std::chrono::system_clock::from_time_t(
+	    get_umsvs_int(data, map, name, pos));
+}
+/* const char *name */
+inline const std::string &get_umsvs_str(
+    const std::unordered_map<std::string, std::vector<std::string>> &data,
+    const std::unordered_map<std::string, std::string> &map, const char *name,
+    int pos = 0)
+{
+	return get_umsvs_str(data, map, std::string(name), pos);
+}
+inline int get_umsvs_int(
+    const std::unordered_map<std::string, std::vector<std::string>> &data,
+    const std::unordered_map<std::string, std::string> &map, const char *name,
+    int pos = 0)
+{
+	return get_umsvs_int(data, map, std::string(name), pos);
+}
+inline bool get_umsvs_bool(
+    const std::unordered_map<std::string, std::vector<std::string>> &data,
+    const std::unordered_map<std::string, std::string> &map, const char *name,
+    int pos = 0)
+{
+	return get_umsvs_bool(data, map, std::string(name), pos);
+}
+inline std::chrono::system_clock::time_point get_umsvs_time(
+    const std::unordered_map<std::string, std::vector<std::string>> &data,
+    const std::unordered_map<std::string, std::string> &map, const char *name,
+    int pos = 0)
+{
+	return get_umsvs_time(data, map, std::string(name), pos);
+}
+}
+
+NicoLive::NicoLive()
+{
 	watcher = std::unique_ptr<NicoLiveWatcher>(new NicoLiveWatcher(this));
 	webApi = std::unique_ptr<NicoLiveApi>(new NicoLiveApi());
 }
 
 NicoLive::~NicoLive() {}
 
-void NicoLive::setSession(const QString &session)
+void NicoLive::setSession(const std::string &session)
 {
 	this->session = session;
 	this->flags.session_valid = false;
 	this->flags.load_viqo = false;
-	this->webApi->setCookie("user_session", this->session.toStdString());
+	this->webApi->setCookie("user_session", this->session);
 }
 
 void NicoLive::setSession(const char *session)
 {
-	this->setSession(QString(session));
+	this->setSession(std::string(session));
 }
 
-void NicoLive::setAccount(const QString &mail, const QString &password)
+void NicoLive::setAccount(const std::string &mail, const std::string &password)
 {
 	this->mail = mail;
 	this->password = password;
@@ -44,10 +107,7 @@ void NicoLive::setAccount(const QString &mail, const QString &password)
 
 void NicoLive::setAccount(const char *mail, const char *password)
 {
-	this->mail = mail;
-	this->password = password;
-	this->flags.session_valid = false;
-	this->flags.load_viqo = false;
+	this->setAccount(std::string(mail), std::string(password));
 }
 
 void NicoLive::setEnabledAdjustBitrate(bool enabled)
@@ -55,41 +115,35 @@ void NicoLive::setEnabledAdjustBitrate(bool enabled)
 	this->flags.adjust_bitrate = enabled;
 }
 
-const QString &NicoLive::getMail() const { return this->mail; }
+const std::string &NicoLive::getMail() const { return this->mail; }
 
-const QString &NicoLive::getPassword() const { return this->password; }
+const std::string &NicoLive::getPassword() const { return this->password; }
 
-const QString &NicoLive::getSession() const { return this->session; }
+const std::string &NicoLive::getSession() const { return this->session; }
 
-const QString &NicoLive::getLiveId() const { return this->live_info.id; }
+const std::string &NicoLive::getLiveId() const { return this->live_info.id; }
 
-const QString &NicoLive::getLiveUrl() const { return this->live_url; }
+const std::string &NicoLive::getLiveUrl() const { return this->live_url; }
 
-const QString &NicoLive::getLiveKey() const { return this->live_key; }
+const std::string &NicoLive::getLiveKey() const { return this->live_key; }
 
 long long NicoLive::getLiveBitrate() const { return this->live_info.bitrate; }
 
-const QString &NicoLive::getOnairLiveId() const { return this->onair_live_id; }
-
-int NicoLive::getRemainingLive() const
+const std::string &NicoLive::getOnairLiveId() const
 {
-	if (isOnair())
-		return QDateTime::currentDateTime().secsTo(
-		    this->live_info.end_time);
-	else
-		return 0;
+	return this->onair_live_id;
 }
 
 bool NicoLive::enabledLive() const
 {
-	QDateTime now = QDateTime::currentDateTime();
+	auto now = std::chrono::system_clock::now();
 	return this->live_info.start_time <= now &&
 	       this->live_info.end_time >= now;
 }
 
 NicoLive::LiveState NicoLive::getLiveState() const
 {
-	auto now = time(NULL);
+	auto now = std::chrono::system_clock::now();
 	if (now < getLiveStartTime()) {
 		return NicoLive::LiveState::BEFORE_START;
 	} else if (now <= getLiveEndTime()) {
@@ -99,26 +153,33 @@ NicoLive::LiveState NicoLive::getLiveState() const
 	}
 }
 
-std::time_t NicoLive::getLiveStartTime() const
+std::chrono::system_clock::time_point NicoLive::getLiveStartTime() const
 {
-	return static_cast<std::time_t>(this->live_info.start_time.toTime_t());
+	return this->live_info.start_time;
 }
 
-std::time_t NicoLive::getLiveEndTime() const
+std::chrono::system_clock::time_point NicoLive::getLiveEndTime() const
 {
-	return static_cast<std::time_t>(this->live_info.end_time.toTime_t());
+	return this->live_info.end_time;
 }
 
-std::chrono::milliseconds NicoLive::getRemainingStartTime() const
+std::chrono::system_clock::duration NicoLive::getRemainingStartTime() const
 {
-	return std::chrono::seconds(this->live_info.start_time.toTime_t() -
-				    this->live_info.server_time.toTime_t());
+	return this->live_info.start_time - this->live_info.server_time;
 }
 
-std::chrono::milliseconds NicoLive::getRemainingEndTime() const
+std::chrono::system_clock::duration NicoLive::getRemainingEndTime() const
 {
-	return std::chrono::seconds(this->live_info.end_time.toTime_t() -
-				    this->live_info.server_time.toTime_t());
+	return this->live_info.end_time - this->live_info.server_time;
+}
+
+std::chrono::system_clock::duration NicoLive::getRemainingLive() const
+{
+	if (isOnair())
+		return this->live_info.end_time -
+		       std::chrono::system_clock::now();
+	else
+		return std::chrono::milliseconds(0);
 }
 
 bool NicoLive::enabledStopBeforeEndTime() const
@@ -150,7 +211,7 @@ void NicoLive::startStreaming()
 
 void NicoLive::stopStreaming()
 {
-	this->onair_live_id = QString();
+	this->onair_live_id = std::string();
 	this->flags.onair = false;
 }
 
@@ -175,13 +236,13 @@ bool NicoLive::checkLive() { return siteLiveProf(); }
 
 bool NicoLive::siteLogin()
 {
-	if (this->mail.isEmpty() || this->password.isEmpty()) {
+	if (this->mail.empty() || this->password.empty()) {
 		nicolive_log_warn("no mail or password");
 		return false;
 	}
 
-	bool result = this->webApi->loginSiteNicolive(
-	    this->mail.toStdString(), this->password.toStdString());
+	bool result =
+	    this->webApi->loginSiteNicolive(this->mail, this->password);
 	if (result) {
 		this->session = this->webApi->getCookie("user_session").c_str();
 	}
@@ -190,16 +251,16 @@ bool NicoLive::siteLogin()
 
 bool NicoLive::siteLoginNLE()
 {
-	if (this->mail.isEmpty() || this->password.isEmpty()) {
+	if (this->mail.empty() || this->password.empty()) {
 		nicolive_log_warn("no mail or password");
 		return false;
 	}
 
-	std::string result = this->webApi->loginNicoliveEncoder(
-	    this->mail.toStdString(), this->password.toStdString());
-	nicolive_log_debug("ticket: %20s", result.c_str());
-	if (!result.empty()) {
-		this->ticket = result.c_str();
+	std::string ticket =
+	    this->webApi->loginNicoliveEncoder(this->mail, this->password);
+	nicolive_log_debug("ticket: %20s", ticket.c_str());
+	if (!ticket.empty()) {
+		this->ticket = ticket;
 		return true;
 	} else {
 		return false;
@@ -208,12 +269,11 @@ bool NicoLive::siteLoginNLE()
 
 bool NicoLive::sitePubStat()
 {
-	nicolive_log_debug(
-	    "session: %20s", this->session.toStdString().c_str());
-	nicolive_log_debug("ticket: %20s", this->ticket.toStdString().c_str());
+	nicolive_log_debug("session: %20s", this->session.c_str());
+	nicolive_log_debug("ticket: %20s", this->ticket.c_str());
 
 	bool useTicket = false;
-	if (this->session.isEmpty()) {
+	if (this->session.empty()) {
 		if (this->siteLoginNLE()) {
 			useTicket = true;
 		} else {
@@ -252,8 +312,8 @@ bool NicoLive::sitePubStat()
 
 	bool result = false;
 	if (useTicket) {
-		result = this->webApi->getPublishStatusTicket(
-		    this->ticket.toStdString(), &data);
+		result =
+		    this->webApi->getPublishStatusTicket(this->ticket, &data);
 	} else {
 		result = this->webApi->getPublishStatus(&data);
 	}
@@ -273,38 +333,42 @@ bool NicoLive::sitePubStat()
 
 	if (status == "ok") {
 		try {
-			this->live_info.server_time.setTime_t(
-			    std::stoi(data[xpathMap.at("server_time")].at(0)));
+			this->live_info.server_time =
+			    get_umsvs_time(data, xpathMap, "server_time");
 			this->live_info.id =
-			    data[xpathMap.at("id")].at(0).c_str();
+			    get_umsvs_str(data, xpathMap, "id");
 			this->live_info.exclude =
-			    (data[xpathMap.at("exclude")].at(0) == "1");
-			this->live_info.base_time.setTime_t(
-			    std::stoi(data[xpathMap.at("base_time")].at(0)));
-			this->live_info.open_time.setTime_t(
-			    std::stoi(data[xpathMap.at("open_time")].at(0)));
-			this->live_info.start_time.setTime_t(
-			    std::stoi(data[xpathMap.at("start_time")].at(0)));
-			this->live_info.end_time.setTime_t(
-			    std::stoi(data[xpathMap.at("end_time")].at(0)));
+			    get_umsvs_bool(data, xpathMap, "exclude");
+			this->live_info.base_time =
+			    get_umsvs_time(data, xpathMap, "base_time");
+			this->live_info.open_time =
+			    get_umsvs_time(data, xpathMap, "open_time");
+			this->live_info.start_time =
+			    get_umsvs_time(data, xpathMap, "start_time");
+			this->live_info.end_time =
+			    get_umsvs_time(data, xpathMap, "end_time");
 			this->live_info.url =
-			    data[xpathMap.at("url")].at(0).c_str();
+			    get_umsvs_str(data, xpathMap, "url");
 			this->live_info.stream =
-			    data[xpathMap.at("stream")].at(0).c_str();
+			    get_umsvs_str(data, xpathMap, "stream");
 			if (data.find(xpathMap.at("ticket")) != data.end() &&
 			    data[xpathMap.at("ticket")].size() != 0) {
 				this->live_info.ticket =
-				    data[xpathMap.at("ticket")].at(0).c_str();
+				    data[xpathMap.at("ticket")].at(0);
 			} else {
-				this->live_info.ticket = QString();
+				this->live_info.ticket = std::string();
 			}
 			this->live_info.bitrate =
-			    std::stoi(data[xpathMap.at("bitrate")].at(0));
-			nicolive_log_info("live waku: %s",
-			    this->live_info.id.toStdString().c_str());
+			    get_umsvs_int(data, xpathMap, "bitrate");
+			nicolive_log_info(
+			    "live waku: %s", this->live_info.id.c_str());
 			success = true;
-		} catch (std::out_of_range &err) {
-			nicolive_log_error("parse faild?");
+		} catch (const std::out_of_range &err) {
+			nicolive_log_error("parse faild: %s", err.what());
+			clearLiveInfo();
+			success = false;
+		} catch (const std::invalid_argument &err) {
+			nicolive_log_error("parse faild: %s", err.what());
 			clearLiveInfo();
 			success = false;
 		}
@@ -340,20 +404,20 @@ bool NicoLive::sitePubStat()
 bool NicoLive::siteLiveProf()
 {
 
-	if (this->live_info.id.isEmpty()) {
+	if (this->live_info.id.empty()) {
 		nicolive_log_debug("this->live_info.id is empty.");
-		this->live_url = QString();
-		this->live_key = QString();
+		this->live_url = std::string();
+		this->live_key = std::string();
 		return false;
-	} else if (this->live_info.ticket.isEmpty()) {
+	} else if (this->live_info.ticket.empty()) {
 		nicolive_log_info("found live url and key without ticket");
-		this->live_url = QString();
+		this->live_url = std::string();
 		this->live_url += this->live_info.url;
 		this->live_key = this->live_info.stream;
 		return true;
 	} else {
 		nicolive_log_info("found live url and key with ticket");
-		this->live_url = QString();
+		this->live_url = std::string();
 		this->live_url += this->live_info.url;
 		this->live_url += "?";
 		this->live_url += this->live_info.ticket;

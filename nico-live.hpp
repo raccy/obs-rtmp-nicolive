@@ -3,14 +3,13 @@
 #include <chrono>
 #include <ctime>
 #include <memory>
-#include <QtCore>
+#include <string>
 
 class NicoLiveWatcher;
 class NicoLiveApi;
 
-class NicoLive : public QObject
+class NicoLive
 {
-	Q_OBJECT
 	friend class NicoLiveWatcher;
 
 	enum class LiveState {
@@ -21,26 +20,26 @@ class NicoLive : public QObject
 
 public:
 private:
-	QString mail;
-	QString password;
-	QString session;
-	QString ticket;
+	std::string mail;
+	std::string password;
+	std::string session;
+	std::string ticket;
 	struct {
-		QString id;
-		QString url;
-		QString stream;
-		QString ticket;
-		QDateTime server_time;
-		QDateTime base_time;
-		QDateTime open_time;
-		QDateTime start_time;
-		QDateTime end_time;
+		std::string id;
+		std::string url;
+		std::string stream;
+		std::string ticket;
+		std::chrono::system_clock::time_point server_time;
+		std::chrono::system_clock::time_point base_time;
+		std::chrono::system_clock::time_point open_time;
+		std::chrono::system_clock::time_point start_time;
+		std::chrono::system_clock::time_point end_time;
 		long long bitrate = 0;
 		bool exclude = false;
 	} live_info;
-	QString live_url;
-	QString live_key;
-	QString onair_live_id;
+	std::string live_url;
+	std::string live_key;
+	std::string onair_live_id;
 	struct {
 		bool session_valid = false;
 		bool onair = false;
@@ -52,29 +51,29 @@ private:
 	std::unique_ptr<NicoLiveApi> webApi;
 
 public:
-	NicoLive(QObject *parent = 0);
+	NicoLive();
 	~NicoLive();
 	void setSession(const char *session);
-	void setSession(const QString &session);
+	void setSession(const std::string &session);
 	void setAccount(const char *mail, const char *password);
-	void setAccount(const QString &mail, const QString &password);
+	void setAccount(const std::string &mail, const std::string &password);
 	void setEnabledAdjustBitrate(bool enabled);
 
-	const QString &getMail() const;
-	const QString &getPassword() const;
-	const QString &getSession() const;
-	const QString &getLiveId() const;
-	const QString &getLiveUrl() const;
-	const QString &getLiveKey() const;
+	const std::string &getMail() const;
+	const std::string &getPassword() const;
+	const std::string &getSession() const;
+	const std::string &getLiveId() const;
+	const std::string &getLiveUrl() const;
+	const std::string &getLiveKey() const;
 	long long getLiveBitrate() const;
-	const QString &getOnairLiveId() const;
-	int getRemainingLive() const;
+	const std::string &getOnairLiveId() const;
 	bool enabledLive() const;
 	LiveState getLiveState() const;
-	std::time_t getLiveStartTime() const;
-	std::time_t getLiveEndTime() const;
-	std::chrono::milliseconds getRemainingStartTime() const;
-	std::chrono::milliseconds getRemainingEndTime() const;
+	std::chrono::system_clock::time_point getLiveStartTime() const;
+	std::chrono::system_clock::time_point getLiveEndTime() const;
+	std::chrono::system_clock::duration getRemainingStartTime() const;
+	std::chrono::system_clock::duration getRemainingEndTime() const;
+	std::chrono::system_clock::duration getRemainingLive() const;
 	bool enabledStopBeforeEndTime() const;
 	bool enabledStartBeforeStartTime() const;
 
