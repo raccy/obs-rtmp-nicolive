@@ -31,14 +31,8 @@ NicoLiveWatcher::~NicoLiveWatcher()
 
 void NicoLiveWatcher::start()
 {
-	// if (sec < NicoLiveWatcher::MIN_INTERVAL_SEC)
-	// 	sec = NicoLiveWatcher::MIN_INTERVAL_SEC;
-	// else if (sec > NicoLiveWatcher::MAX_INTERVAL_SEC)
-	// 	sec = NicoLiveWatcher::MAX_INTERVAL_SEC;
-	// this->interval = sec * 1000;
 	nicolive_log_debug("start watch");
 	this->boostCount = 0;
-	// this->timer->SetIntervalMsec(this->interval);
 	this->timer->Start();
 }
 
