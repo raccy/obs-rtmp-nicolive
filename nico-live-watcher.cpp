@@ -109,6 +109,7 @@ std::chrono::system_clock::duration NicoLiveWatcher::watchOffAir()
 			    remainingStartTime);
 		}
 	}
+	nicolive_streaming_start();
 
 	return NicoLiveWatcher::OFF_AIR_INTERVAL_TIME;
 }
