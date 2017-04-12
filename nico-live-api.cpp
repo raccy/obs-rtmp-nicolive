@@ -18,6 +18,7 @@ const std::string NicoLiveApi::LOGIN_API_URL =
     "https://account.nicovideo.jp/api/v1/login";
 const std::string NicoLiveApi::PUBSTAT_URL =
     "http://live.nicovideo.jp/api/getpublishstatus";
+const std::string NicoLiveApi::USER_AGENT = "NicoLiveApi/1.0";
 
 std::string NicoLiveApi::createWwwFormUrlencoded(
     const std::unordered_map<std::string, std::string> &formData)
@@ -195,7 +196,8 @@ bool NicoLiveApi::accessWeb(const std::string &url,
 
 	// URL
 	curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-
+	// User Agent
+	curl_easy_setopt(curl, CURLOPT_USERAGENT, USER_AGENT.c_str());
 	// header and body data
 	curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headerData);
 	curl_easy_setopt(

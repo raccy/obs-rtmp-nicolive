@@ -15,6 +15,7 @@ public:
 	static const std::string LOGIN_SITE_URL;
 	static const std::string LOGIN_API_URL;
 	static const std::string PUBSTAT_URL;
+	static const std::string USER_AGENT;
 	static std::string createWwwFormUrlencoded(
 	    const std::unordered_map<std::string, std::string> &formData);
 	static std::string createCookieString(
