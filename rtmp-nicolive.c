@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <string.h>
 #include <obs-module.h>
 #include "nicookie.h"
 #include "nicolive-log.h"
@@ -23,6 +24,7 @@ static obs_data_t *current_settings;
 inline static bool check_settings(obs_data_t *settings)
 {
 	bool check_ok = false;
+	const char *additional_message = NULL;
 	const char *session = NULL;
 	switch (obs_data_get_int(settings, "login_type")) {
 	case RTMP_NICOLIVE_LOGIN_MAIL:
@@ -40,6 +42,7 @@ inline static bool check_settings(obs_data_t *settings)
 		if (session == NULL) {
 			nicolive_log_error(
 			    "failed load cookie session from app");
+			additional_message = nicookie_strerror(nicookie_errno);
 			check_ok = false;
 			break;
 		}
@@ -47,16 +50,30 @@ inline static bool check_settings(obs_data_t *settings)
 		break;
 	default:
 		nicolive_log_error("unknown login type");
-		obs_data_set_string(
-		    settings, "check_message", obs_module_text("Failed"));
+		additional_message = "unknown login type";
+		check_ok = false;
 	}
+
+	const char *result_message = NULL;
 	if (check_ok) {
-		obs_data_set_string(
-		    settings, "check_message", obs_module_text("Succeeded"));
+		result_message = obs_module_text("Succeeded");
 	} else {
-		obs_data_set_string(
-		    settings, "check_message", obs_module_text("Failed"));
+		result_message = obs_module_text("Failed");
 	}
+
+	char *message = NULL;
+	if (additional_message == NULL) {
+		message = bstrdup(result_message);
+	} else {
+		message = bzalloc(
+		    strlen(result_message) + strlen(additional_message) + 2);
+		strcat(message, result_message);
+		strcat(message, ":");
+		strcat(message, additional_message);
+	}
+
+	obs_data_set_string(settings, "check_message", message);
+	bfree(message);
 	return true;
 }
 
