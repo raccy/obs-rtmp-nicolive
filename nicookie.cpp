@@ -80,7 +80,7 @@ std::string FindViqo()
 	std::ifstream ifs(settingsJson);
 	if (ifs.fail()) {
 		if (errno == ENOENT) {
-			nicookie_errno = NICOOKIE_ERROR_NOT_FOUND_DATA_FILE;
+			nicookie_errno = NICOOKIE_ERROR_NOT_FOUND_FILE;
 		} else {
 			nicookie_errno = NICOOKIE_ERROR_FAILED_OPEN_DATA_FILE;
 		}
@@ -228,7 +228,7 @@ extern "C" const char *nicookie_strerror(int errnum)
 	case NICOOKIE_ERROR_NOT_FOUND_DATA:
 		return "Data was not found.";
 		break;
-	case NICOOKIE_ERROR_NOT_FOUND_DATA_FILE:
+	case NICOOKIE_ERROR_NOT_FOUND_FILE:
 		return "Data file was not found.";
 		break;
 	case NICOOKIE_ERROR_INVALID_DATA_FORMAT:
