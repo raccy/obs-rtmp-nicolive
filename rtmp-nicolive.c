@@ -2,63 +2,140 @@
 #include <string.h>
 #include <obs-module.h>
 #include "nicookie.h"
+#include "nicolive-api.h"
+#include "nicolive-errno.h"
 #include "nicolive-log.h"
 #include "nicolive.h"
 
 // use in set_data_nicolive for reset default settigs
-#define reset_obs_data(type, settings, name) \
-	obs_data_set_##type(                 \
-	    (settings), (name), obs_data_get_##type((settings), (name)))
+// #define reset_obs_data(type, settings, name) \
+// 	obs_data_set_##type(                 \
+// 	    (settings), (name), obs_data_get_##type((settings), (name)))
 
-enum rtmp_nicolive_login_type {
-	RTMP_NICOLIVE_LOGIN_MAIL,
-	RTMP_NICOLIVE_LOGIN_SESSION,
-	RTMP_NICOLIVE_LOGIN_APP,
+// enum rtmp_nicolive_login_type {
+// 	RTMP_NICOLIVE_LOGIN_MAIL,
+// 	RTMP_NICOLIVE_LOGIN_SESSION,
+// 	RTMP_NICOLIVE_LOGIN_APP,
+// };
+
+enum rtmp_nicolive_session_method {
+	RTMP_NICOLIVE_SESSION_LOGIN,
+	RTMP_NICOLIVE_SESSION_APP,
+	RTMP_NICOLIVE_SESSION_MANUAL,
 };
 
 // use on callback for check button
-static obs_data_t *current_settings;
+static obs_data_t *current_settings = NULL;
+// uso on callback for modified settings
+static obs_data_t *checked_settings = NULL;
 
 /* utilities */
 
+inline static bool same_data_string(
+    obs_data_t *a, obs_data_t *b, const char *name)
+{
+	return strcmp(obs_data_get_string(a, name),
+		   obs_data_get_string(b, name)) == 0;
+}
+
+inline static bool same_data_int(obs_data_t *a, obs_data_t *b, const char *name)
+{
+	return obs_data_get_int(a, name) == obs_data_get_int(b, name);
+}
+
+inline static bool same_checked_settings(obs_data_t *settings)
+{
+	if (checked_settings == NULL) return false;
+	if (!same_data_int(checked_settings, settings, "session_method"))
+		return false;
+	switch (obs_data_get_int(settings, "session_method")) {
+	case RTMP_NICOLIVE_SESSION_LOGIN:
+		return same_data_string(checked_settings, settings, "mail") &&
+		       same_data_string(checked_settings, settings, "password");
+	case RTMP_NICOLIVE_SESSION_APP:
+		return same_data_int(checked_settings, settings, "cookie_app");
+	case RTMP_NICOLIVE_SESSION_MANUAL:
+		return same_data_string(checked_settings, settings, "session");
+	}
+	return false;
+}
+
+/** get session and check session.
+ * If a session is valid, then set session on settings and return true,
+ * else clear session on settings and false.
+ * @param settings read and write obs settings
+ * @return boolean that the session is valid
+ */
 inline static bool check_settings(obs_data_t *settings)
 {
+	// first check that the setting has checkd, if ok then return
+	// true
+	if (obs_data_get_bool(settings, "checked")) {
+		// do not change
+		return true;
+	}
+
+	nicolive_errno = 0;
 	bool check_ok = false;
 	const char *additional_message = NULL;
-	const char *session = NULL;
-	switch (obs_data_get_int(settings, "login_type")) {
-	case RTMP_NICOLIVE_LOGIN_MAIL:
-		check_ok =
-		    nicolive_test_login(obs_data_get_string(settings, "mail"),
-			obs_data_get_string(settings, "password"));
-		break;
-	case RTMP_NICOLIVE_LOGIN_SESSION:
-		check_ok = nicolive_test_session(
-		    obs_data_get_string(settings, "session"));
-		break;
-	case RTMP_NICOLIVE_LOGIN_APP:
-		session = nicookie_get_session(
-		    obs_data_get_int(settings, "cookie_app"));
-		if (session == NULL) {
-			nicolive_log_error(
-			    "failed load cookie session from app");
-			additional_message = nicookie_strerror(nicookie_errno);
-			check_ok = false;
+	const char *session = obs_data_get_string(settings, "session");
+	// second check that the session is valid, if ok then return
+	// true
+	check_ok = nicolive_api_check_session(session);
+
+	// third get session and check session
+	if (!check_ok) {
+		switch (obs_data_get_int(settings, "session_method")) {
+		case RTMP_NICOLIVE_SESSION_LOGIN:
+			session = nicolive_api_get_session_login(
+			    obs_data_get_string(settings, "mail"),
+			    obs_data_get_string(settings, "password"));
+
+			if (session == NULL) {
+				nicolive_log_warn("failed to login");
+			} else {
+				nicolive_log_info("succeded to login");
+				check_ok = nicolive_api_check_session(session);
+			}
 			break;
+		case RTMP_NICOLIVE_SESSION_APP:
+			session = nicolive_api_get_session_app(
+			    obs_data_get_int(settings, "cookie_app"));
+			if (session == NULL) {
+				nicolive_log_warn("failed to get session");
+			} else {
+				nicolive_log_info("succeded to get session");
+				check_ok = nicolive_api_check_session(session);
+			}
+			break;
+		case RTMP_NICOLIVE_SESSION_MANUAL:
+			// already checkd, and faield, so do nothing
+			break;
+		default:
+			nicolive_log_error("unknown session method");
+			additional_message =
+			    obs_module_text("UnknownSessionMethod");
+			check_ok = false;
 		}
-		check_ok = nicolive_test_session(session);
-		break;
-	default:
-		nicolive_log_error("unknown login type");
-		additional_message = "unknown login type";
-		check_ok = false;
 	}
 
 	const char *result_message = NULL;
 	if (check_ok) {
+		nicolive_log_info("valid user session cookie");
+		obs_data_set_string(settings, "session", session);
+		obs_data_set_bool(settings, "checked", true);
+		if (checked_settings == NULL)
+			checked_settings = obs_data_create();
+		obs_data_apply(checked_settings, settings);
 		result_message = obs_module_text("Succeeded");
 	} else {
+		nicolive_log_warn("invalid user session cookie");
+		obs_data_set_bool(settings, "checked", false);
 		result_message = obs_module_text("Failed");
+	}
+
+	if (nicolive_errno != 0 && additional_message == NULL) {
+		additional_message = nicolive_strerror(nicolive_errno);
 	}
 
 	char *message = NULL;
@@ -71,41 +148,24 @@ inline static bool check_settings(obs_data_t *settings)
 		strcat(message, ":");
 		strcat(message, additional_message);
 	}
-
 	obs_data_set_string(settings, "check_message", message);
 	bfree(message);
-	return true;
+
+	return check_ok;
 }
 
 inline static void set_data_nicolive(void *data, obs_data_t *settings)
 {
-	switch (obs_data_get_int(settings, "login_type")) {
-	case RTMP_NICOLIVE_LOGIN_MAIL:
-		nicolive_set_settings(data,
-		    obs_data_get_string(settings, "mail"),
-		    obs_data_get_string(settings, "password"), "");
-		if (!nicolive_check_session(data)) {
-			nicolive_log_warn("failed login");
-		}
-		break;
-	case RTMP_NICOLIVE_LOGIN_SESSION:
+	if (check_settings(settings)) {
 		nicolive_set_settings(
 		    data, "", "", obs_data_get_string(settings, "session"));
-		if (!nicolive_check_session(data)) {
-			nicolive_log_warn("failed login");
-		}
-		break;
-	case RTMP_NICOLIVE_LOGIN_APP:
-		if (nicolive_load_viqo_settings(data)) {
-			if (!nicolive_check_session(data)) {
-				nicolive_log_warn("failed login");
-			}
-		} else {
-			nicolive_log_warn("failed load app settings");
-		}
-		break;
-	default:
-		nicolive_log_error("unknown login type");
+		// OPTIMIZE: double check?
+		// if (!nicolive_check_session(data)) {
+		// 	nicolive_log_warn("invalid session");
+		// }
+	} else {
+		// reset session
+		nicolive_set_settings(data, "", "", "");
 	}
 
 	nicolive_set_enabled_adjust_bitrate(
@@ -160,15 +220,35 @@ inline static bool adjust_bitrate(long long bitrate,
 
 /* property events */
 
-inline static bool on_modified_login_type(
+inline static bool on_modified_settings(
     obs_properties_t *props, obs_property_t *property, obs_data_t *settings)
 {
-	UNUSED_PARAMETER(property);
+	nicolive_log_debug_call_func();
+	if (same_checked_settings(settings)) {
+		if (!obs_data_get_bool(settings, "checked")) {
+			obs_data_set_bool(settings, "checked", true);
+			obs_data_set_string(settings, "check_message",
+			    obs_module_text("Checked"));
+		}
+
+	} else {
+		if (obs_data_get_bool(settings, "checked")) {
+			obs_data_set_bool(settings, "checked", false);
+			obs_data_set_string(settings, "check_message",
+			    obs_module_text("Unchecked"));
+		}
+	}
+	return true;
+}
+
+inline static bool on_modified_session_method(
+    obs_properties_t *props, obs_property_t *property, obs_data_t *settings)
+{
+	on_modified_settings(props, property, settings);
 	// update current settings
 	current_settings = settings;
-
-	switch (obs_data_get_int(settings, "login_type")) {
-	case RTMP_NICOLIVE_LOGIN_MAIL:
+	switch (obs_data_get_int(settings, "session_method")) {
+	case RTMP_NICOLIVE_SESSION_LOGIN:
 		obs_property_set_visible(
 		    obs_properties_get(props, "mail"), true);
 		obs_property_set_visible(
@@ -178,17 +258,7 @@ inline static bool on_modified_login_type(
 		obs_property_set_visible(
 		    obs_properties_get(props, "cookie_app"), false);
 		break;
-	case RTMP_NICOLIVE_LOGIN_SESSION:
-		obs_property_set_visible(
-		    obs_properties_get(props, "mail"), false);
-		obs_property_set_visible(
-		    obs_properties_get(props, "password"), false);
-		obs_property_set_visible(
-		    obs_properties_get(props, "session"), true);
-		obs_property_set_visible(
-		    obs_properties_get(props, "cookie_app"), false);
-		break;
-	case RTMP_NICOLIVE_LOGIN_APP:
+	case RTMP_NICOLIVE_SESSION_APP:
 		obs_property_set_visible(
 		    obs_properties_get(props, "mail"), false);
 		obs_property_set_visible(
@@ -198,6 +268,17 @@ inline static bool on_modified_login_type(
 		obs_property_set_visible(
 		    obs_properties_get(props, "cookie_app"), true);
 		break;
+	case RTMP_NICOLIVE_SESSION_MANUAL:
+		obs_property_set_visible(
+		    obs_properties_get(props, "mail"), false);
+		obs_property_set_visible(
+		    obs_properties_get(props, "password"), false);
+		obs_property_set_visible(
+		    obs_properties_get(props, "session"), true);
+		obs_property_set_visible(
+		    obs_properties_get(props, "cookie_app"), false);
+		break;
+
 	default:
 		nicolive_log_error("unknown login type");
 		return false;
@@ -266,7 +347,7 @@ static void rtmp_nicolive_defaults(obs_data_t *settings)
 {
 	nicolive_log_debug_call_func();
 	obs_data_set_default_int(
-	    settings, "login_type", RTMP_NICOLIVE_LOGIN_MAIL);
+	    settings, "session_method", RTMP_NICOLIVE_SESSION_LOGIN);
 	obs_data_set_default_string(settings, "mail", "");
 	obs_data_set_default_string(settings, "password", "");
 	obs_data_set_default_string(settings, "session", "");
@@ -283,28 +364,31 @@ static obs_properties_t *rtmp_nicolive_properties(void *data)
 	UNUSED_PARAMETER(data);
 	obs_properties_t *ppts = obs_properties_create();
 
-	obs_property_t *prop_login_type = obs_properties_add_list(ppts,
-	    "login_type", obs_module_text("LoginType"), OBS_COMBO_TYPE_LIST,
-	    OBS_COMBO_FORMAT_INT);
-	obs_property_list_add_int(prop_login_type,
-	    obs_module_text("LoginMailPassowrd"), RTMP_NICOLIVE_LOGIN_MAIL);
-	obs_property_list_add_int(prop_login_type,
-	    obs_module_text("UseCookieUserSession"),
-	    RTMP_NICOLIVE_LOGIN_SESSION);
-	obs_property_list_add_int(prop_login_type,
-	    obs_module_text("LoadAppSettings"), RTMP_NICOLIVE_LOGIN_APP);
+	obs_property_t *prop_session_method = obs_properties_add_list(ppts,
+	    "session_method", obs_module_text("SessionSettingMethod"),
+	    OBS_COMBO_TYPE_LIST, OBS_COMBO_FORMAT_INT);
+	obs_property_list_add_int(prop_session_method,
+	    obs_module_text("LoginMailPassowrd"), RTMP_NICOLIVE_SESSION_LOGIN);
+	obs_property_list_add_int(prop_session_method,
+	    obs_module_text("LoadAppSettings"), RTMP_NICOLIVE_SESSION_APP);
+	obs_property_list_add_int(prop_session_method,
+	    obs_module_text("ManualInputUserSession"),
+	    RTMP_NICOLIVE_SESSION_MANUAL);
 	obs_property_set_modified_callback(
-	    prop_login_type, on_modified_login_type);
+	    prop_session_method, on_modified_session_method);
 
 	// login mail
-	obs_properties_add_text(
+	obs_property_t *prop_mail = obs_properties_add_text(
 	    ppts, "mail", obs_module_text("MailAddress"), OBS_TEXT_DEFAULT);
-	obs_properties_add_text(
+	obs_property_set_modified_callback(prop_mail, on_modified_settings);
+	obs_property_t *prop_password = obs_properties_add_text(
 	    ppts, "password", obs_module_text("Password"), OBS_TEXT_PASSWORD);
+	obs_property_set_modified_callback(prop_password, on_modified_settings);
 
 	// login session
-	obs_properties_add_text(
+	obs_property_t *prop_session = obs_properties_add_text(
 	    ppts, "session", obs_module_text("Session"), OBS_TEXT_PASSWORD);
+	obs_property_set_modified_callback(prop_session, on_modified_settings);
 
 	// login app
 	obs_property_t *prop_cookie_app = obs_properties_add_list(ppts,
@@ -317,6 +401,8 @@ static obs_properties_t *rtmp_nicolive_properties(void *data)
 		obs_property_list_add_int(
 		    prop_cookie_app, nicookie_app_name(*app_p), *app_p);
 	}
+	obs_property_set_modified_callback(
+	    prop_cookie_app, on_modified_settings);
 
 	obs_properties_add_button(
 	    ppts, "check", obs_module_text("Check"), on_clicked_check);
