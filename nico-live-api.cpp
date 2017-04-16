@@ -137,7 +137,11 @@ void NicoLiveApi::clearCookie() { this->cookie.clear(); }
 
 const std::string NicoLiveApi::getCookie(const std::string &name) const
 {
-	return this->cookie.at(name);
+	if (this->cookie.count(name) > 0) {
+		return this->cookie.at(name);
+	} else {
+		return "";
+	}
 }
 
 bool NicoLiveApi::accessWeb(const std::string &url,
