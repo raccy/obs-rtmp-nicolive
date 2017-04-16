@@ -102,13 +102,34 @@ extern "C" bool nicolive_api_check_session(const char *session)
 	data[errorCodeXpath] = std::vector<std::string>();
 	bool result = nla.getPublishStatus(&data);
 
-	if (!result) return false;
-	if (data[statusXpath].empty()) return false;
-	std::string &status = data[statusXpath][0];
-	if (status == "ok") return true;
-	if (status == "fail" && !data[errorCodeXpath].empty() &&
-	    data[errorCodeXpath][0] == "notfound")
+	if (!result) {
+		nicolive_errno = NICOLIVE_ERROR_ACCESS_ERROR;
+		return false;
+	}
+	if (data[statusXpath].empty()) {
+		// FIXME: access error? service down?
+		nicolive_errno = NICOLIVE_ERROR_ACCESS_ERROR;
+		return false;
+	}
+
+	std::string &status = data[statusXpath].front();
+
+	if (status == "ok") {
+		nicolive_errno = NICOLIVE_ERROR_VALID_USER_SESSION;
 		return true;
+	}
+
+	if (status == "fail") {
+		std::string error_code(data[errorCodeXpath].empty()
+					   ? data[errorCodeXpath].front()
+					   : "");
+		if (error_code == "notfound" ||
+		    error_code == "permison_denied") {
+			nicolive_errno = NICOLIVE_ERROR_VALID_USER_SESSION;
+			return true;
+		}
+	}
+	nicolive_errno = NICOLIVE_ERROR_INVALID_USER_SESSION;
 	return false;
 }
 
