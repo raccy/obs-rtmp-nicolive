@@ -121,8 +121,8 @@ extern "C" bool nicolive_api_check_session(const char *session)
 
 	if (status == "fail") {
 		std::string error_code(data[errorCodeXpath].empty()
-					   ? data[errorCodeXpath].front()
-					   : "");
+					   ? ""
+					   : data[errorCodeXpath].front());
 		if (error_code == "notfound" ||
 		    error_code == "permison_denied") {
 			nicolive_errno = NICOLIVE_ERROR_VALID_USER_SESSION;
