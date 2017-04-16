@@ -145,7 +145,7 @@ inline static bool check_settings(obs_data_t *settings)
 		message = bzalloc(
 		    strlen(result_message) + strlen(additional_message) + 2);
 		strcat(message, result_message);
-		strcat(message, ":");
+		strcat(message, " ");
 		strcat(message, additional_message);
 	}
 	obs_data_set_string(settings, "check_message", message);
