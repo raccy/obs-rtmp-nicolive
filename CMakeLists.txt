@@ -64,12 +64,13 @@ if(NOT BUILD_IN_OBS AND NOT LibObs_FOUND)
 endif(NOT BUILD_IN_OBS AND NOT LibObs_FOUND)
 
 set(rtmp-nicolive_SOURCES
-	nicolive-error.c
-	nicolive-operation.c
 	nico-live-api.cpp
 	nico-live-timer.cpp
 	nico-live-watcher.cpp
 	nico-live.cpp
+	nicolive-error.c
+	nicolive-operation.c
+	nicolive-api.cpp
 	nicolive.cpp
 	rtmp-nicolive.c)
 
