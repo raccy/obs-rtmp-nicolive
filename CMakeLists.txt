@@ -68,7 +68,7 @@ set(rtmp-nicolive_SOURCES
 	nico-live-timer.cpp
 	nico-live-watcher.cpp
 	nico-live.cpp
-	nicolive-error.c
+	nicolive-errno.c
 	nicolive-operation.c
 	nicolive-api.cpp
 	nicolive.cpp
