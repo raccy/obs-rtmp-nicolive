@@ -148,35 +148,3 @@ extern "C" bool nicolive_silent_once(void *data)
 	NicoLive *nicolive = static_cast<NicoLive *>(data);
 	return nicolive->silentOnce();
 }
-
-extern "C" bool nicolive_test_login(const char *mail, const char *password)
-{
-	std::string mail_str(mail);
-	std::string password_str(password);
-	NicoLiveApi nla;
-	auto ticket = nla.loginNicoliveEncoder(mail_str, password_str);
-	return !ticket.empty();
-}
-
-extern "C" bool nicolive_test_session(const char *session)
-{
-	std::string session_str(session);
-	NicoLiveApi nla;
-	nla.setCookie("user_session", session_str);
-	const std::string statusXpath = "/getpublishstatus/@status";
-	const std::string errorCodeXpath =
-	    "/getpublishstatus/error/code/text()";
-	std::unordered_map<std::string, std::vector<std::string>> data;
-	data[statusXpath] = std::vector<std::string>();
-	data[errorCodeXpath] = std::vector<std::string>();
-	bool result = nla.getPublishStatus(&data);
-
-	if (!result) return false;
-	if (data[statusXpath].empty()) return false;
-	std::string &status = data[statusXpath][0];
-	if (status == "ok") return true;
-	if (status == "fail" && !data[errorCodeXpath].empty() &&
-	    data[errorCodeXpath][0] == "notfound")
-		return true;
-	return false;
-}
