@@ -2,7 +2,7 @@
 
 # make package tool for obs-rtmp-nicolive
 
-OBS_RTMP_NICOLIVE_VERSION=2.1.0
+OBS_RTMP_NICOLIVE_VERSION=2.2.0-pre1
 PACAKGE_NAME=obs-rtmp-nicolive_${OBS_RTMP_NICOLIVE_VERSION}-osx
 
 DATA_DIR=../data
@@ -39,9 +39,6 @@ cp -R "../data" \
   "${PACAKGE_NAME}/Contents/Resources/data/obs-plugins/rtmp-nicolive"
 "${RUBY_EXE}" "${CONVERT_README_RB}" "${README_MD}" "${MAC_INSTALL_MD}" \
   "${PACAKGE_NAME}/README.txt"
-
-# set rpath
-"${RUBY_EXE}" "${FIX_RPATH_RB}" "${PLUGIN_SO}"
 
 hdiutil create -ov -srcfolder "${PACAKGE_NAME}" -fs HFS+ -format UDBZ \
   -volname "obs-studio rtmp-nicolive" "${PACAKGE_NAME}.dmg"
