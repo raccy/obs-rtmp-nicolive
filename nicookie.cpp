@@ -69,7 +69,7 @@ std::string FindViqo()
 	settingsJson += AppDataDirectory();
 #else
 	settingsJson += HomeDirectory();
-	settingsJson += "/.local/share"
+	settingsJson += "/.local/share";
 #endif
 	settingsJson += PATH_SEPARATOR;
 	settingsJson += "Viqo";
