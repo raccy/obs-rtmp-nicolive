@@ -5,6 +5,8 @@ end_of_line = lf
 trim_trailing_whitespace = true
 insert_final_newline = true
 charset = utf-8
+indent_style = space
+indent_size = 2
 tab_width = 8
 max_line_length = 80
 curly_bracket_next_line = false
@@ -13,6 +15,7 @@ spaces_around_brackets = both
 
 [*.{c,cpp,h,hpp}]
 indent_style = tab
+indent_size = 8
 c_include_path = ../../libobs
 indent_brace_style = K&R
 
