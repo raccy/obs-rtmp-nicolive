@@ -12,12 +12,14 @@ REM set QT_DIR=C:\Qt
 REM set QT32_DIR=%QT_DIR%
 REM set QT64_DIR=%QT_DIR%
 
-set MINGW_DIR=C:\MinGW
+REM set MINGW_DIR=C:\MinGW
+set MSYS2_DIR=C:\tools\msys64
 set VS2015_DIR=C:\Program Files (x86)\Microsoft Visual Studio 14.0
 set CMAKE_DIR=C:\Program Files\CMake\bin
 
 rem ##### Create variables (should not modified) #####
-set PEXPORTS_EXE=%MINGW_DIR%\bin\pexports.exe
+REM set PEXPORTS_EXE=%MINGW_DIR%\bin\pexports.exe
+set GENDEF_EXE=%MSYS2_DIR%\mingw64\bin\gendef.exe
 set LIB_EXE=%VS2015_DIR%\VC\bin\lib.exe
 REM set QT32_CMAKE=%QT32_DIR%\%QT_VERSION%\msvc2015\lib\cmake
 REM set QT64_CMAKE=%QT64_DIR%\%QT_VERSION%\msvc2015_64\lib\cmake
@@ -29,7 +31,8 @@ cd ..\..
 if /i "%CD%\tools\win\make_build.cmd" neq "%~f0" call :die "You must run this batch on the top directory of sources" 255
 
 rem check file
-call :check_exist "%PEXPORTS_EXE%" "Not found pexports.exe. Please install mingw32-pexpots or change MINGW_DIR"
+REM call :check_exist "%PEXPORTS_EXE%" "Not found pexports.exe. Please install mingw32-pexpots or change MINGW_DIR"
+call :check_exist "%GENDEF_EXE%" "Not found gendef.exe. Please install mingw-w64-x86_64-toolchain or change MSYS2_DIR"
 call :check_exist "%LIB_EXE%" "Not found lib.exe. Please install VS2015 or change VS2015_DIR"
 REM call :check_exist "%QT32_CMAKE%" "Not found qt 32bit cmake. Please install Qt msvc2015_opengl or change QT32_DIR"
 REM call :check_exist "%QT64_CMAKE%" "Not found qt 64bit cmake. Please install Qt msvc2015_64_opengl or change QT64_DIR"
@@ -62,13 +65,17 @@ mkdir build\lib32
 mkdir build\lib64
 
 rem obs.dll
-"%PEXPORTS_EXE%" /EXPORTS "%OBS_APP%\bin\32bit\obs.dll" > "build\lib32\obs.def"
-"%PEXPORTS_EXE%" /EXPORTS "%OBS_APP%\bin\64bit\obs.dll" > "build\lib64\obs.def"
+REM "%PEXPORTS_EXE%" /EXPORTS "%OBS_APP%\bin\32bit\obs.dll" > "build\lib32\obs.def"
+REM "%PEXPORTS_EXE%" /EXPORTS "%OBS_APP%\bin\64bit\obs.dll" > "build\lib64\obs.def"
+"%GEDEF_EXE%" - "%OBS_APP%\bin\32bit\obs.dll" > "build\lib32\obs.def"
+"%GEDEF_EXE%" - "%OBS_APP%\bin\64bit\obs.dll" > "build\lib64\obs.def"
 "%LIB_EXE%" /MACHINE:x86 /def:"build\lib32\obs.def" /out:"build\lib32\obs.lib"
 "%LIB_EXE%" /MACHINE:x64 /def:"build\lib64\obs.def" /out:"build\lib64\obs.lib"
 rem libcurl.dll
-"%PEXPORTS_EXE%" /EXPORTS "%OBS_APP%\bin\32bit\libcurl.dll" > "build\lib32\libcurl.def"
-"%PEXPORTS_EXE%" /EXPORTS "%OBS_APP%\bin\64bit\libcurl.dll" > "build\lib64\libcurl.def"
+REM "%PEXPORTS_EXE%" /EXPORTS "%OBS_APP%\bin\32bit\libcurl.dll" > "build\lib32\libcurl.def"
+REM "%PEXPORTS_EXE%" /EXPORTS "%OBS_APP%\bin\64bit\libcurl.dll" > "build\lib64\libcurl.def"
+"%GEDEF_EXE%" - "%OBS_APP%\bin\32bit\libcurl.dll" > "build\lib32\libcurl.def"
+"%GEDEF_EXE%" - "%OBS_APP%\bin\64bit\libcurl.dll" > "build\lib64\libcurl.def"
 "%LIB_EXE%" /MACHINE:x86 /def:"build\lib32\libcurl.def" /out:"build\lib32\libcurl.lib"
 "%LIB_EXE%" /MACHINE:x64 /def:"build\lib64\libcurl.def" /out:"build\lib64\libcurl.lib"
 
