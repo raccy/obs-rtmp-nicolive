@@ -4,7 +4,7 @@ rem make build tool for obs-rtmp-nicolive
 rem ##### Settings #####
 rem You must change follow lines to suite your environment.
 set OBS_APP=C:\Program Files (x86)\obs-studio
-set OBS_SRC=%HOMEDRIVE%%HOMEPATH%\Documents\obs-studio-18.0.1
+set OBS_SRC=%HOMEDRIVE%%HOMEPATH%\Documents\obs-studio-18.0.2
 set CURL_SRC=%HOMEDRIVE%%HOMEPATH%\Documents\curl-7.54.0
 
 REM set QT_VERSION=5.7
