@@ -67,15 +67,15 @@ mkdir build\lib64
 rem obs.dll
 REM "%PEXPORTS_EXE%" /EXPORTS "%OBS_APP%\bin\32bit\obs.dll" > "build\lib32\obs.def"
 REM "%PEXPORTS_EXE%" /EXPORTS "%OBS_APP%\bin\64bit\obs.dll" > "build\lib64\obs.def"
-"%GEDEF_EXE%" - "%OBS_APP%\bin\32bit\obs.dll" > "build\lib32\obs.def"
-"%GEDEF_EXE%" - "%OBS_APP%\bin\64bit\obs.dll" > "build\lib64\obs.def"
+"%GENDEF_EXE%" - "%OBS_APP%\bin\32bit\obs.dll" > "build\lib32\obs.def"
+"%GENDEF_EXE%" - "%OBS_APP%\bin\64bit\obs.dll" > "build\lib64\obs.def"
 "%LIB_EXE%" /MACHINE:x86 /def:"build\lib32\obs.def" /out:"build\lib32\obs.lib"
 "%LIB_EXE%" /MACHINE:x64 /def:"build\lib64\obs.def" /out:"build\lib64\obs.lib"
 rem libcurl.dll
 REM "%PEXPORTS_EXE%" /EXPORTS "%OBS_APP%\bin\32bit\libcurl.dll" > "build\lib32\libcurl.def"
 REM "%PEXPORTS_EXE%" /EXPORTS "%OBS_APP%\bin\64bit\libcurl.dll" > "build\lib64\libcurl.def"
-"%GEDEF_EXE%" - "%OBS_APP%\bin\32bit\libcurl.dll" > "build\lib32\libcurl.def"
-"%GEDEF_EXE%" - "%OBS_APP%\bin\64bit\libcurl.dll" > "build\lib64\libcurl.def"
+"%GENDEF_EXE%" - "%OBS_APP%\bin\32bit\libcurl.dll" > "build\lib32\libcurl.def"
+"%GENDEF_EXE%" - "%OBS_APP%\bin\64bit\libcurl.dll" > "build\lib64\libcurl.def"
 "%LIB_EXE%" /MACHINE:x86 /def:"build\lib32\libcurl.def" /out:"build\lib32\libcurl.lib"
 "%LIB_EXE%" /MACHINE:x64 /def:"build\lib64\libcurl.def" /out:"build\lib64\libcurl.lib"
 
