@@ -23,20 +23,20 @@ indent_brace_style = K&R
 indent_style = space
 indent_size = 4
 
-[CMakeLists.txt]
+[{CMakeLists.txt,*.cmake}]
 indent_style = tab
 
-[*.{rb}]
+[*.rb]
 indent_style = space
 indent_size = 2
 continuation_indent_size = 4
 
-[*.{py}]
+[*.py]
 indent_style = space
 indent_size = 4
 continuation_indent_size = 8
 
-[*.{sh}]
+[*.sh]
 indent_style = space
 indent_size = 2
 
