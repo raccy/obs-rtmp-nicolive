@@ -26,7 +26,7 @@ else()
 	set(_lib_suffix 32)
 endif()
 
-if(MSVC)
+if(WIN32)
 	set(LIBOBS_PLUGIN_DESTINATION
 		"${OBS_APP}/obs-plugins/${_lib_suffix}bit")
 	set(LIBOBS_PLUGIN_DATA_DESTINATION

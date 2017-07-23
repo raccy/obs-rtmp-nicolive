@@ -56,11 +56,11 @@ if(NOT BUILD_IN_OBS AND NOT LibObs_FOUND)
 	# libobs
 	add_library(libobs SHARED IMPORTED)
 	set_property(TARGET libobs
-	PROPERTY IMPORTED_LOCATION ${OBS_LIB_LIBOBS})
-	if(MSVC)
+		PROPERTY IMPORTED_LOCATION ${OBS_LIB_LIBOBS})
+	if(WIN32)
 		set_property(TARGET libobs
 			PROPERTY IMPORTED_IMPLIB ${OBS_LIB_LIBOBS_LIB})
-	endif(MSVC)
+	endif(WIN32)
 endif(NOT BUILD_IN_OBS AND NOT LibObs_FOUND)
 
 set(rtmp-nicolive_SOURCES
