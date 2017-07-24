@@ -64,7 +64,7 @@ std::string FindViqo()
 {
 	std::string settingsJson = "";
 #ifdef _WIN32
-	settingsJson += AppDataDirectory();
+	settingsJson += LocalAppDataDirectory();
 #elif __APPLE__
 	settingsJson += AppDataDirectory();
 #else
