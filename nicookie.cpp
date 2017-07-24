@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 #include "json/json.hpp"
-#include "sqlite/sqlite3.h"
+// #include "sqlite/sqlite3.h"
 
 // Globale Objects
 int nicookie_errno = NICOOKIE_ERROR_NONE;

@@ -72,7 +72,7 @@ set(rtmp-nicolive_SOURCES
 
 add_library(rtmp-nicolive MODULE
 	pugixml/pugixml.cpp
-	sqlite/sqlite3.c
+	# sqlite/sqlite3.c
 	nicookie.cpp
 	${rtmp-nicolive_SOURCES})
 
