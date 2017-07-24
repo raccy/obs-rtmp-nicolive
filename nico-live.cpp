@@ -184,13 +184,13 @@ std::chrono::system_clock::duration NicoLive::getRemainingLive() const
 
 bool NicoLive::enabledStopBeforeEndTime() const
 {
-	// TODO: 実装！
+	// TODO: Implement!
 	return true;
 }
 
 bool NicoLive::enabledStartBeforeStartTime() const
 {
-	// TODO: 実装！
+	// TODO: Implement!
 	return true;
 }
 
