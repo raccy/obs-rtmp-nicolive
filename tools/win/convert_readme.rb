@@ -28,7 +28,8 @@ if __FILE__ == $0
       text << line
     end
   end
-  open(readme_txt, "wt:Windows-31J") do |io|
-    io.write text
+  open(readme_txt, "wb:UTF-8") do |io|
+    io.write "\uFEFF" # BOM
+    io.write text.gsub(/\r?\n/, "\r\n")
   end
 end
