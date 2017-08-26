@@ -378,17 +378,14 @@ static obs_properties_t *rtmp_nicolive_properties(void *data)
 	    prop_session_method, on_modified_session_method);
 
 	// login mail
-	obs_property_t *prop_mail = obs_properties_add_text(
-	    ppts, "mail", obs_module_text("MailAddress"), OBS_TEXT_DEFAULT);
-	obs_property_set_modified_callback(prop_mail, on_modified_settings);
-	obs_property_t *prop_password = obs_properties_add_text(
-	    ppts, "password", obs_module_text("Password"), OBS_TEXT_PASSWORD);
-	obs_property_set_modified_callback(prop_password, on_modified_settings);
+	obs_properties_add_text(ppts, "mail", obs_module_text("MailAddress"),
+			OBS_TEXT_DEFAULT);
+	obs_properties_add_text(ppts, "password", obs_module_text("Password"),
+			OBS_TEXT_PASSWORD);
 
 	// login session
-	obs_property_t *prop_session = obs_properties_add_text(
-	    ppts, "session", obs_module_text("Session"), OBS_TEXT_PASSWORD);
-	obs_property_set_modified_callback(prop_session, on_modified_settings);
+	obs_properties_add_text(ppts, "session", obs_module_text("Session"),
+			OBS_TEXT_PASSWORD);
 
 	// login app
 	obs_property_t *prop_cookie_app = obs_properties_add_list(ppts,
